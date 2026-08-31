@@ -2,7 +2,7 @@
 
 import {
   ArrowRight, BookOpenText, Check, Languages,
-  Layers3, MessageCircleMore, Move3D, Play, Presentation, Settings2,
+  Layers3, MessageCircleMore, Move3D, Play, Presentation,
   Sparkles, Trash2, UsersRound, WandSparkles, X, PencilLine, Target,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -40,31 +40,25 @@ const activities:Activity[] = [
 export default function Home(){
   const [vocabulary,setVocabulary]=useState("学校、先生、数学、体育、好き、きらい");
   const [grammar,setGrammar]=useState("～が好きです／～が好きじゃないです");
-  const [yearLevel,setYearLevel]=useState("8");
-  const [support,setSupport]=useState("Developing");
-  const [duration,setDuration]=useState("10–15 minutes");
+  const yearLevel="8";
+  const support="Developing";
+  const duration="10–15 minutes";
   const [participation,setParticipation]=useState("Whole class");
   const [energy,setEnergy]=useState("calm");
   const [selected,setSelected]=useState<Activity|null>(null);
   const [generated,setGenerated]=useState<GeneratedActivity|null>(null);
   const [presentationOpen,setPresentationOpen]=useState(false);
-  const [settingsOpen,setSettingsOpen]=useState(false);
   const [tray,setTray]=useState<GeneratedActivity[]>([]);
   const [trayOpen,setTrayOpen]=useState(false);
-  const [clock,setClock]=useState("--:--");
-  const [dateLabel,setDateLabel]=useState("Japanese activity workspace");
 
   useEffect(()=>{
     const restore=window.setTimeout(()=>{
       const stored=window.localStorage.getItem("lesson-lab-tray");
       if(stored){try{const parsed=JSON.parse(stored) as GeneratedActivity[];setTray(parsed.filter((item)=>item.activityId&&item.targetVocabulary));}catch{/* Ignore invalid local data. */}}
     },0);
-    const updateClock=()=>{const now=new Date();setClock(new Intl.DateTimeFormat("en-AU",{hour:"numeric",minute:"2-digit",hour12:false}).format(now));setDateLabel(new Intl.DateTimeFormat("en-AU",{weekday:"long",month:"long",day:"numeric"}).format(now));};
-    const initialClock=window.setTimeout(updateClock,0);
-    const timer=window.setInterval(updateClock,30000);
-    const close=(event:KeyboardEvent)=>{if(event.key==="Escape"&&!presentationOpen){setSelected(null);setSettingsOpen(false);setTrayOpen(false);}};
+    const close=(event:KeyboardEvent)=>{if(event.key==="Escape"&&!presentationOpen){setSelected(null);setTrayOpen(false);}};
     window.addEventListener("keydown",close);
-    return()=>{window.clearTimeout(restore);window.clearTimeout(initialClock);window.clearInterval(timer);window.removeEventListener("keydown",close);};
+    return()=>{window.clearTimeout(restore);window.removeEventListener("keydown",close);};
   },[presentationOpen]);
 
   const saveTray=(next:GeneratedActivity[])=>{
@@ -84,10 +78,11 @@ export default function Home(){
   const SelectedIcon=selected?.icon??Sparkles;
   return <main className="ipad-page">
     <a className="skip-link" href="#activity-apps">Skip to activities</a>
-    <header className="ipad-status">
-      <div><strong>{clock}</strong><span>{dateLabel}</span></div>
-      <div className="status-title"><Languages size={17}/><span>Gamify</span></div>
-      <button onClick={()=>setSettingsOpen(true)} aria-label="Open class settings"><Settings2 size={18}/><span>Year {yearLevel}</span></button>
+    <header className="ipad-status brand-status">
+      <div className="brand-lockup" aria-label="Gamify — Language Activity Studio">
+        <span className="brand-mark" aria-hidden="true"><span>G</span><i/></span>
+        <span className="brand-copy"><strong>Gamify</strong><small>Language Activity Studio</small></span>
+      </div>
     </header>
 
     <section className="home-screen">
@@ -100,7 +95,6 @@ export default function Home(){
         <article className="language-widget grammar-widget">
           <div className="widget-heading"><span>Target pattern</span><small>One is best</small></div>
           <textarea value={grammar} onChange={(event)=>setGrammar(event.target.value)} aria-label="Target grammar or sentence pattern"/>
-          <button onClick={()=>setSettingsOpen(true)}><Settings2 size={15}/> Class settings</button>
         </article>
       </aside>
 
@@ -117,7 +111,6 @@ export default function Home(){
     <div className="page-dots" aria-hidden="true"><i className="active"/><i/></div>
     <nav className="ipad-dock" aria-label="Quick actions">
       <button onClick={()=>document.querySelector<HTMLTextAreaElement>(".vocabulary-widget textarea")?.focus()}><span className="dock-icon dock-language"><Languages size={25}/></span><small>Language</small></button>
-      <button onClick={()=>setSettingsOpen(true)}><span className="dock-icon dock-settings"><Settings2 size={25}/></span><small>Settings</small></button>
       <button className="dock-launch" disabled={!generated} onClick={()=>generated&&setPresentationOpen(true)}><span className="dock-icon dock-play"><Play size={26}/></span><small>Last activity</small></button>
       <button onClick={()=>setTrayOpen(true)}><span className="dock-icon dock-tray"><Layers3 size={25}/>{tray.length>0&&<b>{tray.length}</b>}</span><small>Saved</small></button>
     </nav>
@@ -131,7 +124,6 @@ export default function Home(){
       <button className="launch-button" onClick={createActivity} disabled={!vocabulary.trim()}><Play size={19}/> Build and launch slides <ArrowRight size={19}/></button>
     </section></div>}
 
-    {settingsOpen&&<div className="modal-backdrop" onMouseDown={(event)=>{if(event.target===event.currentTarget)setSettingsOpen(false);}}><section className="settings-sheet" role="dialog" aria-modal="true" aria-labelledby="settings-title"><button className="sheet-close" onClick={()=>setSettingsOpen(false)} aria-label="Close"><X size={20}/></button><div className="settings-symbol"><Settings2 size={24}/></div><p className="sheet-category">Activity defaults</p><h2 id="settings-title">Class settings</h2><div className="settings-grid"><label>Year level<select value={yearLevel} onChange={(event)=>setYearLevel(event.target.value)}><option>7</option><option>8</option><option>9</option><option>10</option></select></label><label>Student support<select value={support} onChange={(event)=>setSupport(event.target.value)}><option>Beginning</option><option>Developing</option><option>Mixed ability</option></select></label><label>Activity length<select value={duration} onChange={(event)=>setDuration(event.target.value)}><option>5–10 minutes</option><option>10–15 minutes</option><option>15–25 minutes</option></select></label><div className="switch-row"><span><strong>Furigana always on</strong><small>Every kanji reading stays visible on student slides</small></span><Check size={19}/></div></div><button className="done-button" onClick={()=>setSettingsOpen(false)}>Done</button></section></div>}
 
     {trayOpen&&<div className="drawer-backdrop" onMouseDown={(event)=>{if(event.target===event.currentTarget)setTrayOpen(false);}}><aside className="tray-drawer"><div className="tray-heading"><div><p>RECENT DECKS</p><h2>Saved activities</h2></div><button className="sheet-close" onClick={()=>setTrayOpen(false)} aria-label="Close"><X size={20}/></button></div>{!tray.length?<div className="tray-empty"><Layers3 size={30}/><h3>No activities yet</h3><p>Activities appear here automatically after you launch them.</p></div>:<div className="saved-decks">{tray.map((item)=><article key={item.id}><button className="saved-main" onClick={()=>{setGenerated(item);setTrayOpen(false);setPresentationOpen(true);}}><span><Presentation size={19}/></span><div><strong>{item.title}</strong><small>{item.subtitle}</small></div><Play size={18}/></button><button className="delete-deck" onClick={()=>saveTray(tray.filter((entry)=>entry.id!==item.id))} aria-label={`Delete ${item.title}`}><Trash2 size={16}/></button></article>)}</div>}</aside></div>}
 
