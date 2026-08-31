@@ -9,6 +9,7 @@ import { useEffect, useState } from "react";
 import { generateActivity, type GeneratedActivity } from "./generator";
 import PresentationPortal from "./PresentationPortal";
 import ReadMyMindGame from "./ReadMyMindGame";
+import DelayedDictationGame from "./DelayedDictationGame";
 import { wordPacks } from "./wordPacks";
 
 type Activity = {
@@ -28,7 +29,7 @@ const lessonStages:{id:StageId;number:string;name:string;purpose:string;tone:str
 const activities:Activity[] = [
   { id:"read-my-mind", title:"Read My Mind", shortTitle:"Read My Mind", description:"Sensei secretly chooses one answer. Students predict, listen to clues, change their minds, then see the reveal.", category:"Input by Listening", time:"5–8 min", icon:Sparkles, tone:"purple", stage:"listening" },
   { id:"faulty-echo", title:"Faulty Echo", shortTitle:"Faulty Echo", description:"Students echo the model only when what they hear is accurate, noticing tiny changes in familiar language.", category:"Input by Listening", time:"3–6 min", icon:Check, tone:"blue", stage:"listening" },
-  { id:"delayed-dictation", title:"Delayed Dictation", shortTitle:"Delayed Dictation", description:"Listen, hold a phrase in memory for a short delay, then reconstruct it in writing.", category:"Input by Listening", time:"5–8 min", icon:PencilLine, tone:"indigo", stage:"listening" },
+  { id:"delayed-dictation", title:"Delayed Dictation", shortTitle:"Delayed Dictation", description:"Listen to a hidden sentence, hold it in memory, write it from recall, then self-correct against the model.", category:"Input by Listening", time:"5–8 min", icon:PencilLine, tone:"indigo", stage:"listening" },
   { id:"karuta", title:"Karuta", shortTitle:"Karuta", description:"Race to identify the correct card from a spoken word, clue or sentence before anyone else.", category:"Input by Listening", time:"5–10 min", icon:Target, tone:"rose", stage:"listening" },
   { id:"narrow-listening", title:"Narrow Listening", shortTitle:"Narrow Listening", description:"Listen to several highly similar mini-texts and detect the small details that change.", category:"Input by Listening", time:"8–12 min", icon:Presentation, tone:"cyan", stage:"listening" },
   { id:"true-false", title:"True or false", shortTitle:"True or False", description:"Listen to familiar-language statements and decide whether each is true.", category:"Input by Listening", time:"5–8 min", icon:Check, tone:"blue", stage:"listening" },
@@ -74,6 +75,8 @@ export default function Home(){
   const [generated,setGenerated]=useState<GeneratedActivity|null>(null);
   const [presentationOpen,setPresentationOpen]=useState(false);
   const [readMyMindOpen,setReadMyMindOpen]=useState(false);
+  const [delayedDictationOpen,setDelayedDictationOpen]=useState(false);
+  const [memoryDelay,setMemoryDelay]=useState(5);
 
   const activePack=wordPacks.find((pack)=>pack.id===packId)??wordPacks[0];
   const selectedCount=selectedVocabulary.length+selectedPatterns.length;
@@ -82,6 +85,7 @@ export default function Home(){
   const grammar=selectedPatterns.join("／");
   const selectedNouns=activePack.vocabularyGroups.find((group)=>group.id==="nouns")?.items.filter((item)=>selectedVocabulary.includes(item))??[];
   const readMyMindOptions=selectedNouns.length>=4?selectedNouns:(selectedVocabulary.length>=4?selectedVocabulary:activePack.vocabulary);
+  const delayedDictationGroups=activePack.vocabularyGroups.map((group)=>({...group,items:group.items.filter((item)=>selectedVocabulary.includes(item))})).filter((group)=>group.items.length>0);
 
   const choosePack=(nextPackId:string)=>{
     const nextPack=wordPacks.find((pack)=>pack.id===nextPackId)??wordPacks[0];
@@ -106,16 +110,23 @@ export default function Home(){
   };
 
   useEffect(()=>{
-    const close=(event:KeyboardEvent)=>{if(event.key==="Escape"&&!presentationOpen&&!readMyMindOpen)setSelected(null);};
+    const close=(event:KeyboardEvent)=>{
+      if(event.key==="Escape"&&!presentationOpen&&!readMyMindOpen&&!delayedDictationOpen)setSelected(null);
+    };
     window.addEventListener("keydown",close);
     return()=>window.removeEventListener("keydown",close);
-  },[presentationOpen,readMyMindOpen]);
+  },[presentationOpen,readMyMindOpen,delayedDictationOpen]);
 
   const createActivity=()=>{
     if(!selected||selectedCount===0)return;
     if(selected.id==="read-my-mind"){
       setSelected(null);
       setReadMyMindOpen(true);
+      return;
+    }
+    if(selected.id==="delayed-dictation"){
+      setSelected(null);
+      setDelayedDictationOpen(true);
       return;
     }
     const created=generateActivity({activityId:selected.id,activityTitle:selected.title,vocabulary,grammar,yearLevel,support,duration,participation,energy});
@@ -125,6 +136,8 @@ export default function Home(){
   };
 
   const SelectedIcon=selected?.icon??Sparkles;
+  const launchLabel=selected?.id==="read-my-mind"?"Launch Read My Mind":selected?.id==="delayed-dictation"?"Launch Delayed Dictation":"Build and launch slides";
+
   return <main className="ipad-page">
     <a className="skip-link" href="#activity-apps">Skip to activities</a>
     <header className="ipad-status brand-status">
@@ -185,12 +198,16 @@ export default function Home(){
       <button className="sheet-close" onClick={()=>setSelected(null)} aria-label="Close"><X size={20}/></button>
       <header className="launch-identity"><div className={`app-icon app-${selected.tone}`}><SelectedIcon size={34}/><i/></div><div><p className="sheet-category">{selected.category} · {selected.time}</p><h2 id="launch-title">{selected.title}</h2></div></header>
       <p className="launch-description">{selected.description}</p>
-      <section className="launch-config" aria-label="Selected language"><div className="language-preview"><small>{activePack.name} · {selectedCount} selected</small><strong>{selectedVocabulary.length>0?`${selectedVocabulary.slice(0,8).join("、")}${selectedVocabulary.length>8?" …":""}`:selectedPatterns.slice(0,6).join("、")||"Choose at least one language item"}</strong>{selectedPatterns.length>0&&<span>{selectedPatterns.slice(0,4).join("／")}{selectedPatterns.length>4?" …":""}</span>}</div></section>
-      <button className="launch-button" onClick={createActivity} disabled={selectedCount===0}><Play size={19}/> {selected.id==="read-my-mind"?"Launch Read My Mind":"Build and launch slides"} <ArrowRight size={19}/></button>
+      <section className="launch-config" aria-label="Selected language">
+        <div className="language-preview"><small>{activePack.name} · {selectedCount} selected</small><strong>{selectedVocabulary.length>0?`${selectedVocabulary.slice(0,8).join("、")}${selectedVocabulary.length>8?" …":""}`:selectedPatterns.slice(0,6).join("、")||"Choose at least one language item"}</strong>{selectedPatterns.length>0&&<span>{selectedPatterns.slice(0,4).join("／")}{selectedPatterns.length>4?" …":""}</span>}</div>
+        {selected.id==="delayed-dictation"&&<div className="dd-launch-setting"><div><strong>Memory delay</strong><small>How long students must hold the sentence before writing.</small></div><div className="dd-delay-options">{[3,5,8,10].map((delay)=><button type="button" key={delay} className={memoryDelay===delay?"selected":""} aria-pressed={memoryDelay===delay} onClick={()=>setMemoryDelay(delay)}>{delay} sec</button>)}</div></div>}
+      </section>
+      <button className="launch-button" onClick={createActivity} disabled={selectedCount===0}><Play size={19}/> {launchLabel} <ArrowRight size={19}/></button>
     </section></div>}
 
     {presentationOpen&&generated&&<PresentationPortal activity={generated} onClose={()=>setPresentationOpen(false)}/>} 
     {readMyMindOpen&&<ReadMyMindGame options={readMyMindOptions} onClose={()=>setReadMyMindOpen(false)}/>} 
+    {delayedDictationOpen&&<DelayedDictationGame packId={activePack.id} groups={delayedDictationGroups} patterns={selectedPatterns} memoryDelay={memoryDelay} onClose={()=>setDelayedDictationOpen(false)}/>} 
     <footer className="legal-note">Gamify · Classroom-ready language activities organised by input and production mode.</footer>
   </main>;
 }
