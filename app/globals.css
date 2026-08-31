@@ -1346,3 +1346,31 @@ button:focus-visible,textarea:focus-visible,input:focus-visible,select:focus-vis
 .rmm-setup>header small{
   color:#655891;
 }
+
+
+/* Keep Japanese Read My Mind choices horizontal inside the pastel grid */
+.rmm-secret-grid button{justify-items:stretch}
+.rmm-secret-grid button>span{
+  position:static;
+  left:auto;
+  top:auto;
+  justify-self:start;
+}
+.rmm-secret-grid button>svg{
+  position:static;
+  right:auto;
+  top:auto;
+  justify-self:end;
+}
+.rmm-secret-grid strong{
+  width:100%;
+  min-width:0;
+  color:var(--pastel-heading);
+  font-size:18px;
+  line-height:1.4;
+  text-align:left;
+  white-space:normal;
+  word-break:keep-all;
+  overflow-wrap:anywhere;
+  writing-mode:horizontal-tb;
+}
