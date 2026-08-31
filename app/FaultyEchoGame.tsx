@@ -135,10 +135,17 @@ function buildEchoRound(packId: string, groups: VocabularyGroup[], patterns: str
     p([firstItem],"もういちど、",item(firstItem),"。"),
     p([firstItem],item(firstItem),"ですか。"),
   ];
-  const rest=shuffled([...curated,...bareWords.slice(1),...supplements]);
-  const unique=[first,...rest].filter((prompt,index,all)=>kanaLength(prompt.kana)<20 && all.findIndex((candidate)=>candidate.kana===prompt.kana)===index).slice(0,5);
-  while(unique.length<5)unique.push(supplements[unique.length%supplements.length]);
-  return unique.sort((left,right)=>kanaLength(left.kana)-kanaLength(right.kana));
+  const chosen: EchoPrompt[]=[first];
+  const addUnique=(prompt:EchoPrompt)=>{
+    if(chosen.length<5 && kanaLength(prompt.kana)<20 && !chosen.some((candidate)=>candidate.kana===prompt.kana))chosen.push(prompt);
+  };
+  const richPrompt=shuffled(curated.filter((prompt)=>prompt.parts.some((part)=>part.reading)))[0];
+  if(richPrompt)addUnique(richPrompt);
+  shuffled(curated).forEach(addUnique);
+  shuffled(supplements).forEach(addUnique);
+  bareWords.slice(1).forEach(addUnique);
+  while(chosen.length<5)chosen.push(supplements[chosen.length%supplements.length]);
+  return chosen.sort((left,right)=>kanaLength(left.kana)-kanaLength(right.kana));
 }
 
 function PromptText({ prompt, mode }:{prompt:EchoPrompt;mode:DisplayMode}) {
