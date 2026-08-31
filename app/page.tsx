@@ -11,6 +11,7 @@ import { generateActivity, type GeneratedActivity } from "./generator";
 import PresentationPortal from "./PresentationPortal";
 import ReadMyMindGame from "./ReadMyMindGame";
 import DelayedDictationGame from "./DelayedDictationGame";
+import TugOfWarGame from "./TugOfWarGame";
 import { wordPacks } from "./wordPacks";
 
 type Activity = {
@@ -61,6 +62,7 @@ const activities:Activity[] = [
   { id:"exit-ticket", title:"Exit ticket", shortTitle:"Exit Ticket", description:"Write one concise piece of evidence showing what was learned.", category:"Production by Writing", time:"3–5 min", icon:ArrowRight, tone:"slate", stage:"writing" },
 
   { id:"sentence-stealer", title:"Sentence Stealer", shortTitle:"Sentence Stealer", description:"Students secretly choose sentences, mingle and steal matches through repeated speaking.", category:"Production by Speaking", time:"5–10 min", icon:UsersRound, tone:"purple", stage:"speaking" },
+  { id:"tug-of-war", title:"Tug-of-War Vocabulary Game", shortTitle:"Tug-of-War", description:"Two teams race to recall valid Word Pack vocabulary beginning with the target hiragana. Every accepted word pulls the rope.", category:"Production by Speaking", time:"8–12 min", icon:Move3D, tone:"pink", stage:"speaking" },
   { id:"trapdoor", title:"Trapdoor", shortTitle:"Trapdoor", description:"Guess a partner's hidden sentence-builder route; one wrong choice sends you back to the start.", category:"Production by Speaking", time:"8–12 min", icon:Layers3, tone:"orange", stage:"speaking" },
   { id:"oral-ping-pong", title:"Oral Ping-Pong", shortTitle:"Oral Ping-Pong", description:"Pairs rally rapidly between prompts and responses, keeping familiar language moving aloud.", category:"Production by Speaking", time:"5–8 min", icon:MessageCircleMore, tone:"sky", stage:"speaking" },
   { id:"battleships", title:"Battleships", shortTitle:"Battleships", description:"Attack hidden grid coordinates by producing complete target-language questions or sentences.", category:"Production by Speaking", time:"10–15 min", icon:Target, tone:"blue", stage:"speaking" },
@@ -85,6 +87,7 @@ export default function Home(){
   const [presentationOpen,setPresentationOpen]=useState(false);
   const [readMyMindOpen,setReadMyMindOpen]=useState(false);
   const [delayedDictationOpen,setDelayedDictationOpen]=useState(false);
+  const [tugOfWarOpen,setTugOfWarOpen]=useState(false);
   const [memoryDelay,setMemoryDelay]=useState(5);
 
   const activePack=wordPacks.find((pack)=>pack.id===packId)??wordPacks[0];
@@ -120,11 +123,11 @@ export default function Home(){
 
   useEffect(()=>{
     const close=(event:KeyboardEvent)=>{
-      if(event.key==="Escape"&&!presentationOpen&&!readMyMindOpen&&!delayedDictationOpen)setSelected(null);
+      if(event.key==="Escape"&&!presentationOpen&&!readMyMindOpen&&!delayedDictationOpen&&!tugOfWarOpen)setSelected(null);
     };
     window.addEventListener("keydown",close);
     return()=>window.removeEventListener("keydown",close);
-  },[presentationOpen,readMyMindOpen,delayedDictationOpen]);
+  },[presentationOpen,readMyMindOpen,delayedDictationOpen,tugOfWarOpen]);
 
   const createActivity=()=>{
     if(!selected||selectedCount===0)return;
@@ -138,6 +141,12 @@ export default function Home(){
       setDelayedDictationOpen(true);
       return;
     }
+    if(selected.id==="tug-of-war"){
+      if(selectedVocabulary.length===0)return;
+      setSelected(null);
+      setTugOfWarOpen(true);
+      return;
+    }
     const created=generateActivity({activityId:selected.id,activityTitle:selected.title,vocabulary,grammar,yearLevel,support,duration,participation,energy});
     setGenerated(created);
     setSelected(null);
@@ -145,7 +154,8 @@ export default function Home(){
   };
 
   const SelectedIcon=selected?.icon??Sparkles;
-  const launchLabel=selected?.id==="read-my-mind"?"Launch Read My Mind":selected?.id==="delayed-dictation"?"Launch Delayed Dictation":"Build and launch slides";
+  const selectedLanguageCount=selected?.id==="tug-of-war"?selectedVocabulary.length:selectedCount;
+  const launchLabel=selected?.id==="read-my-mind"?"Launch Read My Mind":selected?.id==="delayed-dictation"?"Launch Delayed Dictation":selected?.id==="tug-of-war"?"Launch Tug-of-War":"Build and launch slides";
 
   return <main className="ipad-page">
     <a className="skip-link" href="#activity-apps">Skip to activities</a>
@@ -214,15 +224,17 @@ export default function Home(){
       <header className="launch-identity"><div className={`app-icon app-${selected.tone}`}><SelectedIcon size={34}/><i/></div><div><p className="sheet-category">{selected.category} · {selected.time}</p><h2 id="launch-title">{selected.title}</h2></div></header>
       <p className="launch-description">{selected.description}</p>
       <section className="launch-config" aria-label="Selected language">
-        <div className="language-preview"><small>{activePack.name} · {selectedCount} selected</small><strong>{selectedVocabulary.length>0?`${selectedVocabulary.slice(0,8).join("、")}${selectedVocabulary.length>8?" …":""}`:selectedPatterns.slice(0,6).join("、")||"Choose at least one language item"}</strong>{selectedPatterns.length>0&&<span>{selectedPatterns.slice(0,4).join("／")}{selectedPatterns.length>4?" …":""}</span>}</div>
+        <div className="language-preview"><small>{activePack.name} · {selectedLanguageCount} selected</small><strong>{selectedVocabulary.length>0?`${selectedVocabulary.slice(0,8).join("、")}${selectedVocabulary.length>8?" …":""}`:selected?.id==="tug-of-war"?"Choose at least one vocabulary item":selectedPatterns.slice(0,6).join("、")||"Choose at least one language item"}</strong>{selected?.id!=="tug-of-war"&&selectedPatterns.length>0&&<span>{selectedPatterns.slice(0,4).join("／")}{selectedPatterns.length>4?" …":""}</span>}</div>
         {selected.id==="delayed-dictation"&&<div className="dd-launch-setting"><div><strong>Memory delay</strong><small>How long students must hold the sentence before writing.</small></div><div className="dd-delay-options">{[3,5,8,10].map((delay)=><button type="button" key={delay} className={memoryDelay===delay?"selected":""} aria-pressed={memoryDelay===delay} onClick={()=>setMemoryDelay(delay)}>{delay} sec</button>)}</div></div>}
+        {selected.id==="tug-of-war"&&<div className="tow-launch-note"><UsersRound size={19}/><div><strong>Two-team classroom mode</strong><small>Answers are validated against the vocabulary selected in this Word Pack.</small></div></div>}
       </section>
-      <button className="launch-button" onClick={createActivity} disabled={selectedCount===0}><Play size={19}/> {launchLabel} <ArrowRight size={19}/></button>
+      <button className="launch-button" onClick={createActivity} disabled={selectedLanguageCount===0}><Play size={19}/> {launchLabel} <ArrowRight size={19}/></button>
     </section></div>}
 
     {presentationOpen&&generated&&<PresentationPortal activity={generated} onClose={()=>setPresentationOpen(false)}/>} 
     {readMyMindOpen&&<ReadMyMindGame options={readMyMindOptions} onClose={()=>setReadMyMindOpen(false)}/>} 
     {delayedDictationOpen&&<DelayedDictationGame packId={activePack.id} groups={delayedDictationGroups} patterns={selectedPatterns} memoryDelay={memoryDelay} onClose={()=>setDelayedDictationOpen(false)}/>} 
+    {tugOfWarOpen&&<TugOfWarGame items={selectedVocabulary} packName={activePack.name} onClose={()=>setTugOfWarOpen(false)}/>}
     <footer className="legal-note">Gamify · Classroom-ready language activities organised by input and production mode.</footer>
   </main>;
 }

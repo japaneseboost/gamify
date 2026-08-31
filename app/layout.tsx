@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./layout-fixes.css";
 import "./delayed-dictation.css";
 import "./globals.css";
+import "./tug-of-war.css";
 
 export const metadata: Metadata = {
   title: "Gamify — Language Activity Workspace",
