@@ -1300,3 +1300,20 @@ button:focus-visible,textarea:focus-visible,input:focus-visible,select:focus-vis
 @media(prefers-reduced-motion:reduce){
   .sparkle,.language-chip,.stage-activity,.stage-activity .app-icon,.pack-toolbar button,.launch-button{animation:none!important;transition:none!important}
 }
+
+
+/* Specificity bridges for the legacy component stylesheets */
+.ipad-page{padding-bottom:0}
+.pos-vocabulary-groups .pos-group+.pos-group{padding-top:13px;border-top:1px solid var(--group-border)}
+.pos-group>header .pos-count{
+  min-width:42px;
+  padding:4px 8px;
+  border-radius:999px;
+  color:var(--group-accent);
+  background:rgba(255,255,255,.78);
+  font-size:9px;
+  font-weight:800;
+  text-align:center;
+}
+.legal-note{display:none}
+@media(max-width:900px){.ipad-page{padding-bottom:38px}}
