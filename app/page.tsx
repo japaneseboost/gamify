@@ -4,6 +4,7 @@ import {
   ArrowRight, BookOpenText, Check,
   Layers3, MessageCircleMore, Move3D, Play, Presentation,
   Sparkles, UsersRound, WandSparkles, X, PencilLine, Target, PackageOpen,
+  Clock3, Palette, Puzzle, Shapes, Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { generateActivity, type GeneratedActivity } from "./generator";
@@ -25,6 +26,14 @@ const lessonStages:{id:StageId;number:string;name:string;purpose:string;tone:str
   {id:"writing",number:"03",name:"Production by Writing",purpose:"Create language in writing",tone:"orange"},
   {id:"speaking",number:"04",name:"Production by Speaking",purpose:"Use language aloud",tone:"rose"},
 ];
+
+const vocabularyGroupVisuals:Record<string,{icon:typeof Shapes;tone:string;description:string}> = {
+  nouns:{icon:Shapes,tone:"sky",description:"People, places and things"},
+  verbs:{icon:Zap,tone:"mint",description:"Actions and routines"},
+  adjectives:{icon:Palette,tone:"peach",description:"Describing words"},
+  expressions:{icon:MessageCircleMore,tone:"pink",description:"Useful classroom phrases"},
+  "adverbs-time":{icon:Clock3,tone:"lavender",description:"Time, frequency and manner"},
+};
 
 const activities:Activity[] = [
   { id:"read-my-mind", title:"Read My Mind", shortTitle:"Read My Mind", description:"Sensei secretly chooses one answer. Students predict, listen to clues, change their minds, then see the reveal.", category:"Input by Listening", time:"5–8 min", icon:Sparkles, tone:"purple", stage:"listening" },
@@ -140,6 +149,10 @@ export default function Home(){
 
   return <main className="ipad-page">
     <a className="skip-link" href="#activity-apps">Skip to activities</a>
+    <div className="pastel-decor" aria-hidden="true">
+      <span className="pastel-blob blob-sky"/><span className="pastel-blob blob-mint"/><span className="pastel-blob blob-peach"/><span className="pastel-blob blob-lavender"/>
+      <Sparkles className="sparkle sparkle-one" size={30}/><Sparkles className="sparkle sparkle-two" size={22}/><Sparkles className="sparkle sparkle-three" size={26}/>
+    </div>
     <header className="ipad-status brand-status">
       <div className="brand-lockup" aria-label="Gamify — Language Activity Studio">
         <span className="brand-mark" aria-hidden="true"><span>G</span><i/></span>
@@ -153,39 +166,41 @@ export default function Home(){
           <header className="word-pack-header">
             <div className="word-pack-title">
               <span className="word-pack-icon" aria-hidden="true"><PackageOpen size={24}/></span>
-              <div><small>WORD PACK</small><h2>{activePack.name}</h2><p>Select the language used in every game mode.</p></div>
+              <div><small>WORD PACK</small><h2>{activePack.name}</h2><p>Build the language set for today&apos;s games.</p></div>
             </div>
             <label className="pack-picker"><span>Choose pack</span><select className="pack-select" value={packId} onChange={(event)=>choosePack(event.target.value)}>{wordPacks.map((pack)=><option key={pack.id} value={pack.id}>{pack.name}</option>)}</select></label>
           </header>
 
           <div className="pack-toolbar">
-            <span><strong>{selectedCount}</strong> of {totalPackItems} selected</span>
+            <span className="selection-summary"><i aria-hidden="true"><Check size={12}/></i><strong>{selectedCount}</strong> of {totalPackItems} ready</span>
             <div><button type="button" onClick={selectAllItems}>Select all</button><button type="button" onClick={clearItems}>Clear</button></div>
           </div>
 
           <div className="pack-groups">
-            <section className="pack-group" aria-labelledby="pack-vocabulary-title">
-              <header><h3 id="pack-vocabulary-title">Vocabulary</h3><span>{selectedVocabulary.length}/{activePack.vocabulary.length}</span></header>
+            <section className="pack-group vocabulary-library" aria-labelledby="pack-vocabulary-title">
+              <header className="pack-section-heading"><div><h3 id="pack-vocabulary-title">Vocabulary library</h3><small>Grouped by how each word works</small></div><span>{selectedVocabulary.length}/{activePack.vocabulary.length}</span></header>
               <div className="pos-vocabulary-groups">
                 {activePack.vocabularyGroups.map((group)=>{
                   const selectedInGroup=group.items.filter((item)=>selectedVocabulary.includes(item)).length;
-                  return <section className="pos-group" key={group.id} aria-labelledby={`pos-${activePack.id}-${group.id}`}>
-                    <header><h4 id={`pos-${activePack.id}-${group.id}`}>{group.label}</h4><span>{selectedInGroup}/{group.items.length}</span></header>
+                  const visual=vocabularyGroupVisuals[group.id]??vocabularyGroupVisuals.nouns;
+                  const GroupIcon=visual.icon;
+                  return <section className={`pos-group pos-${visual.tone}`} key={group.id} aria-labelledby={`pos-${activePack.id}-${group.id}`}>
+                    <header><span className="pos-icon" aria-hidden="true"><GroupIcon size={16}/></span><div><h4 id={`pos-${activePack.id}-${group.id}`}>{group.label}</h4><small>{visual.description}</small></div><span className="pos-count">{selectedInGroup}/{group.items.length}</span></header>
                     <div className="language-chip-grid">{group.items.map((item)=>{const isSelected=selectedVocabulary.includes(item);return <button type="button" className={`language-chip ${isSelected?"selected":""}`} aria-pressed={isSelected} key={item} onClick={()=>toggleLanguageItem("vocabulary",item)}>{isSelected&&<Check size={13} aria-hidden="true"/>}<span>{item}</span></button>;})}</div>
                   </section>;
                 })}
               </div>
             </section>
-            <section className="pack-group" aria-labelledby="pack-patterns-title">
-              <header><h3 id="pack-patterns-title">Target patterns</h3><span>{selectedPatterns.length}/{activePack.patterns.length}</span></header>
-              <div className="language-chip-grid">{activePack.patterns.map((item)=>{const isSelected=selectedPatterns.includes(item);return <button type="button" className={`language-chip ${isSelected?"selected":""}`} aria-pressed={isSelected} key={item} onClick={()=>toggleLanguageItem("patterns",item)}>{isSelected&&<Check size={13} aria-hidden="true"/>}<span>{item}</span></button>;})}</div>
+            <section className="pack-group pattern-library" aria-labelledby="pack-patterns-title">
+              <header className="pack-section-heading"><span className="pos-icon pattern-icon" aria-hidden="true"><Puzzle size={16}/></span><div><h3 id="pack-patterns-title">Target patterns</h3><small>Sentence frames and grammar</small></div><span>{selectedPatterns.length}/{activePack.patterns.length}</span></header>
+              <div className="language-chip-grid">{activePack.patterns.map((item)=>{const isSelected=selectedPatterns.includes(item);return <button type="button" className={`language-chip pattern-chip ${isSelected?"selected":""}`} aria-pressed={isSelected} key={item} onClick={()=>toggleLanguageItem("patterns",item)}>{isSelected&&<Check size={13} aria-hidden="true"/>}<span>{item}</span></button>;})}</div>
             </section>
           </div>
         </article>
       </aside>
 
       <section className="apps-area" id="activity-apps" aria-labelledby="apps-title">
-        <div className="apps-heading"><div><p>LANGUAGE LEARNING</p><h1 id="apps-title">Choose by learning mode</h1></div><span>Every activity opens as a live classroom deck</span></div>
+        <div className="apps-heading"><div><p>PLAY · PRACTISE · PROGRESS</p><h1 id="apps-title">Choose your learning mode</h1></div><span>Pick a colourful classroom activity and start playing</span></div>
         <div className="lesson-stage-grid">
           {lessonStages.map((stage)=><section className={`lesson-stage stage-${stage.tone}`} key={stage.id} aria-labelledby={`stage-${stage.id}`}><header><span className="stage-index"><small>Stage</small><b>{stage.number}</b></span><div><h2 id={`stage-${stage.id}`}>{stage.name}</h2><p>{stage.purpose}</p></div></header><div className="stage-activities">
             {activities.filter((activity)=>activity.stage===stage.id).map((activity)=>{const Icon=activity.icon;return <button className="stage-activity" key={activity.id} onClick={()=>setSelected(activity)} aria-label={`Create ${activity.title}`}><span className={`app-icon app-${activity.tone}`}><Icon size={24}/><i/></span><span><strong>{activity.shortTitle}</strong><small>{activity.time}</small></span></button>;})}
