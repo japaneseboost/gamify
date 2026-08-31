@@ -1317,3 +1317,6 @@ button:focus-visible,textarea:focus-visible,input:focus-visible,select:focus-vis
 }
 .legal-note{display:none}
 @media(max-width:900px){.ipad-page{padding-bottom:38px}}
+
+
+.pack-toolbar .selection-summary strong{color:var(--pastel-heading)}
