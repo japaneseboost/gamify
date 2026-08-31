@@ -1,53 +1,76 @@
-/* Layout polish: centred Word Pack + full-page scrolling */
-html,body{min-height:100%;overflow-x:hidden;scrollbar-color:rgba(151,164,188,.42) rgba(10,15,26,.55);scrollbar-width:thin}
-body{overflow-y:auto;background:#101827}
-.ipad-page{min-height:100dvh;height:auto;overflow-x:hidden;overflow-y:visible;padding-bottom:138px}
-.home-screen{
-  width:min(1500px,calc(100% - 56px));
-  height:auto;
-  min-height:0;
-  margin:0 auto;
-  display:flex;
-  flex-direction:column;
-  align-items:stretch;
-  gap:48px;
+/* Layout polish: left-centred Word Pack + full-page scrolling */
+html,body{
+  min-height:100%;
+  overflow-x:hidden;
+  scrollbar-color:rgba(151,164,188,.42) rgba(10,15,26,.55);
+  scrollbar-width:thin;
 }
-.word-pack-column{
-  width:min(1040px,100%);
+body{overflow-y:auto;background:#101827}
+.ipad-page{
+  min-height:100dvh;
+  height:auto;
+  overflow-x:hidden;
+  overflow-y:visible;
+  padding-bottom:138px;
+}
+
+/* Keep the Word Pack on the left. The page itself can now grow and scroll. */
+.home-screen{
+  width:min(1540px,calc(100% - 56px));
+  height:auto;
+  min-height:calc(100dvh - 130px);
   margin:0 auto;
-  align-self:center;
+  display:grid;
+  grid-template-columns:clamp(350px,26vw,430px) minmax(0,1fr);
+  gap:clamp(42px,5vw,82px);
+  align-items:start;
+}
+
+/* Visually centre the panel in the left side of the viewport and keep it useful while scrolling. */
+.word-pack-column{
+  width:100%;
+  min-width:0;
+  position:sticky;
+  top:clamp(112px,17vh,160px);
+  align-self:start;
 }
 .word-pack-widget{
-  height:auto;
-  min-height:0;
-  max-height:none;
-  grid-template-rows:auto auto auto;
+  width:100%;
+  height:min(610px,calc(100dvh - 210px));
+  min-height:480px;
+  max-height:680px;
+  grid-template-rows:auto auto minmax(0,1fr);
   overflow:hidden;
 }
 .pack-groups{
   min-height:0;
-  overflow:visible;
-  display:grid;
-  grid-template-columns:minmax(0,1.75fr) minmax(300px,1fr);
-  gap:26px;
-  padding:21px 24px 26px;
+  display:block;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  padding:19px 20px 24px;
+  scrollbar-color:rgba(151,164,188,.38) transparent;
+  scrollbar-width:thin;
 }
 .pack-group+ .pack-group{
-  margin-top:0;
-  padding-top:0;
-  padding-left:26px;
-  border-top:0;
-  border-left:1px solid var(--comfort-line);
+  margin-top:23px;
+  padding-top:20px;
+  padding-left:0;
+  border-top:1px solid var(--comfort-line);
+  border-left:0;
 }
-.apps-area{width:100%;min-width:0}
+
+/* Games stay on the right, with normal document flow so every stage is reachable. */
+.apps-area{width:100%;min-width:0;padding-bottom:28px}
 .apps-heading{margin-bottom:18px}
 .lesson-stage-grid{width:100%}
 .lesson-stage{align-items:start}
 .stage-activities{
-  grid-template-columns:repeat(4,minmax(0,1fr));
+  grid-template-columns:repeat(3,minmax(0,1fr));
   align-items:stretch;
 }
 .stage-activity{height:100%}
+
+/* Keep quick actions accessible without blocking page scrolling. */
 .ipad-dock{position:fixed;bottom:18px}
 .page-dots{display:none}
 .legal-note{
@@ -55,29 +78,40 @@ body{overflow-y:auto;background:#101827}
   right:auto;
   bottom:auto;
   max-width:none;
-  margin:42px auto -90px;
+  margin:38px auto -88px;
   padding:0 24px;
   text-align:center;
 }
 
+@media(min-width:1500px){
+  .home-screen{grid-template-columns:420px minmax(0,1fr)}
+}
+
 @media(max-width:1180px){
-  .home-screen{width:min(1180px,calc(100% - 40px));gap:40px}
-  .word-pack-column{width:min(920px,100%)}
-  .pack-groups{grid-template-columns:1fr 1fr;gap:20px}
-  .stage-activities{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .home-screen{
+    width:min(1160px,calc(100% - 38px));
+    grid-template-columns:330px minmax(0,1fr);
+    gap:34px;
+  }
+  .word-pack-column{top:112px}
+  .word-pack-widget{height:min(570px,calc(100dvh - 170px));min-height:440px}
+  .stage-activities{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 
 @media(max-width:900px){
-  .home-screen{width:calc(100% - 30px);gap:34px}
-  .word-pack-column{width:100%}
-  .pack-groups{display:block;padding:18px 18px 22px}
-  .pack-group+ .pack-group{
-    margin-top:22px;
-    padding-top:20px;
-    padding-left:0;
-    border-top:1px solid var(--comfort-line);
-    border-left:0;
+  .home-screen{
+    width:calc(100% - 30px);
+    min-height:0;
+    display:block;
   }
+  .word-pack-column{
+    position:relative;
+    top:auto;
+    width:min(620px,100%);
+    margin:0 auto 36px;
+  }
+  .word-pack-widget{height:auto;min-height:0;max-height:none}
+  .pack-groups{overflow:visible;padding:18px 18px 22px}
   .lesson-stage{grid-template-columns:1fr;gap:16px}
   .lesson-stage>header{min-height:0}
   .stage-activities{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -85,7 +119,8 @@ body{overflow-y:auto;background:#101827}
 
 @media(max-width:620px){
   .ipad-page{padding-bottom:122px}
-  .home-screen{width:calc(100% - 24px);gap:28px}
+  .home-screen{width:calc(100% - 24px)}
+  .word-pack-column{margin-bottom:30px}
   .word-pack-widget{border-radius:22px}
   .word-pack-header{padding:18px 16px 15px}
   .pack-toolbar{padding-left:14px;padding-right:14px}
