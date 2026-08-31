@@ -1,17 +1,15 @@
 "use client";
 
 import {
-  ArrowRight, BookOpenText, Check,
-  Layers3, MessageCircleMore, Move3D, Play, Presentation,
-  Brain, Gavel, MessagesSquare, UsersRound, X, PencilLine, Target, PackageOpen,
+  ArrowRight, Check, MessageCircleMore, Move3D, Play,
+  Brain, UsersRound, X, PencilLine, Target, PackageOpen,
   Clock3, Moon, Palette, Puzzle, Shapes, Sun, Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { generateActivity, type GeneratedActivity } from "./generator";
-import PresentationPortal from "./PresentationPortal";
 import ReadMyMindGame from "./ReadMyMindGame";
 import DelayedDictationGame from "./DelayedDictationGame";
 import TugOfWarGame from "./TugOfWarGame";
+import FaultyEchoGame from "./FaultyEchoGame";
 import { wordPacks } from "./wordPacks";
 
 type Activity = {
@@ -41,52 +39,16 @@ const activities:Activity[] = [
   { id:"read-my-mind", title:"Read My Mind", shortTitle:"Read My Mind", description:"Sensei secretly chooses one answer. Students predict, listen to clues, change their minds, then see the reveal.", category:"Input by Listening", time:"5–8 min", icon:Brain, tone:"purple", stage:"listening" },
   { id:"faulty-echo", title:"Faulty Echo", shortTitle:"Faulty Echo", description:"Students echo the model only when what they hear is accurate, noticing tiny changes in familiar language.", category:"Input by Listening", time:"3–6 min", icon:Check, tone:"blue", stage:"listening" },
   { id:"delayed-dictation", title:"Delayed Dictation", shortTitle:"Delayed Dictation", description:"Listen to a hidden sentence, hold it in memory, write it from recall, then self-correct against the model.", category:"Input by Listening", time:"5–8 min", icon:PencilLine, tone:"indigo", stage:"listening" },
-  { id:"karuta", title:"Karuta", shortTitle:"Karuta", description:"Race to identify the correct card from a spoken word, clue or sentence before anyone else.", category:"Input by Listening", time:"5–10 min", icon:Target, tone:"rose", stage:"listening" },
-  { id:"narrow-listening", title:"Narrow Listening", shortTitle:"Narrow Listening", description:"Listen to several highly similar mini-texts and detect the small details that change.", category:"Input by Listening", time:"8–12 min", icon:Presentation, tone:"cyan", stage:"listening" },
-  { id:"true-false", title:"True or false", shortTitle:"True or False", description:"Listen to familiar-language statements and decide whether each is true.", category:"Input by Listening", time:"5–8 min", icon:Check, tone:"blue", stage:"listening" },
-  { id:"story-listening", title:"Story listening", shortTitle:"Story Listening", description:"Provide controlled, understandable input with prediction and gesture.", category:"Input by Listening", time:"10–15 min", icon:Presentation, tone:"rose", stage:"listening" },
-  { id:"listen-draw", title:"Listen and draw", shortTitle:"Listen & Draw", description:"Students listen for familiar vocabulary and turn meaning into a drawing.", category:"Input by Listening", time:"8–12 min", icon:PencilLine, tone:"cyan", stage:"listening" },
-
-  { id:"sentence-chaos", title:"Sentence Chaos", shortTitle:"Sentence Chaos", description:"Reconstruct scrambled chunks into meaningful, grammatically valid sentences.", category:"Input by Reading", time:"5–8 min", icon:Layers3, tone:"orange", stage:"reading" },
-  { id:"sentence-maze", title:"Sentence Maze", shortTitle:"Sentence Maze", description:"Navigate a path through sentence chunks while avoiding plausible distractors.", category:"Input by Reading", time:"6–10 min", icon:Move3D, tone:"green", stage:"reading" },
-  { id:"find-intruder", title:"Find the Intruder", shortTitle:"Find Intruder", description:"Choose the item that does not belong, then justify the category or language pattern.", category:"Input by Reading", time:"5–8 min", icon:Target, tone:"amber", stage:"reading" },
-  { id:"reading-bingo", title:"Reading Bingo", shortTitle:"Reading Bingo", description:"Match written target language to meanings, clues or spoken prompts on a bingo grid.", category:"Input by Reading", time:"8–12 min", icon:Check, tone:"sky", stage:"reading" },
-  { id:"lesson-focus", title:"Guided reading", shortTitle:"Guided Reading", description:"Read the target language together and identify the key meaning.", category:"Input by Reading", time:"5–8 min", icon:Target, tone:"indigo", stage:"reading" },
-  { id:"read-discuss", title:"Read and discuss", shortTitle:"Read & Discuss", description:"Process familiar written language, then connect it to personal meaning.", category:"Input by Reading", time:"10–15 min", icon:BookOpenText, tone:"amber", stage:"reading" },
-
-  { id:"one-pen-one-dice", title:"One Pen One Dice", shortTitle:"One Pen One Dice", description:"One student writes while the other rolls; hitting the target number steals the pen and reverses roles.", category:"Production by Writing", time:"8–12 min", icon:PencilLine, tone:"green", stage:"writing" },
-  { id:"pyramid-translation", title:"Pyramid Translation", shortTitle:"Pyramid", description:"Translate increasingly long lines that repeatedly recycle the same core chunks.", category:"Production by Writing", time:"8–12 min", icon:Layers3, tone:"purple", stage:"writing" },
-  { id:"sentence-race", title:"Sentence Race", shortTitle:"Sentence Race", description:"Build an accurate sentence from timed keywords, meanings or image prompts.", category:"Production by Writing", time:"5–10 min", icon:ArrowRight, tone:"rose", stage:"writing" },
-  { id:"running-dictation", title:"Running Dictation", shortTitle:"Running Dictation", description:"Runners memorise target-language stations and dictate them to a partner writer.", category:"Production by Writing", time:"10–15 min", icon:Move3D, tone:"cyan", stage:"writing" },
-  { id:"sentence-auction", title:"Sentence Auction", shortTitle:"Sentence Auction", description:"Teams bid imaginary money on whether sentences are correct, then repair errors for bonus points.", category:"Production by Writing", time:"10–15 min", icon:Gavel, tone:"orange", stage:"writing" },
-  { id:"question-ladder", title:"Question ladder", shortTitle:"Question Ladder", description:"Build increasingly independent written responses from a clear scaffold.", category:"Production by Writing", time:"6–10 min", icon:Layers3, tone:"green", stage:"writing" },
-  { id:"exit-ticket", title:"Exit ticket", shortTitle:"Exit Ticket", description:"Write one concise piece of evidence showing what was learned.", category:"Production by Writing", time:"3–5 min", icon:ArrowRight, tone:"slate", stage:"writing" },
-
-  { id:"sentence-stealer", title:"Sentence Stealer", shortTitle:"Sentence Stealer", description:"Students secretly choose sentences, mingle and steal matches through repeated speaking.", category:"Production by Speaking", time:"5–10 min", icon:UsersRound, tone:"purple", stage:"speaking" },
   { id:"tug-of-war", title:"Tug-of-War Vocabulary Game", shortTitle:"Tug-of-War", description:"Four starting kana begin in the centre. Drag the matching kana toward the team whenever they give a correct Word Pack item.", category:"Production by Speaking", time:"8–12 min", icon:Move3D, tone:"pink", stage:"speaking" },
-  { id:"trapdoor", title:"Trapdoor", shortTitle:"Trapdoor", description:"Guess a partner's hidden sentence-builder route; one wrong choice sends you back to the start.", category:"Production by Speaking", time:"8–12 min", icon:Layers3, tone:"orange", stage:"speaking" },
-  { id:"oral-ping-pong", title:"Oral Ping-Pong", shortTitle:"Oral Ping-Pong", description:"Pairs rally rapidly between prompts and responses, keeping familiar language moving aloud.", category:"Production by Speaking", time:"5–8 min", icon:MessageCircleMore, tone:"sky", stage:"speaking" },
-  { id:"battleships", title:"Battleships", shortTitle:"Battleships", description:"Attack hidden grid coordinates by producing complete target-language questions or sentences.", category:"Production by Speaking", time:"10–15 min", icon:Target, tone:"blue", stage:"speaking" },
-  { id:"janken-evolution", title:"Janken Evolution", shortTitle:"Janken Evolution", description:"Students mingle, complete a target-language exchange, then evolve through stages by winning janken.", category:"Production by Speaking", time:"8–12 min", icon:Move3D, tone:"green", stage:"speaking" },
-  { id:"pqa", title:"Personal questions", shortTitle:"Personal Questions", description:"Create personal relevance through a genuine class conversation.", category:"Production by Speaking", time:"8–12 min", icon:MessageCircleMore, tone:"sky", stage:"speaking" },
-  { id:"special-person", title:"Special person interview", shortTitle:"Special Person", description:"Interview a class member, then retell what was learned.", category:"Production by Speaking", time:"12–18 min", icon:UsersRound, tone:"purple", stage:"speaking" },
-  { id:"co-created-story", title:"Co-created story", shortTitle:"Class Story", description:"Introduce and recycle language through bounded student choices.", category:"Production by Speaking", time:"15–25 min", icon:MessagesSquare, tone:"orange", stage:"speaking" },
-  { id:"four-corners", title:"Four corners", shortTitle:"Four Corners", description:"Use target-language choices in a visible whole-class movement task.", category:"Production by Speaking", time:"8–12 min", icon:Move3D, tone:"pink", stage:"speaking" },
 ];
 
 export default function Home(){
   const [packId,setPackId]=useState(wordPacks[0].id);
   const [selectedVocabulary,setSelectedVocabulary]=useState<string[]>(()=>[...wordPacks[0].vocabulary]);
   const [selectedPatterns,setSelectedPatterns]=useState<string[]>(()=>[...wordPacks[0].patterns]);
-  const yearLevel="8";
-  const support="Developing";
-  const duration="10–15 minutes";
-  const participation="Whole class";
-  const energy="calm";
   const [selected,setSelected]=useState<Activity|null>(null);
-  const [generated,setGenerated]=useState<GeneratedActivity|null>(null);
-  const [presentationOpen,setPresentationOpen]=useState(false);
   const [readMyMindOpen,setReadMyMindOpen]=useState(false);
+  const [faultyEchoOpen,setFaultyEchoOpen]=useState(false);
   const [delayedDictationOpen,setDelayedDictationOpen]=useState(false);
   const [tugOfWarOpen,setTugOfWarOpen]=useState(false);
   const [memoryDelay,setMemoryDelay]=useState(5);
@@ -95,8 +57,6 @@ export default function Home(){
   const activePack=wordPacks.find((pack)=>pack.id===packId)??wordPacks[0];
   const selectedCount=selectedVocabulary.length+selectedPatterns.length;
   const totalPackItems=activePack.vocabulary.length+activePack.patterns.length;
-  const vocabulary=(selectedVocabulary.length>0?selectedVocabulary:selectedPatterns).join("、");
-  const grammar=selectedPatterns.join("／");
   const selectedNouns=activePack.vocabularyGroups.find((group)=>group.id==="nouns")?.items.filter((item)=>selectedVocabulary.includes(item))??[];
   const readMyMindOptions=selectedNouns.length>=4?selectedNouns:(selectedVocabulary.length>=4?selectedVocabulary:activePack.vocabulary);
   const delayedDictationGroups=activePack.vocabularyGroups.map((group)=>({...group,items:group.items.filter((item)=>selectedVocabulary.includes(item))})).filter((group)=>group.items.length>0);
@@ -146,17 +106,23 @@ export default function Home(){
 
   useEffect(()=>{
     const close=(event:KeyboardEvent)=>{
-      if(event.key==="Escape"&&!presentationOpen&&!readMyMindOpen&&!delayedDictationOpen&&!tugOfWarOpen)setSelected(null);
+      if(event.key==="Escape"&&!readMyMindOpen&&!faultyEchoOpen&&!delayedDictationOpen&&!tugOfWarOpen)setSelected(null);
     };
     window.addEventListener("keydown",close);
     return()=>window.removeEventListener("keydown",close);
-  },[presentationOpen,readMyMindOpen,delayedDictationOpen,tugOfWarOpen]);
+  },[readMyMindOpen,faultyEchoOpen,delayedDictationOpen,tugOfWarOpen]);
 
   const createActivity=()=>{
     if(!selected||selectedCount===0)return;
     if(selected.id==="read-my-mind"){
       setSelected(null);
       setReadMyMindOpen(true);
+      return;
+    }
+    if(selected.id==="faulty-echo"){
+      if(selectedVocabulary.length===0)return;
+      setSelected(null);
+      setFaultyEchoOpen(true);
       return;
     }
     if(selected.id==="delayed-dictation"){
@@ -170,15 +136,11 @@ export default function Home(){
       setTugOfWarOpen(true);
       return;
     }
-    const created=generateActivity({activityId:selected.id,activityTitle:selected.title,vocabulary,grammar,yearLevel,support,duration,participation,energy});
-    setGenerated(created);
-    setSelected(null);
-    setPresentationOpen(true);
   };
 
   const SelectedIcon=selected?.icon??Target;
-  const selectedLanguageCount=selected?.id==="tug-of-war"?selectedVocabulary.length:selectedCount;
-  const launchLabel=selected?.id==="read-my-mind"?"Launch Read My Mind":selected?.id==="delayed-dictation"?"Launch Delayed Dictation":selected?.id==="tug-of-war"?"Launch Tug-of-War":"Build and launch slides";
+  const selectedLanguageCount=selected?.id==="tug-of-war"||selected?.id==="faulty-echo"?selectedVocabulary.length:selectedCount;
+  const launchLabel=selected?.id==="read-my-mind"?"Launch Read My Mind":selected?.id==="faulty-echo"?"Launch Faulty Echo":selected?.id==="delayed-dictation"?"Launch Delayed Dictation":selected?.id==="tug-of-war"?"Launch Tug-of-War":"Build and launch slides";
 
   return <main className="ipad-page" data-theme={theme}>
     <a className="skip-link" href="#activity-apps">Skip to activities</a>
@@ -239,9 +201,9 @@ export default function Home(){
       <section className="apps-area" id="activity-apps" aria-labelledby="apps-title">
         <h1 className="visually-hidden" id="apps-title">Gamify learning modes</h1>
         <div className="lesson-stage-grid">
-          {lessonStages.map((stage)=><section className={`lesson-stage stage-${stage.tone}`} key={stage.id} aria-labelledby={`stage-${stage.id}`}><header><span className="stage-index"><small>Stage</small><b>{stage.number}</b></span><div><h2 id={`stage-${stage.id}`}>{stage.name}</h2><p>{stage.purpose}</p></div></header><div className="stage-activities">
-            {activities.filter((activity)=>activity.stage===stage.id).map((activity)=>{const Icon=activity.icon;return <button className="stage-activity" key={activity.id} onClick={()=>setSelected(activity)} aria-label={`Create ${activity.title}`}><span className={`app-icon app-${activity.tone}`}><Icon size={24}/><i/></span><span><strong>{activity.shortTitle}</strong><small>{activity.time}</small></span></button>;})}
-          </div></section>)}
+          {lessonStages.map((stage)=>{const stageActivities=activities.filter((activity)=>activity.stage===stage.id);if(stageActivities.length===0)return null;return <section className={`lesson-stage stage-${stage.tone}`} key={stage.id} aria-labelledby={`stage-${stage.id}`}><header><span className="stage-index"><small>Stage</small><b>{stage.number}</b></span><div><h2 id={`stage-${stage.id}`}>{stage.name}</h2><p>{stage.purpose}</p></div></header><div className="stage-activities">
+            {stageActivities.map((activity)=>{const Icon=activity.icon;return <button className="stage-activity" key={activity.id} onClick={()=>setSelected(activity)} aria-label={`Create ${activity.title}`}><span className={`app-icon app-${activity.tone}`}><Icon size={24}/><i/></span><span><strong>{activity.shortTitle}</strong><small>{activity.time}</small></span></button>;})}
+          </div></section>;})}
         </div>
       </section>
     </section>
@@ -258,9 +220,9 @@ export default function Home(){
       <button className="launch-button" onClick={createActivity} disabled={selectedLanguageCount===0}><Play size={19}/> {launchLabel} <ArrowRight size={19}/></button>
     </section></div>}
 
-    {presentationOpen&&generated&&<PresentationPortal activity={generated} onClose={()=>setPresentationOpen(false)}/>} 
-    {readMyMindOpen&&<ReadMyMindGame options={readMyMindOptions} onClose={()=>setReadMyMindOpen(false)}/>} 
-    {delayedDictationOpen&&<DelayedDictationGame packId={activePack.id} groups={delayedDictationGroups} patterns={selectedPatterns} memoryDelay={memoryDelay} onClose={()=>setDelayedDictationOpen(false)}/>} 
+    {readMyMindOpen&&<ReadMyMindGame options={readMyMindOptions} onClose={()=>setReadMyMindOpen(false)}/>}
+    {faultyEchoOpen&&<FaultyEchoGame packId={activePack.id} packName={activePack.name} groups={delayedDictationGroups} patterns={selectedPatterns} onClose={()=>setFaultyEchoOpen(false)}/>}
+    {delayedDictationOpen&&<DelayedDictationGame packId={activePack.id} groups={delayedDictationGroups} patterns={selectedPatterns} memoryDelay={memoryDelay} onClose={()=>setDelayedDictationOpen(false)}/>}
     {tugOfWarOpen&&<TugOfWarGame items={selectedVocabulary} packName={activePack.name} onClose={()=>setTugOfWarOpen(false)}/>}
     <footer className="legal-note">Gamify · Classroom-ready language activities organised by input and production mode.</footer>
   </main>;

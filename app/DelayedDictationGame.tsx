@@ -16,6 +16,7 @@ type Props = {
 type Phase = "listen" | "remember" | "write" | "reveal";
 
 const clean = (value: string) => value.replace(/^\(お\)/, "お").replace(/^\(あさ\)/, "あさ").replace(/\(な\)/g, "").replace(/[（(]([^)）]+)[)）]/g, "$1");
+const speechText = (value: string) => value.replace(/毎日|まい日/g, "まいにち");
 
 function shuffled<T>(values: T[]) {
   const copy = [...values];
@@ -188,7 +189,7 @@ export default function DelayedDictationGame({ packId, groups, patterns, memoryD
       resolve(false);
       return;
     }
-    const utterance = new SpeechSynthesisUtterance(sentence);
+    const utterance = new SpeechSynthesisUtterance(speechText(sentence));
     utterance.lang = "ja-JP";
     utterance.rate = 0.75;
     utterance.pitch = 1;
@@ -237,7 +238,7 @@ export default function DelayedDictationGame({ packId, groups, patterns, memoryD
       return;
     }
     window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(sentence);
+    const utterance = new SpeechSynthesisUtterance(speechText(sentence));
     utterance.lang = "ja-JP";
     utterance.rate = 0.75;
     utterance.pitch = 1;
