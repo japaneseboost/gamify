@@ -111,13 +111,11 @@ function makeEntry(display: string, index: number): WordEntry | null {
 
 function choosePrompt(
   groups: Map<string, WordEntry[]>,
-  requestedPulls: number,
   previousPrompt: string,
 ) {
   const allGroups = Array.from(groups.entries());
-  const enoughForGoal = allGroups.filter(([, entries]) => entries.length >= requestedPulls);
   const enoughForPlay = allGroups.filter(([, entries]) => entries.length >= 2);
-  let choices = enoughForGoal.length ? enoughForGoal : enoughForPlay.length ? enoughForPlay : allGroups;
+  let choices = enoughForPlay.length ? enoughForPlay : allGroups;
   const freshChoices = choices.filter(([initial]) => initial !== previousPrompt);
   if (freshChoices.length) choices = freshChoices;
   return choices[Math.floor(Math.random() * choices.length)] ?? ["あ", [] as WordEntry[]];
@@ -158,7 +156,7 @@ export default function TugOfWarGame({ items, packName, onClose }: Props) {
     : 50;
 
   const prepareRound = (nextRound: number, previousPrompt = prompt) => {
-    const [nextPrompt, possibleWords] = choosePrompt(promptGroups, pullsToWin, previousPrompt);
+    const [nextPrompt, possibleWords] = choosePrompt(promptGroups, previousPrompt);
     setRound(nextRound);
     setPrompt(nextPrompt);
     setRoundPullTarget(Math.max(1, Math.min(pullsToWin, possibleWords.length)));
