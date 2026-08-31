@@ -9,6 +9,7 @@ import {
   RotateCcw,
   Target,
   Trophy,
+  Timer,
   UsersRound,
   Volume2,
   VolumeX,
@@ -18,6 +19,7 @@ import {
   type CSSProperties,
   type KeyboardEvent,
   type PointerEvent,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -135,6 +137,8 @@ export default function TugOfWarGame({ items, packName, onClose }: Props) {
   const [winningTeam, setWinningTeam] = useState<TeamId | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [soundMuted, setSoundMuted] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(15);
+  const [timerRunning, setTimerRunning] = useState(false);
   const [announcement, setAnnouncement] = useState("Four kana are centred and ready to move.");
 
   const boardRef = useRef<HTMLDivElement | null>(null);
@@ -208,12 +212,65 @@ export default function TugOfWarGame({ items, packName, onClose }: Props) {
     });
   };
 
+  const playTimerSound = (finished: boolean) => {
+    const context = getAudioContext();
+    if (!context) return;
+    const now = context.currentTime;
+    const frequencies = finished ? [392, 293.66] : [760];
+    frequencies.forEach((frequency, index) => {
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      const start = now + index * 0.14;
+      oscillator.type = finished ? "sawtooth" : "sine";
+      oscillator.frequency.value = frequency;
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(finished ? 0.1 : 0.075, start + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + (finished ? 0.22 : 0.1));
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start(start);
+      oscillator.stop(start + (finished ? 0.24 : 0.12));
+    });
+  };
+
+  useEffect(() => {
+    if (!timerRunning || phase !== "playing") return;
+    const interval = window.setInterval(() => {
+      setTimeLeft((current) => {
+        const next = current - 1;
+        if (next <= 0) {
+          window.clearInterval(interval);
+          setTimerRunning(false);
+          setAnnouncement("Time is up. Click the timer to give the next team 15 seconds.");
+          playTimerSound(true);
+          return 0;
+        }
+        if (next <= 3) playTimerSound(false);
+        return next;
+      });
+    }, 1000);
+    return () => window.clearInterval(interval);
+  }, [phase, soundMuted, timerRunning]);
+
+  const resetTimer = () => {
+    setTimerRunning(false);
+    setTimeLeft(15);
+  };
+
+  const startTimer = () => {
+    void getAudioContext();
+    setTimeLeft(15);
+    setTimerRunning(true);
+    setAnnouncement("The 15-second answer timer has started.");
+  };
+
   const prepareRound = (nextRound: number, previousKana = activeKana) => {
     const nextKana = chooseKana(promptGroups, previousKana);
     setRound(nextRound);
     setTiles(nextKana.map((kana, index) => ({ id: `${nextRound}-${kana}-${index}`, kana, position: 0 })));
     setWinningTeam(null);
     setDraggingId(null);
+    resetTimer();
     setAnnouncement("Four new kana are centred and ready to move.");
     roundResolvedRef.current = false;
     setPhase("playing");
@@ -230,6 +287,7 @@ export default function TugOfWarGame({ items, packName, onClose }: Props) {
     const nextWins = { ...wins, [team]: wins[team] + 1 };
     setWins(nextWins);
     setWinningTeam(team);
+    setTimerRunning(false);
     setAnnouncement(`${teamNames[team]} wins round ${round}.`);
     playVictorySound(team);
     setPhase(nextWins[team] >= roundsToWin ? "match-win" : "round-win");
@@ -245,6 +303,7 @@ export default function TugOfWarGame({ items, packName, onClose }: Props) {
     const direction = nextPosition > current.position ? 1 : -1;
     const nextTiles = tiles.map((tile) => tile.id === tileId ? { ...tile, position: nextPosition } : tile);
     setTiles(nextTiles);
+    resetTimer();
     playMoveSound(direction);
     if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate(12);
 
@@ -303,6 +362,7 @@ export default function TugOfWarGame({ items, packName, onClose }: Props) {
   const centreBoard = () => {
     const moved = tiles.some((tile) => tile.position !== 0);
     setTiles((current) => current.map((tile) => ({ ...tile, position: 0 })));
+    resetTimer();
     setAnnouncement("All kana returned to the centre.");
     if (moved) playMoveSound(-1);
   };
@@ -315,6 +375,7 @@ export default function TugOfWarGame({ items, packName, onClose }: Props) {
     setWins({ a: 0, b: 0 });
     setTiles([]);
     setWinningTeam(null);
+    resetTimer();
     roundResolvedRef.current = false;
   };
 
@@ -364,7 +425,9 @@ export default function TugOfWarGame({ items, packName, onClose }: Props) {
               <span className="tow-team-icon"><ArrowLeft size={22}/></span>
               <div><small>TEAM A · DRAG LEFT</small><strong>{wins.a}</strong><span>round{wins.a === 1 ? "" : "s"}</span></div>
             </article>
-            <div className="tow-round-summary"><small>MATCH</small><strong>Round {round}</strong><span>{columnCount} columns · 4 kana</span></div>
+            <button type="button" className={`tow-round-summary ${timerRunning ? "running" : timeLeft === 0 ? "expired" : timeLeft <= 5 ? "urgent" : ""}`} onClick={startTimer} aria-label={`${timerRunning ? "Restart" : "Start"} the 15-second answer timer. ${timeLeft} seconds ${timerRunning ? "remaining" : "shown"}.`}>
+              <small>MATCH</small><strong>Round {round}</strong><span className="tow-round-countdown" aria-hidden="true"><Timer size={13}/><b>{timeLeft}</b><i>sec</i></span>
+            </button>
             <article className="tow-team-card team-b">
               <div><small>TEAM B · DRAG RIGHT</small><strong>{wins.b}</strong><span>round{wins.b === 1 ? "" : "s"}</span></div>
               <span className="tow-team-icon"><ArrowRight size={22}/></span>
@@ -379,6 +442,9 @@ export default function TugOfWarGame({ items, packName, onClose }: Props) {
                 <span>Tiles snap to each column. The first team to bring three kana home wins the round.</span>
               </div>
               <div className="tow-board-actions">
+                <button type="button" className={`tow-board-timer ${timerRunning ? "running" : timeLeft === 0 ? "expired" : timeLeft <= 5 ? "urgent" : ""}`} onClick={startTimer} aria-label={`${timerRunning ? "Restart" : "Start"} the 15-second answer timer. ${timeLeft} seconds ${timerRunning ? "remaining" : "shown"}.`}>
+                  <Timer size={18}/><span>{timerRunning ? "Restart timer" : timeLeft === 0 ? "Start again" : "Start timer"}</span><strong aria-hidden="true">{timeLeft}s</strong><i className="tow-timer-progress" style={{transform:`scaleX(${timeLeft / 15})`}} aria-hidden="true"/>
+                </button>
                 <button type="button" onClick={centreBoard}><Target size={17}/> Centre all</button>
                 <button type="button" onClick={changeKana}><RotateCcw size={17}/> New kana</button>
               </div>
