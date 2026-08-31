@@ -1,13 +1,14 @@
 "use client";
 
 import {
-  ArrowRight, BookOpenText, Check, Languages,
+  ArrowRight, BookOpenText, Check,
   Layers3, MessageCircleMore, Move3D, Play, Presentation,
-  Sparkles, Trash2, UsersRound, WandSparkles, X, PencilLine, Target, PackageOpen,
+  Sparkles, UsersRound, WandSparkles, X, PencilLine, Target, PackageOpen,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { generateActivity, type GeneratedActivity } from "./generator";
 import PresentationPortal from "./PresentationPortal";
+import ReadMyMindGame from "./ReadMyMindGame";
 import { wordPacks } from "./wordPacks";
 
 type Activity = {
@@ -25,7 +26,7 @@ const lessonStages:{id:StageId;number:string;name:string;purpose:string;tone:str
 ];
 
 const activities:Activity[] = [
-  { id:"read-my-mind", title:"Read My Mind", shortTitle:"Read My Mind", description:"Students predict the teacher's hidden choice, then refine their guess from repeated target-language clues.", category:"Input by Listening", time:"5–8 min", icon:Sparkles, tone:"purple", stage:"listening" },
+  { id:"read-my-mind", title:"Read My Mind", shortTitle:"Read My Mind", description:"Sensei secretly chooses one answer. Students predict, listen to clues, change their minds, then see the reveal.", category:"Input by Listening", time:"5–8 min", icon:Sparkles, tone:"purple", stage:"listening" },
   { id:"faulty-echo", title:"Faulty Echo", shortTitle:"Faulty Echo", description:"Students echo the model only when what they hear is accurate, noticing tiny changes in familiar language.", category:"Input by Listening", time:"3–6 min", icon:Check, tone:"blue", stage:"listening" },
   { id:"delayed-dictation", title:"Delayed Dictation", shortTitle:"Delayed Dictation", description:"Listen, hold a phrase in memory for a short delay, then reconstruct it in writing.", category:"Input by Listening", time:"5–8 min", icon:PencilLine, tone:"indigo", stage:"listening" },
   { id:"karuta", title:"Karuta", shortTitle:"Karuta", description:"Race to identify the correct card from a spoken word, clue or sentence before anyone else.", category:"Input by Listening", time:"5–10 min", icon:Target, tone:"rose", stage:"listening" },
@@ -67,19 +68,20 @@ export default function Home(){
   const yearLevel="8";
   const support="Developing";
   const duration="10–15 minutes";
-  const [participation,setParticipation]=useState("Whole class");
-  const [energy,setEnergy]=useState("calm");
+  const participation="Whole class";
+  const energy="calm";
   const [selected,setSelected]=useState<Activity|null>(null);
   const [generated,setGenerated]=useState<GeneratedActivity|null>(null);
   const [presentationOpen,setPresentationOpen]=useState(false);
-  const [tray,setTray]=useState<GeneratedActivity[]>([]);
-  const [trayOpen,setTrayOpen]=useState(false);
+  const [readMyMindOpen,setReadMyMindOpen]=useState(false);
 
   const activePack=wordPacks.find((pack)=>pack.id===packId)??wordPacks[0];
   const selectedCount=selectedVocabulary.length+selectedPatterns.length;
   const totalPackItems=activePack.vocabulary.length+activePack.patterns.length;
   const vocabulary=(selectedVocabulary.length>0?selectedVocabulary:selectedPatterns).join("、");
   const grammar=selectedPatterns.join("／");
+  const selectedNouns=activePack.vocabularyGroups.find((group)=>group.id==="nouns")?.items.filter((item)=>selectedVocabulary.includes(item))??[];
+  const readMyMindOptions=selectedNouns.length>=4?selectedNouns:(selectedVocabulary.length>=4?selectedVocabulary:activePack.vocabulary);
 
   const choosePack=(nextPackId:string)=>{
     const nextPack=wordPacks.find((pack)=>pack.id===nextPackId)??wordPacks[0];
@@ -104,25 +106,20 @@ export default function Home(){
   };
 
   useEffect(()=>{
-    const restore=window.setTimeout(()=>{
-      const stored=window.localStorage.getItem("lesson-lab-tray");
-      if(stored){try{const parsed=JSON.parse(stored) as GeneratedActivity[];setTray(parsed.filter((item)=>item.activityId&&item.targetVocabulary));}catch{/* Ignore invalid local data. */}}
-    },0);
-    const close=(event:KeyboardEvent)=>{if(event.key==="Escape"&&!presentationOpen){setSelected(null);setTrayOpen(false);}};
+    const close=(event:KeyboardEvent)=>{if(event.key==="Escape"&&!presentationOpen&&!readMyMindOpen)setSelected(null);};
     window.addEventListener("keydown",close);
-    return()=>{window.clearTimeout(restore);window.removeEventListener("keydown",close);};
-  },[presentationOpen]);
-
-  const saveTray=(next:GeneratedActivity[])=>{
-    setTray(next);
-    window.localStorage.setItem("lesson-lab-tray",JSON.stringify(next));
-  };
+    return()=>window.removeEventListener("keydown",close);
+  },[presentationOpen,readMyMindOpen]);
 
   const createActivity=()=>{
     if(!selected||selectedCount===0)return;
+    if(selected.id==="read-my-mind"){
+      setSelected(null);
+      setReadMyMindOpen(true);
+      return;
+    }
     const created=generateActivity({activityId:selected.id,activityTitle:selected.title,vocabulary,grammar,yearLevel,support,duration,participation,energy});
     setGenerated(created);
-    saveTray([created,...tray.filter((item)=>item.id!==created.id)].slice(0,8));
     setSelected(null);
     setPresentationOpen(true);
   };
@@ -156,7 +153,15 @@ export default function Home(){
           <div className="pack-groups">
             <section className="pack-group" aria-labelledby="pack-vocabulary-title">
               <header><h3 id="pack-vocabulary-title">Vocabulary</h3><span>{selectedVocabulary.length}/{activePack.vocabulary.length}</span></header>
-              <div className="language-chip-grid">{activePack.vocabulary.map((item)=>{const isSelected=selectedVocabulary.includes(item);return <button type="button" className={`language-chip ${isSelected?"selected":""}`} aria-pressed={isSelected} key={item} onClick={()=>toggleLanguageItem("vocabulary",item)}>{isSelected&&<Check size={13} aria-hidden="true"/>}<span>{item}</span></button>;})}</div>
+              <div className="pos-vocabulary-groups">
+                {activePack.vocabularyGroups.map((group)=>{
+                  const selectedInGroup=group.items.filter((item)=>selectedVocabulary.includes(item)).length;
+                  return <section className="pos-group" key={group.id} aria-labelledby={`pos-${activePack.id}-${group.id}`}>
+                    <header><h4 id={`pos-${activePack.id}-${group.id}`}>{group.label}</h4><span>{selectedInGroup}/{group.items.length}</span></header>
+                    <div className="language-chip-grid">{group.items.map((item)=>{const isSelected=selectedVocabulary.includes(item);return <button type="button" className={`language-chip ${isSelected?"selected":""}`} aria-pressed={isSelected} key={item} onClick={()=>toggleLanguageItem("vocabulary",item)}>{isSelected&&<Check size={13} aria-hidden="true"/>}<span>{item}</span></button>;})}</div>
+                  </section>;
+                })}
+              </div>
             </section>
             <section className="pack-group" aria-labelledby="pack-patterns-title">
               <header><h3 id="pack-patterns-title">Target patterns</h3><span>{selectedPatterns.length}/{activePack.patterns.length}</span></header>
@@ -176,25 +181,16 @@ export default function Home(){
       </section>
     </section>
 
-    <div className="page-dots" aria-hidden="true"><i className="active"/><i/></div>
-    <nav className="ipad-dock" aria-label="Quick actions">
-      <button onClick={()=>document.querySelector<HTMLSelectElement>(".pack-select")?.focus()}><span className="dock-icon dock-language"><Languages size={25}/></span><small>Word pack</small></button>
-      <button className="dock-launch" disabled={!generated} onClick={()=>generated&&setPresentationOpen(true)}><span className="dock-icon dock-play"><Play size={26}/></span><small>Last activity</small></button>
-      <button onClick={()=>setTrayOpen(true)}><span className="dock-icon dock-tray"><Layers3 size={25}/>{tray.length>0&&<b>{tray.length}</b>}</span><small>Saved</small></button>
-    </nav>
-
     {selected&&<div className="modal-backdrop app-modal-backdrop" onMouseDown={(event)=>{if(event.target===event.currentTarget)setSelected(null);}}><section className="launch-sheet" role="dialog" aria-modal="true" aria-labelledby="launch-title">
       <button className="sheet-close" onClick={()=>setSelected(null)} aria-label="Close"><X size={20}/></button>
       <header className="launch-identity"><div className={`app-icon app-${selected.tone}`}><SelectedIcon size={34}/><i/></div><div><p className="sheet-category">{selected.category} · {selected.time}</p><h2 id="launch-title">{selected.title}</h2></div></header>
       <p className="launch-description">{selected.description}</p>
-      <section className="launch-config" aria-label="Activity setup"><div className="language-preview"><small>{activePack.name} · {selectedCount} selected</small><strong>{selectedVocabulary.length>0?`${selectedVocabulary.slice(0,8).join("、")}${selectedVocabulary.length>8?" …":""}`:selectedPatterns.slice(0,6).join("、")||"Choose at least one language item"}</strong>{selectedPatterns.length>0&&<span>{selectedPatterns.slice(0,4).join("／")}{selectedPatterns.length>4?" …":""}</span>}</div><div className="setup-heading"><span>Classroom setup</span><small>Adjust before launching</small></div>
-      <div className="sheet-options"><label>Participation<select value={participation} onChange={(event)=>setParticipation(event.target.value)}><option>Whole class</option><option>Pairs</option><option>Small groups</option></select></label><label>Energy<select value={energy} onChange={(event)=>setEnergy(event.target.value)}><option value="calm">Calm and focused</option><option value="active">Active and playful</option></select></label></div></section>
-      <button className="launch-button" onClick={createActivity} disabled={selectedCount===0}><Play size={19}/> Build and launch slides <ArrowRight size={19}/></button>
+      <section className="launch-config" aria-label="Selected language"><div className="language-preview"><small>{activePack.name} · {selectedCount} selected</small><strong>{selectedVocabulary.length>0?`${selectedVocabulary.slice(0,8).join("、")}${selectedVocabulary.length>8?" …":""}`:selectedPatterns.slice(0,6).join("、")||"Choose at least one language item"}</strong>{selectedPatterns.length>0&&<span>{selectedPatterns.slice(0,4).join("／")}{selectedPatterns.length>4?" …":""}</span>}</div></section>
+      <button className="launch-button" onClick={createActivity} disabled={selectedCount===0}><Play size={19}/> {selected.id==="read-my-mind"?"Launch Read My Mind":"Build and launch slides"} <ArrowRight size={19}/></button>
     </section></div>}
 
-    {trayOpen&&<div className="drawer-backdrop" onMouseDown={(event)=>{if(event.target===event.currentTarget)setTrayOpen(false);}}><aside className="tray-drawer"><div className="tray-heading"><div><p>RECENT DECKS</p><h2>Saved activities</h2></div><button className="sheet-close" onClick={()=>setTrayOpen(false)} aria-label="Close"><X size={20}/></button></div>{!tray.length?<div className="tray-empty"><Layers3 size={30}/><h3>No activities yet</h3><p>Activities appear here automatically after you launch them.</p></div>:<div className="saved-decks">{tray.map((item)=><article key={item.id}><button className="saved-main" onClick={()=>{setGenerated(item);setTrayOpen(false);setPresentationOpen(true);}}><span><Presentation size={19}/></span><div><strong>{item.title}</strong><small>{item.subtitle}</small></div><Play size={18}/></button><button className="delete-deck" onClick={()=>saveTray(tray.filter((entry)=>entry.id!==item.id))} aria-label={`Delete ${item.title}`}><Trash2 size={16}/></button></article>)}</div>}</aside></div>}
-
     {presentationOpen&&generated&&<PresentationPortal activity={generated} onClose={()=>setPresentationOpen(false)}/>} 
+    {readMyMindOpen&&<ReadMyMindGame options={readMyMindOptions} onClose={()=>setReadMyMindOpen(false)}/>} 
     <footer className="legal-note">Gamify · Classroom-ready language activities organised by input and production mode.</footer>
   </main>;
 }
