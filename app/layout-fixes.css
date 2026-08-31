@@ -1,4 +1,4 @@
-/* Layout polish: left-centred Word Pack + full-page scrolling */
+/* Layout polish: left Word Pack + full-page scrolling */
 html,body{
   min-height:100%;
   overflow-x:hidden;
@@ -11,10 +11,10 @@ body{overflow-y:auto;background:#101827}
   height:auto;
   overflow-x:hidden;
   overflow-y:visible;
-  padding-bottom:138px;
+  padding-bottom:48px;
 }
 
-/* Keep the Word Pack on the left. The page itself can now grow and scroll. */
+/* Keep the Word Pack on the left and align its top with the learning-mode panel. */
 .home-screen{
   width:min(1540px,calc(100% - 56px));
   height:auto;
@@ -25,20 +25,18 @@ body{overflow-y:auto;background:#101827}
   gap:clamp(42px,5vw,82px);
   align-items:start;
 }
-
-/* Visually centre the panel in the left side of the viewport and keep it useful while scrolling. */
 .word-pack-column{
   width:100%;
   min-width:0;
   position:sticky;
-  top:clamp(112px,17vh,160px);
+  top:24px;
   align-self:start;
 }
 .word-pack-widget{
   width:100%;
-  height:min(610px,calc(100dvh - 210px));
-  min-height:480px;
-  max-height:680px;
+  height:min(760px,calc(100dvh - 48px));
+  min-height:620px;
+  max-height:760px;
   grid-template-rows:auto auto minmax(0,1fr);
   overflow:hidden;
 }
@@ -70,15 +68,27 @@ body{overflow-y:auto;background:#101827}
 }
 .stage-activity{height:100%}
 
-/* Keep quick actions accessible without blocking page scrolling. */
-.ipad-dock{position:fixed;bottom:18px}
-.page-dots{display:none}
+/* The bottom dock is no longer part of the workspace. */
+.ipad-dock,.page-dots{display:none!important}
+
+/* Keep the activity launcher focused: language preview + launch only. */
+.launch-config .setup-heading,
+.launch-config .sheet-options{
+  display:none!important;
+}
+.launch-config .language-preview{
+  margin-bottom:0;
+}
+.launch-sheet .launch-button{
+  margin-top:18px;
+}
+
 .legal-note{
   position:relative;
   right:auto;
   bottom:auto;
   max-width:none;
-  margin:38px auto -88px;
+  margin:38px auto 0;
   padding:0 24px;
   text-align:center;
 }
@@ -93,8 +103,12 @@ body{overflow-y:auto;background:#101827}
     grid-template-columns:330px minmax(0,1fr);
     gap:34px;
   }
-  .word-pack-column{top:112px}
-  .word-pack-widget{height:min(570px,calc(100dvh - 170px));min-height:440px}
+  .word-pack-column{top:20px}
+  .word-pack-widget{
+    height:min(690px,calc(100dvh - 40px));
+    min-height:540px;
+    max-height:690px;
+  }
   .stage-activities{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 
@@ -118,7 +132,7 @@ body{overflow-y:auto;background:#101827}
 }
 
 @media(max-width:620px){
-  .ipad-page{padding-bottom:122px}
+  .ipad-page{padding-bottom:34px}
   .home-screen{width:calc(100% - 24px)}
   .word-pack-column{margin-bottom:30px}
   .word-pack-widget{border-radius:22px}
@@ -126,6 +140,5 @@ body{overflow-y:auto;background:#101827}
   .pack-toolbar{padding-left:14px;padding-right:14px}
   .pack-groups{padding:17px 14px 20px}
   .stage-activities{grid-template-columns:1fr}
-  .ipad-dock{bottom:10px}
-  .legal-note{margin-bottom:-74px}
+  .legal-note{margin-bottom:0}
 }
