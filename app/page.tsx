@@ -3,11 +3,12 @@
 import {
   ArrowRight, BookOpenText, Check, Languages,
   Layers3, MessageCircleMore, Move3D, Play, Presentation,
-  Sparkles, Trash2, UsersRound, WandSparkles, X, PencilLine, Target,
+  Sparkles, Trash2, UsersRound, WandSparkles, X, PencilLine, Target, PackageOpen,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { generateActivity, type GeneratedActivity } from "./generator";
 import PresentationPortal from "./PresentationPortal";
+import { wordPacks } from "./wordPacks";
 
 type Activity = {
   id:string; title:string; shortTitle:string; description:string;
@@ -38,8 +39,9 @@ const activities:Activity[] = [
 ];
 
 export default function Home(){
-  const [vocabulary,setVocabulary]=useState("学校、先生、数学、体育、好き、きらい");
-  const [grammar,setGrammar]=useState("～が好きです／～が好きじゃないです");
+  const [packId,setPackId]=useState(wordPacks[0].id);
+  const [selectedVocabulary,setSelectedVocabulary]=useState<string[]>(()=>[...wordPacks[0].vocabulary]);
+  const [selectedPatterns,setSelectedPatterns]=useState<string[]>(()=>[...wordPacks[0].patterns]);
   const yearLevel="8";
   const support="Developing";
   const duration="10–15 minutes";
@@ -50,6 +52,34 @@ export default function Home(){
   const [presentationOpen,setPresentationOpen]=useState(false);
   const [tray,setTray]=useState<GeneratedActivity[]>([]);
   const [trayOpen,setTrayOpen]=useState(false);
+
+  const activePack=wordPacks.find((pack)=>pack.id===packId)??wordPacks[0];
+  const selectedCount=selectedVocabulary.length+selectedPatterns.length;
+  const totalPackItems=activePack.vocabulary.length+activePack.patterns.length;
+  const vocabulary=(selectedVocabulary.length>0?selectedVocabulary:selectedPatterns).join("、");
+  const grammar=selectedPatterns.join("／");
+
+  const choosePack=(nextPackId:string)=>{
+    const nextPack=wordPacks.find((pack)=>pack.id===nextPackId)??wordPacks[0];
+    setPackId(nextPack.id);
+    setSelectedVocabulary([...nextPack.vocabulary]);
+    setSelectedPatterns([...nextPack.patterns]);
+  };
+
+  const toggleLanguageItem=(group:"vocabulary"|"patterns",item:string)=>{
+    const update=group==="vocabulary"?setSelectedVocabulary:setSelectedPatterns;
+    update((current)=>current.includes(item)?current.filter((value)=>value!==item):[...current,item]);
+  };
+
+  const selectAllItems=()=>{
+    setSelectedVocabulary([...activePack.vocabulary]);
+    setSelectedPatterns([...activePack.patterns]);
+  };
+
+  const clearItems=()=>{
+    setSelectedVocabulary([]);
+    setSelectedPatterns([]);
+  };
 
   useEffect(()=>{
     const restore=window.setTimeout(()=>{
@@ -67,7 +97,7 @@ export default function Home(){
   };
 
   const createActivity=()=>{
-    if(!selected||!vocabulary.trim())return;
+    if(!selected||selectedCount===0)return;
     const created=generateActivity({activityId:selected.id,activityTitle:selected.title,vocabulary,grammar,yearLevel,support,duration,participation,energy});
     setGenerated(created);
     saveTray([created,...tray.filter((item)=>item.id!==created.id)].slice(0,8));
@@ -86,15 +116,31 @@ export default function Home(){
     </header>
 
     <section className="home-screen">
-      <aside className="widget-column" aria-label="Target language widgets">
-        <article className="language-widget vocabulary-widget">
-          <div className="widget-heading"><span>Vocabulary</span><small>Tap to edit</small></div>
-          <textarea value={vocabulary} onChange={(event)=>setVocabulary(event.target.value)} aria-label="Main vocabulary"/>
-          <div className="widget-footer"><span>{vocabulary.split(/[、,\n]/).filter(Boolean).length} items</span><Languages size={16}/></div>
-        </article>
-        <article className="language-widget grammar-widget">
-          <div className="widget-heading"><span>Target pattern</span><small>One is best</small></div>
-          <textarea value={grammar} onChange={(event)=>setGrammar(event.target.value)} aria-label="Target grammar or sentence pattern"/>
+      <aside className="widget-column word-pack-column" aria-label="Word pack">
+        <article className="word-pack-widget">
+          <header className="word-pack-header">
+            <div className="word-pack-title">
+              <span className="word-pack-icon" aria-hidden="true"><PackageOpen size={24}/></span>
+              <div><small>WORD PACK</small><h2>{activePack.name}</h2><p>Select the language used in every game mode.</p></div>
+            </div>
+            <label className="pack-picker"><span>Choose pack</span><select className="pack-select" value={packId} onChange={(event)=>choosePack(event.target.value)}>{wordPacks.map((pack)=><option key={pack.id} value={pack.id}>{pack.name}</option>)}</select></label>
+          </header>
+
+          <div className="pack-toolbar">
+            <span><strong>{selectedCount}</strong> of {totalPackItems} selected</span>
+            <div><button type="button" onClick={selectAllItems}>Select all</button><button type="button" onClick={clearItems}>Clear</button></div>
+          </div>
+
+          <div className="pack-groups">
+            <section className="pack-group" aria-labelledby="pack-vocabulary-title">
+              <header><h3 id="pack-vocabulary-title">Vocabulary</h3><span>{selectedVocabulary.length}/{activePack.vocabulary.length}</span></header>
+              <div className="language-chip-grid">{activePack.vocabulary.map((item)=>{const isSelected=selectedVocabulary.includes(item);return <button type="button" className={`language-chip ${isSelected?"selected":""}`} aria-pressed={isSelected} key={item} onClick={()=>toggleLanguageItem("vocabulary",item)}>{isSelected&&<Check size={13} aria-hidden="true"/>}<span>{item}</span></button>;})}</div>
+            </section>
+            <section className="pack-group" aria-labelledby="pack-patterns-title">
+              <header><h3 id="pack-patterns-title">Target patterns</h3><span>{selectedPatterns.length}/{activePack.patterns.length}</span></header>
+              <div className="language-chip-grid">{activePack.patterns.map((item)=>{const isSelected=selectedPatterns.includes(item);return <button type="button" className={`language-chip ${isSelected?"selected":""}`} aria-pressed={isSelected} key={item} onClick={()=>toggleLanguageItem("patterns",item)}>{isSelected&&<Check size={13} aria-hidden="true"/>}<span>{item}</span></button>;})}</div>
+            </section>
+          </div>
         </article>
       </aside>
 
@@ -110,7 +156,7 @@ export default function Home(){
 
     <div className="page-dots" aria-hidden="true"><i className="active"/><i/></div>
     <nav className="ipad-dock" aria-label="Quick actions">
-      <button onClick={()=>document.querySelector<HTMLTextAreaElement>(".vocabulary-widget textarea")?.focus()}><span className="dock-icon dock-language"><Languages size={25}/></span><small>Language</small></button>
+      <button onClick={()=>document.querySelector<HTMLSelectElement>(".pack-select")?.focus()}><span className="dock-icon dock-language"><Languages size={25}/></span><small>Word pack</small></button>
       <button className="dock-launch" disabled={!generated} onClick={()=>generated&&setPresentationOpen(true)}><span className="dock-icon dock-play"><Play size={26}/></span><small>Last activity</small></button>
       <button onClick={()=>setTrayOpen(true)}><span className="dock-icon dock-tray"><Layers3 size={25}/>{tray.length>0&&<b>{tray.length}</b>}</span><small>Saved</small></button>
     </nav>
@@ -119,9 +165,9 @@ export default function Home(){
       <button className="sheet-close" onClick={()=>setSelected(null)} aria-label="Close"><X size={20}/></button>
       <header className="launch-identity"><div className={`app-icon app-${selected.tone}`}><SelectedIcon size={34}/><i/></div><div><p className="sheet-category">{selected.category} · {selected.time}</p><h2 id="launch-title">{selected.title}</h2></div></header>
       <p className="launch-description">{selected.description}</p>
-      <section className="launch-config" aria-label="Activity setup"><div className="language-preview"><small>Target language</small><strong>{vocabulary||"Add vocabulary first"}</strong>{grammar&&<span>{grammar}</span>}</div><div className="setup-heading"><span>Classroom setup</span><small>Adjust before launching</small></div>
+      <section className="launch-config" aria-label="Activity setup"><div className="language-preview"><small>{activePack.name} · {selectedCount} selected</small><strong>{selectedVocabulary.length>0?`${selectedVocabulary.slice(0,8).join("、")}${selectedVocabulary.length>8?" …":""}`:selectedPatterns.slice(0,6).join("、")||"Choose at least one language item"}</strong>{selectedPatterns.length>0&&<span>{selectedPatterns.slice(0,4).join("／")}{selectedPatterns.length>4?" …":""}</span>}</div><div className="setup-heading"><span>Classroom setup</span><small>Adjust before launching</small></div>
       <div className="sheet-options"><label>Participation<select value={participation} onChange={(event)=>setParticipation(event.target.value)}><option>Whole class</option><option>Pairs</option><option>Small groups</option></select></label><label>Energy<select value={energy} onChange={(event)=>setEnergy(event.target.value)}><option value="calm">Calm and focused</option><option value="active">Active and playful</option></select></label></div></section>
-      <button className="launch-button" onClick={createActivity} disabled={!vocabulary.trim()}><Play size={19}/> Build and launch slides <ArrowRight size={19}/></button>
+      <button className="launch-button" onClick={createActivity} disabled={selectedCount===0}><Play size={19}/> Build and launch slides <ArrowRight size={19}/></button>
     </section></div>}
 
 
