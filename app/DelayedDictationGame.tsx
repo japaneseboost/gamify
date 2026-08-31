@@ -14,7 +14,6 @@ type Props = {
 };
 
 type Phase = "listen" | "remember" | "write" | "reveal";
-type ListenStatus = "ready" | "countdown" | "first" | "pause" | "second";
 
 const clean = (value: string) => value.replace(/^\(お\)/, "お").replace(/^\(あさ\)/, "あさ").replace(/\(な\)/g, "").replace(/[（(]([^)）]+)[)）]/g, "$1");
 
@@ -121,8 +120,6 @@ export default function DelayedDictationGame({ packId, groups, patterns, memoryD
   const [seconds, setSeconds] = useState(memoryDelay);
   const [sequenceRunning, setSequenceRunning] = useState(false);
   const [audioError, setAudioError] = useState(false);
-  const [countIn, setCountIn] = useState<number | null>(null);
-  const [listenStatus, setListenStatus] = useState<ListenStatus>("ready");
   const cancelledRef = useRef(false);
   const timeoutIds = useRef<number[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -134,8 +131,6 @@ export default function DelayedDictationGame({ packId, groups, patterns, memoryD
     timeoutIds.current = [];
     if (cancelSpeech) window.speechSynthesis?.cancel();
     setSequenceRunning(false);
-    setCountIn(null);
-    setListenStatus("ready");
   };
 
   useEffect(() => () => {
@@ -183,7 +178,7 @@ export default function DelayedDictationGame({ packId, groups, patterns, memoryD
       oscillator.start();
       oscillator.stop(context.currentTime + 0.32);
     } catch {
-      // The visual countdown still works if Web Audio is unavailable.
+      // If Web Audio is unavailable, speech still continues normally.
     }
   };
 
@@ -211,36 +206,29 @@ export default function DelayedDictationGame({ packId, groups, patterns, memoryD
     cancelledRef.current = false;
     setSequenceRunning(true);
     setAudioError(false);
-    setListenStatus("countdown");
 
+    // Audio-only get-ready cue: five chimes, with no visual countdown.
     for (let number = 5; number >= 1; number -= 1) {
       if (cancelledRef.current) return;
-      setCountIn(number);
       chime(number === 1);
       await wait(1000);
     }
 
     if (cancelledRef.current) return;
-    setCountIn(null);
-    setListenStatus("first");
     const firstWorked = await speakOnce();
     if (cancelledRef.current) return;
     if (!firstWorked) {
       setSequenceRunning(false);
-      setListenStatus("ready");
       return;
     }
 
-    setListenStatus("pause");
     await wait(3000);
     if (cancelledRef.current) return;
 
-    setListenStatus("second");
     const secondWorked = await speakOnce();
     if (cancelledRef.current) return;
     setSequenceRunning(false);
     if (secondWorked) setPhase("remember");
-    else setListenStatus("ready");
   };
 
   const hearAgain = () => {
@@ -272,16 +260,6 @@ export default function DelayedDictationGame({ packId, groups, patterns, memoryD
     setAudioError(false);
   };
 
-  const listenMessage = listenStatus === "countdown"
-    ? "Get ready…"
-    : listenStatus === "first"
-      ? "First listening"
-      : listenStatus === "pause"
-        ? "Keep it in your head… 3-second pause"
-        : listenStatus === "second"
-          ? "Second listening"
-          : "The sentence stays hidden. You will hear it twice.";
-
   return (
     <div className="dd-portal" role="dialog" aria-modal="true" aria-label="Delayed Dictation classroom game">
       <header className="dd-topbar">
@@ -294,9 +272,8 @@ export default function DelayedDictationGame({ packId, groups, patterns, memoryD
           <div className="dd-phase-icon"><Ear size={58}/></div>
           <p>STEP 1</p>
           <h1>Listen</h1>
-          <span>{listenMessage}</span>
-          {countIn !== null && <div className="dd-countdown" aria-live="polite">{countIn}</div>}
-          <button className="dd-main-action" type="button" onClick={runListenSequence} disabled={sequenceRunning}><Volume2 size={23}/>{sequenceRunning ? "Sequence playing…" : "Start listening"}</button>
+          <span>The sentence stays hidden. You will hear a get-ready chime, then the sentence twice.</span>
+          <button className="dd-main-action" type="button" onClick={runListenSequence} disabled={sequenceRunning}><Volume2 size={23}/>{sequenceRunning ? "Listening…" : "Start listening"}</button>
           {audioError && <div className="dd-audio-warning">Computer voice is unavailable in this browser. Read the hidden sentence aloud twice, three seconds apart, then restart the activity.</div>}
         </section>}
 
