@@ -194,7 +194,7 @@ export default function FaultyEchoGame({ packId, packName, groups, patterns, onC
       <section className="fe-progress" aria-label={`Echo ${echoIndex+1} of ${prompts.length}`}><div><small>ROUND PROGRESS</small><strong>Echo {echoIndex+1} <span>of {prompts.length}</span></strong></div><div className="fe-dots" aria-hidden="true">{prompts.map((_,index)=><i className={index<echoIndex?"done":index===echoIndex?"current":""} key={index}/>)}</div><span>{kanaLength(prompt.kana)} kana</span></section>
       <section className="fe-echo-card" aria-live="polite">
         <p>MODEL SENTENCE · ECHO {String(echoIndex+1).padStart(2,"0")}</p>
-        <h1><PromptText prompt={prompt} mode={mode}/></h1>
+        <h1 className={kanaLength(prompt.kana)>15?"long":kanaLength(prompt.kana)>10?"medium":""}><PromptText prompt={prompt} mode={mode}/></h1>
         <div className="fe-teacher-cue"><span>Teacher chooses:</span><b className="same"><Check size={17}/> Same sentence</b><i>or</i><b className="change"><XCircle size={17}/> Change one detail</b></div>
       </section>
       <section className="fe-game-controls"><div><strong>Read the model, then give your echo.</strong><span>Students repeat only when every word matches.</span></div><button type="button" onClick={nextEcho}>{echoIndex===prompts.length-1?"Finish round":"Next Echo"}<ArrowRight size={21}/></button></section>
