@@ -3,13 +3,15 @@
 import {
   ArrowRight, Check, MessageCircleMore, Move3D, Play,
   Brain, UsersRound, X, PencilLine, Target, PackageOpen,
-  Clock3, Moon, Palette, Puzzle, Shapes, Sun, Zap,
+  Clock3, Eraser, Flame, Moon, Palette, Puzzle, Shapes, Sun, Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import ReadMyMindGame from "./ReadMyMindGame";
 import DelayedDictationGame from "./DelayedDictationGame";
 import TugOfWarGame from "./TugOfWarGame";
 import FaultyEchoGame from "./FaultyEchoGame";
+import QuickfireGame from "./QuickfireGame";
+import EraseGame from "./EraseGame";
 import { wordPacks } from "./wordPacks";
 
 type Activity = {
@@ -36,9 +38,11 @@ const vocabularyGroupVisuals:Record<string,{icon:typeof Shapes;tone:string;descr
 };
 
 const activities:Activity[] = [
+  { id:"quickfire", title:"Quickfire", shortTitle:"Quickfire", description:"Students race to produce the selected Japanese word or sentence, then the winner moves one step towards the front.", category:"Input by Listening", time:"5–10 min", icon:Flame, tone:"orange", stage:"listening" },
   { id:"read-my-mind", title:"Read My Mind", shortTitle:"Read My Mind", description:"Sensei secretly chooses one answer. Students predict, listen to clues, change their minds, then see the reveal.", category:"Input by Listening", time:"5–8 min", icon:Brain, tone:"purple", stage:"listening" },
   { id:"faulty-echo", title:"Faulty Echo", shortTitle:"Faulty Echo", description:"Students echo the model only when what they hear is accurate, noticing tiny changes in familiar language.", category:"Input by Listening", time:"3–6 min", icon:Check, tone:"blue", stage:"listening" },
   { id:"delayed-dictation", title:"Delayed Dictation", shortTitle:"Delayed Dictation", description:"Listen to a hidden sentence, hold it in memory, write it from recall, then self-correct against the model.", category:"Input by Listening", time:"5–8 min", icon:PencilLine, tone:"indigo", stage:"listening" },
+  { id:"erase-game", title:"Erase Game", shortTitle:"Erase Game", description:"Read a complete sentence, remove its chunks step by step, and keep reproducing every missing part from memory.", category:"Input by Reading", time:"5–10 min", icon:Eraser, tone:"mint", stage:"reading" },
   { id:"tug-of-war", title:"Tug-of-War Vocabulary Game", shortTitle:"Tug-of-War", description:"Four starting kana begin in the centre. Drag the matching kana toward the team whenever they give a correct Word Pack item.", category:"Production by Speaking", time:"8–12 min", icon:Move3D, tone:"pink", stage:"speaking" },
 ];
 
@@ -48,8 +52,10 @@ export default function Home(){
   const [selectedPatterns,setSelectedPatterns]=useState<string[]>(()=>[...wordPacks[0].patterns]);
   const [selected,setSelected]=useState<Activity|null>(null);
   const [readMyMindOpen,setReadMyMindOpen]=useState(false);
+  const [quickfireOpen,setQuickfireOpen]=useState(false);
   const [faultyEchoOpen,setFaultyEchoOpen]=useState(false);
   const [delayedDictationOpen,setDelayedDictationOpen]=useState(false);
+  const [eraseGameOpen,setEraseGameOpen]=useState(false);
   const [tugOfWarOpen,setTugOfWarOpen]=useState(false);
   const [memoryDelay,setMemoryDelay]=useState(5);
   const [theme,setTheme]=useState<ThemeMode>("light");
@@ -106,14 +112,20 @@ export default function Home(){
 
   useEffect(()=>{
     const close=(event:KeyboardEvent)=>{
-      if(event.key==="Escape"&&!readMyMindOpen&&!faultyEchoOpen&&!delayedDictationOpen&&!tugOfWarOpen)setSelected(null);
+      if(event.key==="Escape"&&!readMyMindOpen&&!quickfireOpen&&!faultyEchoOpen&&!delayedDictationOpen&&!eraseGameOpen&&!tugOfWarOpen)setSelected(null);
     };
     window.addEventListener("keydown",close);
     return()=>window.removeEventListener("keydown",close);
-  },[readMyMindOpen,faultyEchoOpen,delayedDictationOpen,tugOfWarOpen]);
+  },[readMyMindOpen,quickfireOpen,faultyEchoOpen,delayedDictationOpen,eraseGameOpen,tugOfWarOpen]);
 
   const createActivity=()=>{
     if(!selected||selectedCount===0)return;
+    if(selected.id==="quickfire"){
+      if(selectedVocabulary.length===0)return;
+      setSelected(null);
+      setQuickfireOpen(true);
+      return;
+    }
     if(selected.id==="read-my-mind"){
       setSelected(null);
       setReadMyMindOpen(true);
@@ -130,6 +142,12 @@ export default function Home(){
       setDelayedDictationOpen(true);
       return;
     }
+    if(selected.id==="erase-game"){
+      if(selectedVocabulary.length===0)return;
+      setSelected(null);
+      setEraseGameOpen(true);
+      return;
+    }
     if(selected.id==="tug-of-war"){
       if(selectedVocabulary.length===0)return;
       setSelected(null);
@@ -139,8 +157,9 @@ export default function Home(){
   };
 
   const SelectedIcon=selected?.icon??Target;
-  const selectedLanguageCount=selected?.id==="tug-of-war"||selected?.id==="faulty-echo"?selectedVocabulary.length:selectedCount;
-  const launchLabel=selected?.id==="read-my-mind"?"Launch Read My Mind":selected?.id==="faulty-echo"?"Launch Faulty Echo":selected?.id==="delayed-dictation"?"Launch Delayed Dictation":selected?.id==="tug-of-war"?"Launch Tug-of-War":"Build and launch slides";
+  const vocabularyOnlyActivities=["quickfire","faulty-echo","erase-game","tug-of-war"];
+  const selectedLanguageCount=selected&&vocabularyOnlyActivities.includes(selected.id)?selectedVocabulary.length:selectedCount;
+  const launchLabel=selected?.id==="quickfire"?"Launch Quickfire":selected?.id==="read-my-mind"?"Launch Read My Mind":selected?.id==="faulty-echo"?"Launch Faulty Echo":selected?.id==="delayed-dictation"?"Launch Delayed Dictation":selected?.id==="erase-game"?"Launch Erase Game":selected?.id==="tug-of-war"?"Launch Tug-of-War":"Launch activity";
 
   return <main className="ipad-page" data-theme={theme}>
     <a className="skip-link" href="#activity-apps">Skip to activities</a>
@@ -213,7 +232,7 @@ export default function Home(){
       <header className="launch-identity"><div className={`app-icon app-${selected.tone}`}><SelectedIcon size={34}/><i/></div><div><p className="sheet-category">{selected.category} · {selected.time}</p><h2 id="launch-title">{selected.title}</h2></div></header>
       <p className="launch-description">{selected.description}</p>
       <section className="launch-config" aria-label="Selected language">
-        <div className="language-preview"><small>{activePack.name} · {selectedLanguageCount} selected</small><strong>{selectedVocabulary.length>0?`${selectedVocabulary.slice(0,8).join("、")}${selectedVocabulary.length>8?" …":""}`:selected?.id==="tug-of-war"?"Choose at least one vocabulary item":selectedPatterns.slice(0,6).join("、")||"Choose at least one language item"}</strong>{selected?.id!=="tug-of-war"&&selectedPatterns.length>0&&<span>{selectedPatterns.slice(0,4).join("／")}{selectedPatterns.length>4?" …":""}</span>}</div>
+        <div className="language-preview"><small>{activePack.name} · {selectedLanguageCount} selected</small><strong>{selectedVocabulary.length>0?`${selectedVocabulary.slice(0,8).join("、")}${selectedVocabulary.length>8?" …":""}`:selected&&vocabularyOnlyActivities.includes(selected.id)?"Choose at least one vocabulary item":selectedPatterns.slice(0,6).join("、")||"Choose at least one language item"}</strong>{selected?.id!=="tug-of-war"&&selectedPatterns.length>0&&<span>{selectedPatterns.slice(0,4).join("／")}{selectedPatterns.length>4?" …":""}</span>}</div>
         {selected.id==="delayed-dictation"&&<div className="dd-launch-setting"><div><strong>Memory delay</strong><small>How long students must hold the sentence before writing.</small></div><div className="dd-delay-options">{[3,5,8,10].map((delay)=><button type="button" key={delay} className={memoryDelay===delay?"selected":""} aria-pressed={memoryDelay===delay} onClick={()=>setMemoryDelay(delay)}>{delay} sec</button>)}</div></div>}
         {selected.id==="tug-of-war"&&<div className="tow-launch-note"><UsersRound size={19}/><div><strong>Teacher-controlled team board</strong><small>Four different starting kana are drawn from the vocabulary selected in this Word Pack.</small></div></div>}
       </section>
@@ -221,8 +240,10 @@ export default function Home(){
     </section></div>}
 
     {readMyMindOpen&&<ReadMyMindGame options={readMyMindOptions} onClose={()=>setReadMyMindOpen(false)}/>}
+    {quickfireOpen&&<QuickfireGame packId={activePack.id} packName={activePack.name} groups={delayedDictationGroups} patterns={selectedPatterns} onClose={()=>setQuickfireOpen(false)}/>}
     {faultyEchoOpen&&<FaultyEchoGame packId={activePack.id} packName={activePack.name} groups={delayedDictationGroups} patterns={selectedPatterns} onClose={()=>setFaultyEchoOpen(false)}/>}
     {delayedDictationOpen&&<DelayedDictationGame packId={activePack.id} groups={delayedDictationGroups} patterns={selectedPatterns} memoryDelay={memoryDelay} onClose={()=>setDelayedDictationOpen(false)}/>}
+    {eraseGameOpen&&<EraseGame packId={activePack.id} packName={activePack.name} groups={delayedDictationGroups} patterns={selectedPatterns} onClose={()=>setEraseGameOpen(false)}/>}
     {tugOfWarOpen&&<TugOfWarGame items={selectedVocabulary} packName={activePack.name} onClose={()=>setTugOfWarOpen(false)}/>}
     <footer className="legal-note">Gamify · Classroom-ready language activities organised by input and production mode.</footer>
   </main>;

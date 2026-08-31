@@ -4,6 +4,8 @@ import "./delayed-dictation.css";
 import "./globals.css";
 import "./tug-of-war.css";
 import "./faulty-echo.css";
+import "./quickfire.css";
+import "./erase-game.css";
 
 export const metadata: Metadata = {
   title: "Gamify — Language Activity Workspace",
