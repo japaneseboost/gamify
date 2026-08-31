@@ -200,6 +200,7 @@ export default function Home(){
       </aside>
 
       <section className="apps-area" id="activity-apps" aria-labelledby="apps-title">
+        <h1 className="visually-hidden" id="apps-title">Gamify learning modes</h1>
         <div className="lesson-stage-grid">
           {lessonStages.map((stage)=><section className={`lesson-stage stage-${stage.tone}`} key={stage.id} aria-labelledby={`stage-${stage.id}`}><header><span className="stage-index"><small>Stage</small><b>{stage.number}</b></span><div><h2 id={`stage-${stage.id}`}>{stage.name}</h2><p>{stage.purpose}</p></div></header><div className="stage-activities">
             {activities.filter((activity)=>activity.stage===stage.id).map((activity)=>{const Icon=activity.icon;return <button className="stage-activity" key={activity.id} onClick={()=>setSelected(activity)} aria-label={`Create ${activity.title}`}><span className={`app-icon app-${activity.tone}`}><Icon size={24}/><i/></span><span><strong>{activity.shortTitle}</strong><small>{activity.time}</small></span></button>;})}
