@@ -1,0 +1,96 @@
+/* Layout polish: centred Word Pack + full-page scrolling */
+html,body{min-height:100%;overflow-x:hidden;scrollbar-color:rgba(151,164,188,.42) rgba(10,15,26,.55);scrollbar-width:thin}
+body{overflow-y:auto;background:#101827}
+.ipad-page{min-height:100dvh;height:auto;overflow-x:hidden;overflow-y:visible;padding-bottom:138px}
+.home-screen{
+  width:min(1500px,calc(100% - 56px));
+  height:auto;
+  min-height:0;
+  margin:0 auto;
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:48px;
+}
+.word-pack-column{
+  width:min(1040px,100%);
+  margin:0 auto;
+  align-self:center;
+}
+.word-pack-widget{
+  height:auto;
+  min-height:0;
+  max-height:none;
+  grid-template-rows:auto auto auto;
+  overflow:hidden;
+}
+.pack-groups{
+  min-height:0;
+  overflow:visible;
+  display:grid;
+  grid-template-columns:minmax(0,1.75fr) minmax(300px,1fr);
+  gap:26px;
+  padding:21px 24px 26px;
+}
+.pack-group+ .pack-group{
+  margin-top:0;
+  padding-top:0;
+  padding-left:26px;
+  border-top:0;
+  border-left:1px solid var(--comfort-line);
+}
+.apps-area{width:100%;min-width:0}
+.apps-heading{margin-bottom:18px}
+.lesson-stage-grid{width:100%}
+.lesson-stage{align-items:start}
+.stage-activities{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  align-items:stretch;
+}
+.stage-activity{height:100%}
+.ipad-dock{position:fixed;bottom:18px}
+.page-dots{display:none}
+.legal-note{
+  position:relative;
+  right:auto;
+  bottom:auto;
+  max-width:none;
+  margin:42px auto -90px;
+  padding:0 24px;
+  text-align:center;
+}
+
+@media(max-width:1180px){
+  .home-screen{width:min(1180px,calc(100% - 40px));gap:40px}
+  .word-pack-column{width:min(920px,100%)}
+  .pack-groups{grid-template-columns:1fr 1fr;gap:20px}
+  .stage-activities{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+@media(max-width:900px){
+  .home-screen{width:calc(100% - 30px);gap:34px}
+  .word-pack-column{width:100%}
+  .pack-groups{display:block;padding:18px 18px 22px}
+  .pack-group+ .pack-group{
+    margin-top:22px;
+    padding-top:20px;
+    padding-left:0;
+    border-top:1px solid var(--comfort-line);
+    border-left:0;
+  }
+  .lesson-stage{grid-template-columns:1fr;gap:16px}
+  .lesson-stage>header{min-height:0}
+  .stage-activities{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+@media(max-width:620px){
+  .ipad-page{padding-bottom:122px}
+  .home-screen{width:calc(100% - 24px);gap:28px}
+  .word-pack-widget{border-radius:22px}
+  .word-pack-header{padding:18px 16px 15px}
+  .pack-toolbar{padding-left:14px;padding-right:14px}
+  .pack-groups{padding:17px 14px 20px}
+  .stage-activities{grid-template-columns:1fr}
+  .ipad-dock{bottom:10px}
+  .legal-note{margin-bottom:-74px}
+}
