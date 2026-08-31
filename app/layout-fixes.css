@@ -57,6 +57,14 @@ body{overflow-y:auto;background:#101827}
   border-left:0;
 }
 
+/* Parts of speech inside each Word Pack. */
+.pos-vocabulary-groups{display:grid;gap:18px}
+.pos-group{display:grid;gap:9px}
+.pos-group+ .pos-group{padding-top:15px;border-top:1px solid rgba(255,255,255,.055)}
+.pos-group>header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.pos-group h4{margin:0;color:#aebbd0;font-size:10px;font-weight:780;letter-spacing:.11em;text-transform:uppercase}
+.pos-group>header span{min-width:38px;padding:3px 7px;border-radius:99px;color:#7f8ca0;background:rgba(255,255,255,.035);font-size:8px;font-weight:760;text-align:center}
+
 /* Games stay on the right, with normal document flow so every stage is reachable. */
 .apps-area{width:100%;min-width:0;padding-bottom:28px}
 .apps-heading{margin-bottom:18px}
@@ -76,12 +84,8 @@ body{overflow-y:auto;background:#101827}
 .launch-config .sheet-options{
   display:none!important;
 }
-.launch-config .language-preview{
-  margin-bottom:0;
-}
-.launch-sheet .launch-button{
-  margin-top:18px;
-}
+.launch-config .language-preview{margin-bottom:0}
+.launch-sheet .launch-button{margin-top:18px}
 
 .legal-note{
   position:relative;
@@ -92,6 +96,35 @@ body{overflow-y:auto;background:#101827}
   padding:0 24px;
   text-align:center;
 }
+
+/* Read My Mind — dedicated live classroom game. */
+.rmm-portal{
+  position:fixed;
+  inset:0;
+  z-index:1400;
+  display:grid;
+  grid-template-rows:70px minmax(0,1fr) 82px;
+  color:#edf1f7;
+  background:
+    radial-gradient(circle at 12% 12%,rgba(116,82,191,.22),transparent 32%),
+    radial-gradient(circle at 88% 82%,rgba(60,113,173,.16),transparent 34%),
+    linear-gradient(145deg,#111827,#171b2a 58%,#1e1c2a);
+}
+.rmm-topbar{display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid rgba(255,255,255,.08);background:rgba(8,12,22,.62);backdrop-filter:blur(20px)}
+.rmm-topbar>div{display:flex;align-items:center;gap:11px}.rmm-topbar>div>div{display:grid;gap:2px}.rmm-topbar strong{font-size:14px}.rmm-topbar small{color:#8f99aa;font-size:9px}.rmm-live-dot{width:9px;height:9px;border-radius:50%;background:#a779ff;box-shadow:0 0 0 5px rgba(167,121,255,.12)}
+.rmm-topbar button{width:42px;height:42px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.08);border-radius:50%;color:#dce2eb;background:rgba(255,255,255,.05)}
+.rmm-stage{width:min(1220px,calc(100% - 44px));margin:0 auto;padding:28px 0 34px;overflow:auto}
+.rmm-heading{text-align:center}.rmm-heading p{margin:0 0 8px;color:#a98cf1;font-size:10px;font-weight:800;letter-spacing:.16em}.rmm-heading h1{margin:0;color:#f5f6f9;font-size:clamp(32px,4vw,58px);line-height:1.04;letter-spacing:-.045em}.rmm-heading>span{display:block;margin-top:10px;color:#9da7b8;font-size:13px}
+.rmm-clue{width:min(760px,100%);min-height:94px;display:grid;place-items:center;gap:8px;margin:25px auto 22px;padding:14px 22px;border:1px solid rgba(174,142,241,.18);border-radius:22px;background:linear-gradient(145deg,rgba(127,91,190,.15),rgba(255,255,255,.035));text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+.rmm-clue>div{display:flex;align-items:center;gap:7px;color:#aa91df;font-size:10px;font-weight:760;text-transform:uppercase;letter-spacing:.1em}.rmm-clue strong{font-family:"Noto Sans JP",sans-serif;font-size:clamp(24px,3.2vw,42px);font-weight:720}
+.rmm-answer-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.rmm-answer-card{position:relative;min-height:180px;display:grid;place-items:center;padding:26px 18px;border:1px solid rgba(255,255,255,.11);border-radius:26px;background:linear-gradient(150deg,rgba(255,255,255,.08),rgba(255,255,255,.035));box-shadow:inset 0 1px 0 rgba(255,255,255,.055),0 16px 38px rgba(2,5,14,.2);transition:180ms ease}.rmm-answer-card.answer{border-color:rgba(107,211,154,.68);background:linear-gradient(150deg,rgba(54,155,101,.32),rgba(29,87,61,.17));transform:translateY(-3px)}
+.rmm-number{position:absolute;left:15px;top:14px;width:34px;height:34px;display:grid;place-items:center;border-radius:11px;color:#c7b8f4;background:rgba(129,94,201,.18);font-size:15px;font-weight:820}.rmm-answer-card strong{font-family:"Noto Sans JP",sans-serif;color:#f5f6fa;font-size:clamp(25px,2.5vw,38px);line-height:1.2;text-align:center}.rmm-correct{position:absolute;left:50%;bottom:13px;display:flex;align-items:center;gap:5px;transform:translateX(-50%);color:#9de2ba;font-size:10px;font-weight:760;white-space:nowrap}
+.rmm-gesture-strip{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px;margin:20px auto 0;color:#929cad;font-size:11px}.rmm-gesture-strip b{display:flex;align-items:center;gap:4px;padding:7px 10px;border:1px solid rgba(255,255,255,.07);border-radius:12px;color:#e9ecf2;background:rgba(255,255,255,.035);font-size:19px}.rmm-gesture-strip b small{font-size:10px;color:#9ca6b7}
+.rmm-reveal{width:min(680px,100%);display:grid;justify-items:center;gap:3px;margin:20px auto 0;padding:13px 18px;border:1px solid rgba(96,202,144,.25);border-radius:17px;background:rgba(45,142,89,.12)}.rmm-reveal small{color:#8acfa7;font-size:9px;font-weight:800;letter-spacing:.14em}.rmm-reveal strong{font-family:"Noto Sans JP",sans-serif;font-size:27px}
+.rmm-controls{display:flex;align-items:center;justify-content:center;gap:9px;padding:12px 20px;border-top:1px solid rgba(255,255,255,.08);background:rgba(8,12,22,.7);backdrop-filter:blur(20px)}.rmm-controls button{min-height:46px;display:flex;align-items:center;justify-content:center;gap:7px;padding:0 14px;border:1px solid rgba(255,255,255,.1);border-radius:13px;color:#d8dee8;background:rgba(255,255,255,.055);font-size:11px;font-weight:700}.rmm-controls button:disabled{opacity:.3;cursor:not-allowed}.rmm-controls .rmm-primary{color:#171321;background:#eee8ff;border-color:#eee8ff}.rmm-controls .rmm-next{color:#fff;background:#7655bb;border-color:#7655bb}
+.rmm-setup-backdrop{position:absolute;inset:0;z-index:10;display:grid;place-items:center;padding:22px;background:rgba(5,8,15,.68);backdrop-filter:blur(18px)}.rmm-setup{width:min(720px,100%);padding:26px;border:1px solid rgba(255,255,255,.11);border-radius:28px;background:linear-gradient(150deg,rgba(30,34,48,.98),rgba(18,21,31,.98));box-shadow:0 32px 80px rgba(0,0,0,.38)}.rmm-setup>header{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}.rmm-setup>header small{color:#a58cdf;font-size:9px;font-weight:790;letter-spacing:.13em}.rmm-setup h2{margin:5px 0 4px;color:#f1f3f7;font-size:28px;letter-spacing:-.035em}.rmm-setup p{margin:0;color:#919bad;font-size:11px}.rmm-setup>header button{width:38px;height:38px;display:grid;place-items:center;border:0;border-radius:50%;color:#cfd5df;background:rgba(255,255,255,.06)}
+.rmm-secret-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px}.rmm-secret-grid button{position:relative;min-height:86px;display:grid;place-items:center;padding:11px;border:1px solid rgba(255,255,255,.09);border-radius:17px;color:#e6eaf0;background:rgba(255,255,255,.04);font-family:"Noto Sans JP",sans-serif}.rmm-secret-grid button>span{position:absolute;left:9px;top:8px;color:#9783ca;font-size:9px;font-weight:800}.rmm-secret-grid button>svg{position:absolute;right:9px;top:8px;color:#a9e4c0}.rmm-secret-grid button.selected{border-color:rgba(160,126,231,.65);background:rgba(124,91,190,.18)}.rmm-secret-grid strong{font-size:18px}
+.rmm-clue-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}.rmm-clue-fields label{display:grid;gap:6px;color:#aab2c0;font-size:10px;font-weight:700}.rmm-clue-fields label span small{font-weight:550;color:#778294}.rmm-clue-fields input{min-height:47px;padding:0 13px;border:1px solid rgba(255,255,255,.1);border-radius:13px;color:#edf0f5;background:rgba(8,12,20,.55);font-family:"Noto Sans JP",sans-serif;font-size:14px}.rmm-start{width:100%;min-height:50px;margin-top:18px;border:0;border-radius:14px;color:#171321;background:#eee8ff;font-size:12px;font-weight:780}.rmm-start:disabled{opacity:.35;cursor:not-allowed}
 
 @media(min-width:1500px){
   .home-screen{grid-template-columns:420px minmax(0,1fr)}
@@ -104,26 +137,14 @@ body{overflow-y:auto;background:#101827}
     gap:34px;
   }
   .word-pack-column{top:20px}
-  .word-pack-widget{
-    height:min(690px,calc(100dvh - 40px));
-    min-height:540px;
-    max-height:690px;
-  }
+  .word-pack-widget{height:min(690px,calc(100dvh - 40px));min-height:540px;max-height:690px}
   .stage-activities{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .rmm-answer-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.rmm-answer-card{min-height:135px}
 }
 
 @media(max-width:900px){
-  .home-screen{
-    width:calc(100% - 30px);
-    min-height:0;
-    display:block;
-  }
-  .word-pack-column{
-    position:relative;
-    top:auto;
-    width:min(620px,100%);
-    margin:0 auto 36px;
-  }
+  .home-screen{width:calc(100% - 30px);min-height:0;display:block}
+  .word-pack-column{position:relative;top:auto;width:min(620px,100%);margin:0 auto 36px}
   .word-pack-widget{height:auto;min-height:0;max-height:none}
   .pack-groups{overflow:visible;padding:18px 18px 22px}
   .lesson-stage{grid-template-columns:1fr;gap:16px}
@@ -141,4 +162,5 @@ body{overflow-y:auto;background:#101827}
   .pack-groups{padding:17px 14px 20px}
   .stage-activities{grid-template-columns:1fr}
   .legal-note{margin-bottom:0}
+  .rmm-portal{grid-template-rows:62px minmax(0,1fr) auto}.rmm-stage{width:calc(100% - 24px);padding-top:20px}.rmm-heading h1{font-size:31px}.rmm-heading>span{font-size:11px}.rmm-answer-grid{grid-template-columns:1fr 1fr;gap:9px}.rmm-answer-card{min-height:105px;border-radius:18px}.rmm-answer-card strong{font-size:21px}.rmm-controls{flex-wrap:wrap;padding:10px}.rmm-controls button{min-height:42px;flex:1 1 42%;padding:0 9px}.rmm-secret-grid{grid-template-columns:1fr 1fr}.rmm-clue-fields{grid-template-columns:1fr}.rmm-setup{padding:20px 16px}.rmm-setup h2{font-size:24px}
 }
