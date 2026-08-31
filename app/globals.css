@@ -176,3 +176,14 @@ ruby{ruby-align:center}rt{font-size:.43em;font-weight:650;line-height:1;color:#5
   .stage-index b{font-size:28px}
   .dock-icon{width:52px;height:52px}
 }
+
+
+/* Let enlarged activity names use two lines instead of being clipped on laptops. */
+@media(min-width:1181px){
+  .stage-activity strong{
+    overflow:visible;
+    white-space:normal;
+    text-overflow:clip;
+    line-height:1.15;
+  }
+}
