@@ -113,6 +113,14 @@ export default function Home(){
     update((current)=>current.includes(item)?current.filter((value)=>value!==item):[...current,item]);
   };
 
+  const toggleVocabularyGroup=(items:string[])=>{
+    setSelectedVocabulary((current)=>{
+      const allSelected=items.every((item)=>current.includes(item));
+      if(allSelected)return current.filter((item)=>!items.includes(item));
+      return [...current,...items.filter((item)=>!current.includes(item))];
+    });
+  };
+
   const selectAllItems=()=>{
     setSelectedVocabulary([...activePack.vocabulary]);
     setSelectedPatterns([...activePack.patterns]);
@@ -210,10 +218,11 @@ export default function Home(){
               <div className="pos-vocabulary-groups">
                 {activePack.vocabularyGroups.map((group)=>{
                   const selectedInGroup=group.items.filter((item)=>selectedVocabulary.includes(item)).length;
+                  const allSelected=selectedInGroup===group.items.length;
                   const visual=vocabularyGroupVisuals[group.id]??vocabularyGroupVisuals.nouns;
                   const GroupIcon=visual.icon;
                   return <section className={`pos-group pos-${visual.tone}`} key={group.id} aria-labelledby={`pos-${activePack.id}-${group.id}`}>
-                    <header><span className="pos-icon" aria-hidden="true"><GroupIcon size={16}/></span><div><h4 id={`pos-${activePack.id}-${group.id}`}>{group.label}</h4><small>{visual.description}</small></div><span className="pos-count">{selectedInGroup}/{group.items.length}</span></header>
+                    <header><span className="pos-icon" aria-hidden="true"><GroupIcon size={16}/></span><div className="pos-copy"><h4 id={`pos-${activePack.id}-${group.id}`}>{group.label}</h4><small>{visual.description}</small></div><div className="pos-group-actions"><span className="pos-count">{selectedInGroup}/{group.items.length}</span><button type="button" className="pos-toggle" onClick={()=>toggleVocabularyGroup(group.items)} aria-label={`${allSelected?"Deselect":"Select"} all ${group.label.toLowerCase()} words`}>{allSelected?"Deselect all":"Select all"}</button></div></header>
                     <div className="language-chip-grid">{group.items.map((item)=>{const isSelected=selectedVocabulary.includes(item);return <button type="button" className={`language-chip ${isSelected?"selected":""}`} aria-pressed={isSelected} key={item} onClick={()=>toggleLanguageItem("vocabulary",item)}>{isSelected&&<Check size={13} aria-hidden="true"/>}<span>{item}</span></button>;})}</div>
                   </section>;
                 })}
