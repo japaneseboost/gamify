@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./layout-fixes.css";
 
 export const metadata: Metadata = {
   title: "Gamify — Language Activity Workspace",
