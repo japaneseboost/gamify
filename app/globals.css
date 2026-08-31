@@ -1320,3 +1320,29 @@ button:focus-visible,textarea:focus-visible,input:focus-visible,select:focus-vis
 
 
 .pack-toolbar .selection-summary strong{color:var(--pastel-heading)}
+
+
+/* WCAG contrast pass for small pastel labels */
+.word-pack-title p,
+.pack-picker>span,
+.selection-summary,
+.pack-section-heading small,
+.pos-group header small,
+.apps-heading>span,
+.lesson-stage header p,
+.stage-activity small,
+.launch-sheet>.launch-description,
+.dd-launch-setting small,
+.rmm-heading>span,
+.rmm-topbar small,
+.dd-topbar small,
+.dd-phase-card>span{
+  color:#5f6a82;
+}
+.word-pack-title small,
+.apps-heading p,
+.launch-config .language-preview small,
+.rmm-heading p,
+.rmm-setup>header small{
+  color:#655891;
+}
