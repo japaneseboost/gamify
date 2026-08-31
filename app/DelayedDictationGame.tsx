@@ -14,6 +14,7 @@ type Props = {
 };
 
 type Phase = "listen" | "remember" | "write" | "reveal";
+type ListenStatus = "ready" | "countdown" | "first" | "pause" | "second";
 
 const clean = (value: string) => value.replace(/^\(お\)/, "お").replace(/^\(あさ\)/, "あさ").replace(/\(な\)/g, "").replace(/[（(]([^)）]+)[)）]/g, "$1");
 
@@ -118,12 +119,31 @@ export default function DelayedDictationGame({ packId, groups, patterns, memoryD
   const [round, setRound] = useState(0);
   const [phase, setPhase] = useState<Phase>("listen");
   const [seconds, setSeconds] = useState(memoryDelay);
-  const [speaking, setSpeaking] = useState(false);
+  const [sequenceRunning, setSequenceRunning] = useState(false);
   const [audioError, setAudioError] = useState(false);
-  const advanceAfterSpeech = useRef(true);
+  const [countIn, setCountIn] = useState<number | null>(null);
+  const [listenStatus, setListenStatus] = useState<ListenStatus>("ready");
+  const cancelledRef = useRef(false);
+  const timeoutIds = useRef<number[]>([]);
+  const audioContextRef = useRef<AudioContext | null>(null);
   const sentence = sentences[round % sentences.length];
 
-  useEffect(() => () => window.speechSynthesis?.cancel(), []);
+  const clearSequence = (cancelSpeech = true) => {
+    cancelledRef.current = true;
+    timeoutIds.current.forEach((id) => window.clearTimeout(id));
+    timeoutIds.current = [];
+    if (cancelSpeech) window.speechSynthesis?.cancel();
+    setSequenceRunning(false);
+    setCountIn(null);
+    setListenStatus("ready");
+  };
+
+  useEffect(() => () => {
+    cancelledRef.current = true;
+    timeoutIds.current.forEach((id) => window.clearTimeout(id));
+    window.speechSynthesis?.cancel();
+    void audioContextRef.current?.close();
+  }, []);
 
   useEffect(() => {
     if (phase !== "remember") return;
@@ -141,43 +161,126 @@ export default function DelayedDictationGame({ packId, groups, patterns, memoryD
     return () => window.clearInterval(timer);
   }, [phase, memoryDelay, round]);
 
-  const speak = (advance = true) => {
+  const wait = (milliseconds: number) => new Promise<void>((resolve) => {
+    const id = window.setTimeout(resolve, milliseconds);
+    timeoutIds.current.push(id);
+  });
+
+  const chime = (finalChime = false) => {
+    try {
+      const context = audioContextRef.current ?? new AudioContext();
+      audioContextRef.current = context;
+      if (context.state === "suspended") void context.resume();
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      oscillator.type = "sine";
+      oscillator.frequency.value = finalChime ? 1040 : 820;
+      gain.gain.setValueAtTime(0.0001, context.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.18, context.currentTime + 0.018);
+      gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.3);
+      oscillator.connect(gain);
+      gain.connect(context.destination);
+      oscillator.start();
+      oscillator.stop(context.currentTime + 0.32);
+    } catch {
+      // The visual countdown still works if Web Audio is unavailable.
+    }
+  };
+
+  const speakOnce = () => new Promise<boolean>((resolve) => {
     if (!("speechSynthesis" in window)) {
       setAudioError(true);
-      if (advance) setPhase("remember");
+      resolve(false);
+      return;
+    }
+    const utterance = new SpeechSynthesisUtterance(sentence);
+    utterance.lang = "ja-JP";
+    utterance.rate = 0.75;
+    utterance.pitch = 1;
+    utterance.onstart = () => setAudioError(false);
+    utterance.onend = () => resolve(true);
+    utterance.onerror = () => {
+      setAudioError(true);
+      resolve(false);
+    };
+    window.speechSynthesis.speak(utterance);
+  });
+
+  const runListenSequence = async () => {
+    clearSequence(true);
+    cancelledRef.current = false;
+    setSequenceRunning(true);
+    setAudioError(false);
+    setListenStatus("countdown");
+
+    for (let number = 5; number >= 1; number -= 1) {
+      if (cancelledRef.current) return;
+      setCountIn(number);
+      chime(number === 1);
+      await wait(1000);
+    }
+
+    if (cancelledRef.current) return;
+    setCountIn(null);
+    setListenStatus("first");
+    const firstWorked = await speakOnce();
+    if (cancelledRef.current) return;
+    if (!firstWorked) {
+      setSequenceRunning(false);
+      setListenStatus("ready");
+      return;
+    }
+
+    setListenStatus("pause");
+    await wait(3000);
+    if (cancelledRef.current) return;
+
+    setListenStatus("second");
+    const secondWorked = await speakOnce();
+    if (cancelledRef.current) return;
+    setSequenceRunning(false);
+    if (secondWorked) setPhase("remember");
+    else setListenStatus("ready");
+  };
+
+  const hearAgain = () => {
+    if (!("speechSynthesis" in window)) {
+      setAudioError(true);
       return;
     }
     window.speechSynthesis.cancel();
-    advanceAfterSpeech.current = advance;
     const utterance = new SpeechSynthesisUtterance(sentence);
     utterance.lang = "ja-JP";
-    utterance.rate = 0.82;
+    utterance.rate = 0.75;
     utterance.pitch = 1;
-    utterance.onstart = () => { setSpeaking(true); setAudioError(false); };
-    utterance.onend = () => {
-      setSpeaking(false);
-      if (advanceAfterSpeech.current) setPhase("remember");
-    };
-    utterance.onerror = () => { setSpeaking(false); setAudioError(true); };
+    utterance.onerror = () => setAudioError(true);
     window.speechSynthesis.speak(utterance);
   };
 
   const nextRound = () => {
-    window.speechSynthesis?.cancel();
+    clearSequence(true);
     setRound((value) => (value + 1) % sentences.length);
     setPhase("listen");
     setSeconds(memoryDelay);
-    setSpeaking(false);
     setAudioError(false);
   };
 
   const restartRound = () => {
-    window.speechSynthesis?.cancel();
+    clearSequence(true);
     setPhase("listen");
     setSeconds(memoryDelay);
-    setSpeaking(false);
     setAudioError(false);
   };
+
+  const listenMessage = listenStatus === "countdown"
+    ? "Get ready…"
+    : listenStatus === "first"
+      ? "First listening"
+      : listenStatus === "pause"
+        ? "Keep it in your head… 3-second pause"
+        : listenStatus === "second"
+          ? "Second listening"
+          : "The sentence stays hidden. You will hear it twice.";
 
   return (
     <div className="dd-portal" role="dialog" aria-modal="true" aria-label="Delayed Dictation classroom game">
@@ -191,9 +294,10 @@ export default function DelayedDictationGame({ packId, groups, patterns, memoryD
           <div className="dd-phase-icon"><Ear size={58}/></div>
           <p>STEP 1</p>
           <h1>Listen</h1>
-          <span>The sentence stays hidden. Listen carefully to the computer voice.</span>
-          <button className="dd-main-action" type="button" onClick={() => speak(true)} disabled={speaking}><Volume2 size={23}/>{speaking ? "Listening…" : "Play sentence"}</button>
-          {audioError && <div className="dd-audio-warning">Computer voice is unavailable in this browser. Read the sentence aloud yourself, then continue.</div>}
+          <span>{listenMessage}</span>
+          {countIn !== null && <div className="dd-countdown" aria-live="polite">{countIn}</div>}
+          <button className="dd-main-action" type="button" onClick={runListenSequence} disabled={sequenceRunning}><Volume2 size={23}/>{sequenceRunning ? "Sequence playing…" : "Start listening"}</button>
+          {audioError && <div className="dd-audio-warning">Computer voice is unavailable in this browser. Read the hidden sentence aloud twice, three seconds apart, then restart the activity.</div>}
         </section>}
 
         {phase === "remember" && <section className="dd-phase-card">
@@ -218,7 +322,7 @@ export default function DelayedDictationGame({ packId, groups, patterns, memoryD
           <h1>Self-correct</h1>
           <span>Check every word, particle and ending against the model.</span>
           <div className="dd-answer">{sentence}</div>
-          <div className="dd-reveal-actions"><button type="button" onClick={() => speak(false)}><Volume2 size={19}/> Hear again</button><button type="button" onClick={nextRound}>Next sentence</button></div>
+          <div className="dd-reveal-actions"><button type="button" onClick={hearAgain}><Volume2 size={19}/> Hear again</button><button type="button" onClick={nextRound}>Next sentence</button></div>
         </section>}
       </main>
 
