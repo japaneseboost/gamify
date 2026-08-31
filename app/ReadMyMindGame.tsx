@@ -34,7 +34,7 @@ export default function ReadMyMindGame({ options, onClose }: Props) {
   const [setupOpen, setSetupOpen] = useState(true);
   const [revealed, setRevealed] = useState(false);
   const [clueStep, setClueStep] = useState(0);
-  const [openingClue, setOpeningClue] = useState("私は……");
+  const [openingClue, setOpeningClue] = useState("");
   const [secondClue, setSecondClue] = useState("");
 
   const activeClue = clueStep === 0
