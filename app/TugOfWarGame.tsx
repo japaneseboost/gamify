@@ -402,7 +402,8 @@ export default function TugOfWarGame({ items, packName, onClose }: Props) {
                 {tiles.map((tile, index) => {
                   const left = ((tile.position + pullsToGoal + 0.5) / columnCount) * 100;
                   const claimedTeam = tile.position === -pullsToGoal ? "a" : tile.position === pullsToGoal ? "b" : null;
-                  const valueText = tile.position === 0 ? "centred" : `${Math.abs(tile.position)} columns toward ${teamNames[tile.position < 0 ? "a" : "b"]}`;
+                  const distance = Math.abs(tile.position);
+                  const valueText = tile.position === 0 ? "centred" : `${distance} ${distance === 1 ? "column" : "columns"} toward ${teamNames[tile.position < 0 ? "a" : "b"]}`;
                   return <div className={`tow-kana-lane lane-${index + 1}`} key={tile.id}>
                     <span className="tow-lane-number" aria-hidden="true">{index + 1}</span>
                     <button
