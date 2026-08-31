@@ -57,3 +57,122 @@ ruby{ruby-align:center}rt{font-size:.43em;font-weight:650;line-height:1;color:#5
 
 .story-summary{width:min(1040px,100%);display:grid;gap:11px;margin-top:23px;text-align:left}.story-summary p{min-height:72px;display:grid;grid-template-columns:42px minmax(0,1fr);align-items:center;gap:16px;margin:0;padding:12px 24px 12px 14px;border:1px solid color-mix(in srgb,var(--slide-accent) 16%,#dde3ed);border-radius:18px;color:#172236;background:rgba(255,255,255,.78);font-family:"Noto Sans JP",sans-serif;font-size:clamp(21px,2.5vw,37px);font-weight:680;line-height:1.55;box-shadow:0 10px 28px rgba(42,55,80,.07)}.story-summary p>span{width:36px;height:36px;display:grid;place-items:center;border-radius:12px;color:var(--slide-accent);background:var(--slide-soft);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:12px;font-weight:800}.story-summary rt{color:color-mix(in srgb,var(--slide-accent) 72%,#465166)}
 @media(max-width:720px){.story-summary{gap:8px;margin-top:17px}.story-summary p{min-height:60px;grid-template-columns:30px 1fr;gap:9px;padding:9px 12px 9px 9px;border-radius:14px;font-size:20px}.story-summary p>span{width:29px;height:29px;border-radius:9px;font-size:10px}}
+
+
+/* Enlarged clean workspace — 2026-08-31 */
+/* Keep the atmospheric iOS wallpaper, but remove the tiled grid lines. */
+.ipad-page::after{
+  background:
+    linear-gradient(118deg,transparent 0 36%,rgba(255,255,255,.065) 43%,transparent 50%),
+    linear-gradient(138deg,rgba(255,255,255,.05),transparent 24% 73%,rgba(255,255,255,.035));
+  background-size:auto;
+  mask-image:radial-gradient(ellipse 105% 96% at 50% 44%,#000 25%,rgba(0,0,0,.82) 72%,transparent 100%);
+}
+
+/* A larger, more legible desktop workspace with generous iPad-style touch targets. */
+@media(min-width:1181px){
+  .ipad-status{
+    height:102px;
+    padding:20px clamp(30px,3.8vw,76px);
+  }
+  .ipad-status>div:first-child strong{font-size:34px}
+  .ipad-status>div:first-child span{font-size:13px}
+  .status-title{min-height:44px;padding:9px 16px;font-size:13px}
+  .ipad-status>button{min-height:46px;padding:0 16px;font-size:13px}
+
+  .home-screen{
+    width:min(1700px,calc(100% - 56px));
+    height:calc(100dvh - 194px);
+    min-height:650px;
+    grid-template-columns:clamp(390px,27vw,470px) minmax(0,1fr);
+    gap:clamp(46px,4.7vw,92px);
+  }
+  .widget-column{gap:20px}
+  .language-widget{border-radius:28px}
+  .vocabulary-widget{height:294px;padding:26px 28px}
+  .grammar-widget{height:244px;padding:26px 28px}
+  .widget-heading{margin-bottom:17px}
+  .widget-heading span{font-size:15px}
+  .widget-heading small{font-size:10px}
+  .language-widget textarea{height:182px;font-size:25px;line-height:1.62}
+  .grammar-widget textarea{height:128px;font-size:22px;line-height:1.58}
+  .widget-footer{padding-top:13px;font-size:11px}
+  .grammar-widget button{min-height:42px;font-size:11px}
+
+  .apps-heading{margin-bottom:22px}
+  .apps-heading p{margin-bottom:6px;font-size:11px}
+  .apps-heading h1{font-size:40px}
+  .apps-heading>span{font-size:13px}
+
+  .lesson-stage{
+    min-height:112px;
+    grid-template-columns:235px minmax(0,1fr);
+    gap:25px;
+    padding:17px 5px;
+  }
+  .lesson-stage>header{
+    grid-template-columns:64px minmax(0,1fr);
+    gap:15px;
+    padding-left:8px;
+    border-left-width:4px;
+  }
+  .lesson-stage>header>.stage-index{width:58px}
+  .stage-index small{font-size:9px}
+  .stage-index b{margin-top:5px;font-size:31px}
+  .lesson-stage h2{font-size:20px}
+  .lesson-stage header p{margin-top:7px;font-size:13px;line-height:1.3}
+
+  .stage-activities{gap:12px}
+  .stage-activity{
+    min-height:76px;
+    grid-template-columns:60px minmax(0,1fr);
+    gap:13px;
+    padding:7px 14px 7px 7px;
+    border-radius:19px;
+  }
+  .stage-activity .app-icon{
+    width:60px;
+    height:60px;
+    border-radius:17px;
+  }
+  .stage-activity .app-icon svg{width:31px;height:31px}
+  .stage-activity .app-icon i{inset:auto 7px 6px;height:4px}
+  .stage-activity strong{font-size:15px;line-height:1.25}
+  .stage-activity small{margin-top:4px;font-size:12px}
+
+  .ipad-dock{
+    bottom:18px;
+    gap:12px;
+    padding:11px 16px;
+    border-radius:28px;
+  }
+  .dock-icon{width:58px;height:58px;border-radius:17px}
+  .ipad-dock small{font-size:9px}
+}
+
+/* Preserve the larger feel on short laptop displays without creating vertical clipping. */
+@media(min-width:1181px) and (max-height:820px){
+  .ipad-status{height:86px;padding-top:14px;padding-bottom:14px}
+  .home-screen{height:calc(100dvh - 176px);min-height:570px}
+  .vocabulary-widget{height:250px;padding:21px 23px}
+  .grammar-widget{height:210px;padding:21px 23px}
+  .language-widget textarea{height:146px;font-size:22px}
+  .grammar-widget textarea{height:104px;font-size:20px}
+  .apps-heading{margin-bottom:12px}
+  .apps-heading h1{font-size:36px}
+  .lesson-stage{min-height:96px;padding:11px 4px}
+  .stage-activity{
+    min-height:66px;
+    grid-template-columns:52px minmax(0,1fr);
+    gap:11px;
+    padding:6px 11px 6px 6px;
+  }
+  .stage-activity .app-icon{width:52px;height:52px;border-radius:15px}
+  .stage-activity .app-icon svg{width:28px;height:28px}
+  .stage-activity strong{font-size:14px}
+  .stage-activity small{font-size:11px}
+  .lesson-stage h2{font-size:18px}
+  .lesson-stage header p{font-size:12px}
+  .stage-index b{font-size:28px}
+  .dock-icon{width:52px;height:52px}
+}
