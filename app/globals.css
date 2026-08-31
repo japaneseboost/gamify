@@ -187,3 +187,98 @@ ruby{ruby-align:center}rt{font-size:.43em;font-weight:650;line-height:1;color:#5
     line-height:1.15;
   }
 }
+
+
+/* Comfort palette — softer on the eyes */
+:root{
+  --comfort-text:#e7eaf0;
+  --comfort-heading:#f0f2f6;
+  --comfort-muted:#a8b0bf;
+  --comfort-line:rgba(255,255,255,.085);
+  --comfort-surface:rgba(20,27,43,.92);
+}
+
+.ipad-page{
+  color:var(--comfort-text);
+  background:linear-gradient(140deg,#101827 0%,#172033 38%,#211f32 70%,#292431 100%);
+}
+.ipad-page::before{
+  inset:-8%;
+  background:
+    radial-gradient(ellipse 48% 54% at 5% 4%,rgba(61,111,181,.18),transparent 70%),
+    radial-gradient(ellipse 45% 55% at 95% 8%,rgba(164,80,92,.12),transparent 69%),
+    radial-gradient(ellipse 56% 48% at 75% 100%,rgba(111,80,157,.14),transparent 72%),
+    radial-gradient(ellipse 42% 42% at 18% 86%,rgba(43,132,132,.09),transparent 73%);
+  filter:saturate(.72);
+}
+.ipad-page::after{
+  background:
+    linear-gradient(118deg,transparent 0 38%,rgba(255,255,255,.018) 44%,transparent 50%),
+    linear-gradient(138deg,rgba(255,255,255,.012),transparent 26% 74%,rgba(255,255,255,.01));
+  background-size:auto;
+  box-shadow:inset 0 0 165px 28px rgba(5,9,20,.34);
+}
+
+.ipad-status{color:var(--comfort-text)}
+.status-title,.ipad-status>button{
+  color:#dfe3ea;
+  border-color:rgba(255,255,255,.09);
+  background:rgba(15,22,37,.64);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.045),0 10px 28px rgba(4,8,18,.16);
+}
+
+.vocabulary-widget{
+  border-color:rgba(150,168,202,.12);
+  background:linear-gradient(145deg,rgba(28,36,56,.96),rgba(17,22,37,.95));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.055),0 24px 62px rgba(5,9,23,.28);
+}
+.grammar-widget{
+  border-color:rgba(129,156,190,.13);
+  background:linear-gradient(145deg,rgba(28,39,57,.96),rgba(16,23,37,.95));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.055),0 24px 62px rgba(5,9,23,.27);
+}
+.widget-heading span,.language-widget textarea{color:#e8ebf1}
+.widget-heading small{color:#8993a5}
+.widget-footer{border-color:var(--comfort-line);color:#9fa9ba}
+.grammar-widget button{color:#b8c2d2}
+
+.apps-heading p{color:#aebbd4}
+.apps-heading h1{color:var(--comfort-heading)}
+.apps-heading>span{color:#b8bfcc}
+.lesson-stage-grid{border-top-color:var(--comfort-line)}
+.lesson-stage{
+  border-bottom-color:var(--comfort-line);
+}
+.lesson-stage>header{border-left-color:color-mix(in srgb,var(--stage-accent) 74%,#8d95a5)}
+.stage-index small{color:#929cad}
+.stage-index b{filter:saturate(.72);opacity:.92}
+.lesson-stage h2{color:#edf0f5}
+.lesson-stage header p{color:#a6afbf}
+
+.stage-activity{
+  border-color:rgba(255,255,255,.085);
+  background:linear-gradient(145deg,rgba(255,255,255,.074),rgba(255,255,255,.042));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 7px 18px rgba(4,8,20,.12);
+}
+.stage-activity:hover{
+  border-color:color-mix(in srgb,var(--stage-accent) 34%,rgba(255,255,255,.1));
+  background:linear-gradient(145deg,rgba(255,255,255,.105),rgba(255,255,255,.06));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.065),0 10px 22px rgba(4,8,20,.18);
+}
+.stage-activity .app-icon{
+  filter:saturate(.72) brightness(.91);
+  box-shadow:inset 0 1px 1px rgba(255,255,255,.16),0 8px 16px rgba(4,8,20,.22);
+}
+.stage-activity:hover .app-icon{filter:saturate(.86) brightness(.96)}
+.stage-activity strong{color:#edf0f4}
+.stage-activity small{color:#9da7b8}
+
+.ipad-dock{
+  border-color:rgba(255,255,255,.1);
+  background:rgba(16,22,37,.74);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.055),0 20px 48px rgba(4,8,20,.34);
+}
+.dock-icon{filter:saturate(.76) brightness(.92)}
+.ipad-dock button:hover:not(:disabled) .dock-icon{filter:saturate(.88) brightness(.98)}
+.page-dots i{background:rgba(220,225,235,.28)}
+.page-dots i.active{background:#cbd1dc}
