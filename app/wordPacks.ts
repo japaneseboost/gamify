@@ -6,19 +6,36 @@ export type VocabularyGroup = {
 
 export type WordPack = {
   id: string;
+  seriesId: string;
   name: string;
   vocabulary: string[];
   vocabularyGroups: VocabularyGroup[];
   patterns: string[];
 };
 
+export type WordPackSeries = {
+  id: string;
+  name: string;
+  status: "available" | "awaiting-words";
+  chapterCount?: number;
+};
+
+export const wordPackSeries: WordPackSeries[] = [
+  { id: "iitomo2", name: "iitomo2", status: "available", chapterCount: 6 },
+  { id: "foundation", name: "Foundation", status: "awaiting-words" },
+  { id: "year-11", name: "Year 11", status: "awaiting-words" },
+  { id: "year-12", name: "Year 12", status: "awaiting-words" },
+];
+
 const makePack = (
   id: string,
+  seriesId: string,
   name: string,
   vocabularyGroups: VocabularyGroup[],
   patterns: string[],
 ): WordPack => ({
   id,
+  seriesId,
   name,
   vocabularyGroups,
   vocabulary: vocabularyGroups.flatMap((group) => group.items),
@@ -28,7 +45,8 @@ const makePack = (
 export const wordPacks: WordPack[] = [
   makePack(
     "iitomo2-ch1",
-    "iitomo2 Ch1",
+    "iitomo2",
+    "iitomo2 Ch1: いそがしいですか",
     [
       { id:"expressions", label:"Expressions", items:["すみません"] },
       { id:"adverbs-time", label:"Adverbs & time", items:["いま","まい日","はやく"] },
@@ -39,7 +57,8 @@ export const wordPacks: WordPack[] = [
   ),
   makePack(
     "iitomo2-ch2",
-    "iitomo2 Ch2",
+    "iitomo2",
+    "iitomo2 Ch2: 学校、がんばろう！",
     [
       { id:"nouns", label:"Nouns", items:["小学校","中学校","高校","大学","(お)ひるやすみ","そうじ","かもく","えいご","こくご","すう学","おんがく","りか","たいいく","ぎじゅつ","かてい","どうとく","れきし","ちり","自己紹介"] },
       { id:"adjectives", label:"Adjectives", items:["つまらない","にがて(な)","むずかしい"] },
@@ -49,7 +68,8 @@ export const wordPacks: WordPack[] = [
   ),
   makePack(
     "iitomo2-ch3",
-    "iitomo2 Ch3",
+    "iitomo2",
+    "iitomo2 Ch3: 学校のたのしいイベント",
     [
       { id:"nouns", label:"Nouns", items:["はる（春）","なつ（夏）","あき（秋）","ふゆ（冬）","一がつ","二がつ","三がつ","にゅう学しき","えんそく","水えいたいかい","やすみ","はるやすみ","なつやすみ","ふゆやすみ","りんぎょうさい","ぶんかさい","しゅう学りょこう","ミュージカル","えんげき","ひこうき","くるま","じてんしゃ","しんかんせん","スクールバス","タクシー","でんしゃ","バス"] },
       { id:"adverbs-time", label:"Adverbs / manner", items:["あるいて"] },
@@ -58,7 +78,8 @@ export const wordPacks: WordPack[] = [
   ),
   makePack(
     "iitomo2-ch4",
-    "iitomo2 Ch4",
+    "iitomo2",
+    "iitomo2 Ch4: ひまな時に何をしますか",
     [
       { id:"nouns", label:"Nouns", items:["しゅみ","りょうり","どくしょ","つり","へや","うみ","ビーチ","山","川","天気","くもり"] },
       { id:"verbs", label:"Verbs", items:["つくります","ひきます","(で)あそびます","しゃしんをとります","かきます","つかいます","さんぽします","うたいます"] },
@@ -68,7 +89,8 @@ export const wordPacks: WordPack[] = [
   ),
   makePack(
     "iitomo2-ch5",
-    "iitomo2 Ch5",
+    "iitomo2",
+    "iitomo2 Ch5: どんなキャラクターですか",
     [
       { id:"nouns", label:"Nouns", items:["あし","あたま","かお","かみ(の毛)","くち","しっぽ","せ","手","はな","耳","目","アニメ","キャラクター","コスプレ","ふく","サービス"] },
       { id:"adjectives", label:"Adjectives", items:["ながい","みじかい","たかい","ひくい","つよい","すてき(な)","へん(な)","いろいろ(な)"] },
@@ -79,7 +101,8 @@ export const wordPacks: WordPack[] = [
   ),
   makePack(
     "iitomo2-ch6",
-    "iitomo2 Ch6",
+    "iitomo2",
+    "iitomo2 Ch6: おまつりとおいわい",
     [
       { id:"nouns", label:"Nouns", items:["おとこの人","おんなの人","パーティー","プレゼント","ギフトカード","カラオケ","よる","わたあめ","たこやき","とうもろこし","やきそば","きもの","ゆかた","はっぴ","おめん","はなび"] },
       { id:"adjectives", label:"Adjectives", items:["めずらしい","つめたい","たいせつ(な)"] },
