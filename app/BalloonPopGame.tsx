@@ -101,30 +101,92 @@ const dieDots: Record<number, number[]> = {
 };
 
 function DieFace({ value, rolling }: { value: number; rolling: boolean }) {
-  const visible = new Set(dieDots[value] ?? dieDots[1]);
-  return <span className={`bp-die ${rolling ? "rolling" : ""}`} role="img" aria-label={`Die showing ${value}`}>
-    {Array.from({ length: 9 }, (_, index) => <i className={visible.has(index) ? "visible" : ""} key={index}/>) }
+  return <span className="bp-die-scene" role="img" aria-label={`Die showing ${value}`}>
+    <span className={`bp-die-cube die-${value} ${rolling ? "rolling" : ""}`}>
+      {[1, 2, 3, 4, 5, 6].map((faceValue) => {
+        const visible = new Set(dieDots[faceValue]);
+        return <span className={`bp-die-face face-${faceValue}`} aria-hidden="true" key={faceValue}>
+          {Array.from({ length: 9 }, (_, index) => <i className={visible.has(index) ? "visible" : ""} key={index}/>) }
+        </span>;
+      })}
+    </span>
   </span>;
 }
 
 function Shark({ team }: { team: TeamId }) {
-  return <svg className="bp-shark" viewBox="0 0 150 82" aria-hidden="true">
-    <path className="bp-shark-tail" d="M35 42 6 18l7 28-7 25 30-18Z"/>
-    <path className="bp-shark-body" d="M28 46c13-27 48-36 82-22 13 5 23 13 32 23-11 11-23 19-38 22-32 7-62-1-76-23Z"/>
-    <path className="bp-shark-fin" d="m69 24 15-20 10 25M71 66l16 13 7-15"/>
-    <path className="bp-shark-mouth" d="M115 43c8 0 16 2 23 6-8 7-16 11-25 12"/>
-    <circle className="bp-shark-eye" cx="111" cy="32" r="3.3"/>
-    <path className="bp-shark-gill" d="M99 40c-2 5-2 10 0 15"/>
-    <path className={`bp-shark-accent team-${team}`} d="M46 49c15 9 34 12 51 9"/>
+  const gradientId = `bp-shark-gradient-${team}`;
+  const bellyId = `bp-shark-belly-${team}`;
+  return <svg className="bp-shark" viewBox="0 0 190 102" aria-hidden="true">
+    <defs>
+      <linearGradient id={gradientId} x1="0" y1="0" x2="0.8" y2="1">
+        <stop offset="0" stopColor="#90abc0"/>
+        <stop offset="0.48" stopColor="#587a94"/>
+        <stop offset="1" stopColor="#334f67"/>
+      </linearGradient>
+      <linearGradient id={bellyId} x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stopColor="#eff8fb" stopOpacity="0.96"/>
+        <stop offset="1" stopColor="#a9c5d1" stopOpacity="0.8"/>
+      </linearGradient>
+    </defs>
+    <path className="bp-shark-tail" fill={`url(#${gradientId})`} d="M45 52 7 20l9 34-10 34 41-25c-3-4-4-7-2-11Z"/>
+    <path className="bp-shark-fin" fill={`url(#${gradientId})`} d="M80 31 99 2l14 36M89 78l22 20 10-28"/>
+    <path className="bp-shark-body" fill={`url(#${gradientId})`} d="M39 57c18-34 62-45 107-27 17 7 29 18 39 29-13 14-30 25-51 29-41 8-79-3-95-31Z"/>
+    <path className="bp-shark-belly" fill={`url(#${bellyId})`} d="M51 65c27 20 77 25 121-2-12 14-27 22-47 26-31 6-60-2-74-24Z"/>
+    <path className="bp-shark-pectoral" fill="#46677f" d="m103 66-27 25 35-13Z"/>
+    <ellipse className="bp-shark-highlight" cx="105" cy="34" rx="39" ry="8"/>
+    <path className="bp-shark-mouth" d="M145 60c12-1 23 2 33 7-9 8-20 13-34 14"/>
+    <path className="bp-shark-teeth" d="m154 67 4 5 4-6 4 4 4-5"/>
+    <ellipse className="bp-shark-eye" cx="147" cy="43" rx="6" ry="6.5"/>
+    <circle className="bp-shark-pupil" cx="149" cy="43" r="2.4"/>
+    <circle className="bp-shark-eye-shine" cx="150" cy="40" r="1.2"/>
+    <path className="bp-shark-gill" d="M130 52c-3 7-3 14 0 20M136 54c-2 5-2 10 0 15"/>
+    <path className={`bp-shark-accent team-${team}`} d="M61 63c18 11 40 15 62 13"/>
   </svg>;
 }
 
 function Rider({ team }: { team: TeamId }) {
-  return <svg className="bp-rider" viewBox="0 0 90 126" aria-hidden="true">
-    <path className="bp-rider-rope" d="M16 2 45 34 74 2"/>
-    <circle className="bp-rider-head" cx="45" cy="48" r="12"/>
-    <path className="bp-rider-body" d="M45 60v36M45 70 24 83M45 70l22 12M45 96l-17 27M45 96l18 27"/>
-    <path className={`bp-rider-shirt team-${team}`} d="M32 63c8-5 18-5 26 0l-3 28H35Z"/>
+  const skinId = `bp-rider-skin-${team}`;
+  const shirtId = `bp-rider-shirt-${team}`;
+  const shortsId = `bp-rider-shorts-${team}`;
+  return <svg className="bp-rider" viewBox="0 0 120 165" aria-hidden="true">
+    <defs>
+      <radialGradient id={skinId} cx="34%" cy="26%" r="76%">
+        <stop offset="0" stopColor="#ffd9bd"/>
+        <stop offset="0.58" stopColor="#f2ad7d"/>
+        <stop offset="1" stopColor="#c97956"/>
+      </radialGradient>
+      <linearGradient id={shirtId} x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stopColor={team === "a" ? "#75d5f1" : "#ff9fbe"}/>
+        <stop offset="0.55" stopColor={team === "a" ? "#3da9dc" : "#e95f8d"}/>
+        <stop offset="1" stopColor={team === "a" ? "#207aa9" : "#aa335b"}/>
+      </linearGradient>
+      <linearGradient id={shortsId} x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#4c6380"/>
+        <stop offset="1" stopColor="#25364d"/>
+      </linearGradient>
+    </defs>
+    <path className="bp-rider-rope" d="M13 2 60 46 107 2M13 2 28 73M107 2 92 73"/>
+    <ellipse className="bp-rider-shadow" cx="61" cy="143" rx="35" ry="9"/>
+    <path className="bp-rider-hair-back" d="M39 49c0-18 11-31 27-31 17 0 29 12 29 31 0 15-9 24-28 25-19 0-28-10-28-25Z"/>
+    <circle className="bp-rider-ear" fill={`url(#${skinId})`} cx="40" cy="52" r="7"/>
+    <circle className="bp-rider-ear" fill={`url(#${skinId})`} cx="93" cy="52" r="7"/>
+    <ellipse className="bp-rider-head" fill={`url(#${skinId})`} cx="66" cy="51" rx="25" ry="28"/>
+    <path className="bp-rider-hair" d="M42 46c1-19 12-29 27-29 13 0 24 8 28 21-14-8-26-7-37 1-6 4-12 7-18 7Z"/>
+    <ellipse className="bp-rider-eye" cx="57" cy="53" rx="2.8" ry="3.5"/>
+    <ellipse className="bp-rider-eye" cx="76" cy="53" rx="2.8" ry="3.5"/>
+    <circle className="bp-rider-eye-shine" cx="58" cy="52" r="1"/>
+    <circle className="bp-rider-eye-shine" cx="77" cy="52" r="1"/>
+    <path className="bp-rider-smile" d="M59 64c5 4 10 4 15 0"/>
+    <circle className="bp-rider-blush" cx="49" cy="62" r="3.5"/><circle className="bp-rider-blush" cx="84" cy="62" r="3.5"/>
+    <path className="bp-rider-neck" fill={`url(#${skinId})`} d="M59 72h15v13H59Z"/>
+    <path className={`bp-rider-shirt team-${team}`} fill={`url(#${shirtId})`} d="M42 82c12-9 36-9 48 0l-5 42H47Z"/>
+    <path className="bp-rider-shirt-shine" d="M49 85c7-5 14-6 20-5"/>
+    <path className="bp-rider-arm" fill={`url(#${skinId})`} d="M46 85c-8 3-14 10-19 22l8 5 18-21ZM86 85c8 4 14 11 18 23l-8 5-17-22Z"/>
+    <circle className="bp-rider-hand" fill={`url(#${skinId})`} cx="31" cy="109" r="6"/><circle className="bp-rider-hand" fill={`url(#${skinId})`} cx="100" cy="110" r="6"/>
+    <path className="bp-rider-harness" d="M48 87 66 113 85 87M46 112h40"/>
+    <path className="bp-rider-shorts" fill={`url(#${shortsId})`} d="M48 119h37l5 19-18 2-6-14-6 14-18-2Z"/>
+    <path className="bp-rider-leg" fill={`url(#${skinId})`} d="m50 136 13 2-8 20-10-3ZM77 138l13-2 5 19-10 3Z"/>
+    <path className="bp-rider-shoe" d="m44 151 13 4-2 7H34c0-6 4-9 10-11ZM87 155l12-4c6 2 10 5 10 11H88Z"/>
   </svg>;
 }
 
@@ -191,7 +253,6 @@ export default function BalloonPopGame({ items, packName, onClose }: Props) {
   const [promptLanguage, setPromptLanguage] = useState<PromptLanguage>("english");
   const [balloonTotal, setBalloonTotal] = useState(18);
   const [prompt, setPrompt] = useState<Prompt>(() => choosePrompt(prompts));
-  const [round, setRound] = useState(1);
   const [currentTurn, setCurrentTurn] = useState<TeamId>("a");
   const [revealed, setRevealed] = useState(false);
   const [selectedLoser, setSelectedLoser] = useState<TeamId | null>(null);
@@ -284,7 +345,6 @@ export default function BalloonPopGame({ items, packName, onClose }: Props) {
   const resetBoard = () => {
     setBalloons({ a: shuffledBalloonIds(balloonTotal), b: shuffledBalloonIds(balloonTotal) });
     setPrompt(choosePrompt(prompts));
-    setRound(1);
     setCurrentTurn("a");
     setRevealed(false);
     setSelectedLoser(null);
@@ -307,7 +367,6 @@ export default function BalloonPopGame({ items, packName, onClose }: Props) {
   const nextPrompt = () => {
     if (rolling || winner) return;
     setPrompt((current) => choosePrompt(prompts, current.key));
-    setRound((value) => value + 1);
     if (playMode === "turns") setCurrentTurn((team) => otherTeam(team));
     setRevealed(false);
     setSelectedLoser(null);
@@ -381,7 +440,6 @@ export default function BalloonPopGame({ items, packName, onClose }: Props) {
 
     setSelectedLoser(null);
     setRolling(false);
-    setRound((value) => value + 1);
     if (playMode === "turns") setCurrentTurn((team) => otherTeam(team));
     setPrompt((current) => choosePrompt(prompts, current.key));
     setAnnouncement("Next prompt ready. Listen for the correct answer.");
@@ -449,12 +507,6 @@ export default function BalloonPopGame({ items, packName, onClose }: Props) {
     </main>}
 
     {phase !== "setup" && <main className="bp-game-stage">
-      <section className="bp-scorebar" aria-label="Match status">
-        <div className="bp-score-team team-a"><Flag size={20}/><span><small>TEAM A</small><strong>{balloons.a.length} balloons</strong></span></div>
-        <div className="bp-round-card"><small>MATCH</small><strong>Round {round}</strong><span>{playMode === "race" ? <><Swords size={14}/> Race mode</> : <><UsersRound size={14}/> Taking turns</>}</span></div>
-        <div className="bp-score-team team-b"><span><small>TEAM B</small><strong>{balloons.b.length} balloons</strong></span><Flag size={20}/></div>
-      </section>
-
       <section className="bp-prompt-strip" aria-live="polite">
         <div className="bp-prompt-context"><small>{turnCopy}</small><span><Languages size={15}/>{promptDirection}</span></div>
         <div className="bp-prompt-copy"><p>CLASS PROMPT</p><h1>{promptText}</h1>{revealed && <strong className="bp-revealed-answer">{answerText}</strong>}</div>
