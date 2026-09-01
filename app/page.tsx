@@ -3,7 +3,7 @@
 import {
   ArrowRight, Check, MessageCircleMore, Move3D, Play,
   Brain, UsersRound, X, PencilLine, Target, PackageOpen,
-  Clock3, Eraser, Flame, Moon, Palette, Puzzle, Shapes, Sun, Zap,
+  Clock3, Eraser, Flame, ListChecks, Moon, Palette, Puzzle, Shapes, Sun, Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import ReadMyMindGame from "./ReadMyMindGame";
@@ -17,6 +17,7 @@ import { wordPacks } from "./wordPacks";
 type Activity = {
   id:string; title:string; shortTitle:string; description:string;
   category:string; time:string; icon:typeof MessageCircleMore; tone:string; stage:StageId;
+  rules:string[];
 };
 
 type StageId = "listening"|"reading"|"writing"|"speaking";
@@ -38,12 +39,30 @@ const vocabularyGroupVisuals:Record<string,{icon:typeof Shapes;tone:string;descr
 };
 
 const activities:Activity[] = [
-  { id:"quickfire", title:"Quickfire", shortTitle:"Quickfire", description:"Students race to produce the selected Japanese word or sentence, then the winner moves one step towards the front.", category:"Input by Listening", time:"5–10 min", icon:Flame, tone:"orange", stage:"listening" },
-  { id:"read-my-mind", title:"Read My Mind", shortTitle:"Read My Mind", description:"Sensei secretly chooses one answer. Students predict, listen to clues, change their minds, then see the reveal.", category:"Input by Listening", time:"5–8 min", icon:Brain, tone:"purple", stage:"listening" },
-  { id:"faulty-echo", title:"Faulty Echo", shortTitle:"Faulty Echo", description:"Students echo the model only when what they hear is accurate, noticing tiny changes in familiar language.", category:"Input by Listening", time:"3–6 min", icon:Check, tone:"blue", stage:"listening" },
-  { id:"delayed-dictation", title:"Delayed Dictation", shortTitle:"Delayed Dictation", description:"Listen to a hidden sentence, hold it in memory, write it from recall, then self-correct against the model.", category:"Input by Listening", time:"5–8 min", icon:PencilLine, tone:"indigo", stage:"listening" },
-  { id:"erase-game", title:"Erase Game", shortTitle:"Erase Game", description:"Read a complete sentence, remove its chunks step by step, and keep reproducing every missing part from memory.", category:"Input by Reading", time:"5–10 min", icon:Eraser, tone:"mint", stage:"reading" },
-  { id:"tug-of-war", title:"Tug-of-War Vocabulary Game", shortTitle:"Tug-of-War", description:"Four starting kana begin in the centre. Drag the matching kana toward the team whenever they give a correct Word Pack item.", category:"Production by Speaking", time:"8–12 min", icon:Move3D, tone:"pink", stage:"speaking" },
+  {
+    id:"quickfire", title:"Quickfire", shortTitle:"Quickfire", description:"Students race to produce the selected Japanese word or sentence, then the winner moves one step towards the front.", category:"Input by Listening", time:"5–10 min", icon:Flame, tone:"orange", stage:"listening",
+    rules:["Everyone starts at the back of the classroom.","Teacher reads the English or Japanese prompt aloud.","The first correct Japanese answer wins the round.","The winner moves forward; first to the front wins."],
+  },
+  {
+    id:"read-my-mind", title:"Read My Mind", shortTitle:"Read My Mind", description:"Sensei secretly chooses one answer. Students predict, listen to clues, change their minds, then see the reveal.", category:"Input by Listening", time:"5–8 min", icon:Brain, tone:"purple", stage:"listening",
+    rules:["Teacher secretly chooses one of four answers.","Students predict using the numbered hand signals.","Give clues; students may change their prediction.","Reveal the answer and celebrate correct predictions."],
+  },
+  {
+    id:"faulty-echo", title:"Faulty Echo", shortTitle:"Faulty Echo", description:"Students echo the model only when what they hear is accurate, noticing tiny changes in familiar language.", category:"Input by Listening", time:"3–6 min", icon:Check, tone:"blue", stage:"listening",
+    rules:["Teacher reads the model sentence once.","Repeat it exactly or change one small detail.","Students echo only when the repeat is correct.","If it is faulty, stay silent and identify the change."],
+  },
+  {
+    id:"delayed-dictation", title:"Delayed Dictation", shortTitle:"Delayed Dictation", description:"Listen to a hidden sentence, hold it in memory, write it from recall, then self-correct against the model.", category:"Input by Listening", time:"5–8 min", icon:PencilLine, tone:"indigo", stage:"listening",
+    rules:["Listen to the hidden sentence twice.","Hold the whole sentence during the memory delay.","Write it from memory when the timer ends.","Reveal the model and self-correct every detail."],
+  },
+  {
+    id:"erase-game", title:"Erase Game", shortTitle:"Erase Game", description:"Read a complete sentence, remove its chunks step by step, and keep reproducing every missing part from memory.", category:"Input by Reading", time:"5–10 min", icon:Eraser, tone:"mint", stage:"reading",
+    rules:["Read the complete sentence together.","Erase or reveal one chunk using the chosen mode.","Students still say every hidden chunk from memory.","Continue until they can reproduce the whole sentence."],
+  },
+  {
+    id:"tug-of-war", title:"Tug-of-War Vocabulary Game", shortTitle:"Tug-of-War", description:"Four starting kana begin in the centre. Drag the matching kana toward the team whenever they give a correct Word Pack item.", category:"Production by Speaking", time:"8–12 min", icon:Move3D, tone:"pink", stage:"speaking",
+    rules:["Four starting kana begin in the centre.","A team says a Word Pack item beginning with one kana.","Teacher drags that kana one column towards the team.","First team to bring three kana home wins the round."],
+  },
 ];
 
 export default function Home(){
@@ -231,6 +250,10 @@ export default function Home(){
       <button className="sheet-close" onClick={()=>setSelected(null)} aria-label="Close"><X size={20}/></button>
       <header className="launch-identity"><div className={`app-icon app-${selected.tone}`}><SelectedIcon size={34}/><i/></div><div><p className="sheet-category">{selected.category} · {selected.time}</p><h2 id="launch-title">{selected.title}</h2></div></header>
       <p className="launch-description">{selected.description}</p>
+      <section className={`launch-rules launch-rules-${selected.tone}`} aria-labelledby="launch-rules-title">
+        <header><span aria-hidden="true"><ListChecks size={18}/></span><div><small>HOW TO PLAY</small><h3 id="launch-rules-title">Game rules</h3></div></header>
+        <ol>{selected.rules.map((rule,index)=><li key={rule}><b aria-hidden="true">{index+1}</b><span>{rule}</span></li>)}</ol>
+      </section>
       <section className="launch-config" aria-label="Selected language">
         <div className="language-preview"><small>{activePack.name} · {selectedLanguageCount} selected</small><strong>{selectedVocabulary.length>0?`${selectedVocabulary.slice(0,8).join("、")}${selectedVocabulary.length>8?" …":""}`:selected&&vocabularyOnlyActivities.includes(selected.id)?"Choose at least one vocabulary item":selectedPatterns.slice(0,6).join("、")||"Choose at least one language item"}</strong>{selected?.id!=="tug-of-war"&&selectedPatterns.length>0&&<span>{selectedPatterns.slice(0,4).join("／")}{selectedPatterns.length>4?" …":""}</span>}</div>
         {selected.id==="delayed-dictation"&&<div className="dd-launch-setting"><div><strong>Memory delay</strong><small>How long students must hold the sentence before writing.</small></div><div className="dd-delay-options">{[3,5,8,10].map((delay)=><button type="button" key={delay} className={memoryDelay===delay?"selected":""} aria-pressed={memoryDelay===delay} onClick={()=>setMemoryDelay(delay)}>{delay} sec</button>)}</div></div>}

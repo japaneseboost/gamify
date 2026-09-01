@@ -18,6 +18,24 @@ type Phase = "listen" | "remember" | "write" | "reveal";
 const clean = (value: string) => value.replace(/^\(お\)/, "お").replace(/^\(あさ\)/, "あさ").replace(/\(な\)/g, "").replace(/[（(]([^)）]+)[)）]/g, "$1");
 const speechText = (value: string) => value.replace(/毎日|まい日/g, "まいにち");
 
+function preferredJapaneseVoice(voices: SpeechSynthesisVoice[]) {
+  const japaneseVoices = voices.filter((voice) => /^ja(?:-|_)/i.test(voice.lang) || /Japanese|日本語/i.test(voice.name));
+  const googlePatterns = [
+    /^Google 日本語$/i,
+    /^Google Japanese$/i,
+    /Google.*(?:Japanese|日本語)/i,
+    /(?:Japanese|日本語).*Google/i,
+  ];
+  for (const pattern of googlePatterns) {
+    const googleVoice = japaneseVoices.find((voice) => pattern.test(voice.name));
+    if (googleVoice) return googleVoice;
+  }
+  return japaneseVoices.find((voice) => /Natural|Neural|Premium|Enhanced|Online/i.test(voice.name))
+    ?? japaneseVoices.find((voice) => voice.default)
+    ?? japaneseVoices[0]
+    ?? null;
+}
+
 function shuffled<T>(values: T[]) {
   const copy = [...values];
   for (let index = copy.length - 1; index > 0; index -= 1) {
@@ -124,6 +142,7 @@ export default function DelayedDictationGame({ packId, groups, patterns, memoryD
   const cancelledRef = useRef(false);
   const timeoutIds = useRef<number[]>([]);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const japaneseVoiceRef = useRef<SpeechSynthesisVoice | null>(null);
   const sentence = sentences[round % sentences.length];
 
   const clearSequence = (cancelSpeech = true) => {
@@ -139,6 +158,18 @@ export default function DelayedDictationGame({ packId, groups, patterns, memoryD
     timeoutIds.current.forEach((id) => window.clearTimeout(id));
     window.speechSynthesis?.cancel();
     void audioContextRef.current?.close();
+  }, []);
+
+  useEffect(() => {
+    if (!("speechSynthesis" in window)) return;
+    const speech = window.speechSynthesis;
+    const cachePreferredVoice = () => {
+      const voice = preferredJapaneseVoice(speech.getVoices());
+      if (voice) japaneseVoiceRef.current = voice;
+    };
+    cachePreferredVoice();
+    speech.addEventListener("voiceschanged", cachePreferredVoice);
+    return () => speech.removeEventListener("voiceschanged", cachePreferredVoice);
   }, []);
 
   useEffect(() => {
@@ -190,7 +221,12 @@ export default function DelayedDictationGame({ packId, groups, patterns, memoryD
       return;
     }
     const utterance = new SpeechSynthesisUtterance(speechText(sentence));
-    utterance.lang = "ja-JP";
+    const preferredVoice = preferredJapaneseVoice(window.speechSynthesis.getVoices()) ?? japaneseVoiceRef.current;
+    if (preferredVoice) {
+      japaneseVoiceRef.current = preferredVoice;
+      utterance.voice = preferredVoice;
+    }
+    utterance.lang = preferredVoice?.lang || "ja-JP";
     utterance.rate = 0.75;
     utterance.pitch = 1;
     utterance.onstart = () => setAudioError(false);
@@ -239,7 +275,12 @@ export default function DelayedDictationGame({ packId, groups, patterns, memoryD
     }
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(speechText(sentence));
-    utterance.lang = "ja-JP";
+    const preferredVoice = preferredJapaneseVoice(window.speechSynthesis.getVoices()) ?? japaneseVoiceRef.current;
+    if (preferredVoice) {
+      japaneseVoiceRef.current = preferredVoice;
+      utterance.voice = preferredVoice;
+    }
+    utterance.lang = preferredVoice?.lang || "ja-JP";
     utterance.rate = 0.75;
     utterance.pitch = 1;
     utterance.onerror = () => setAudioError(true);
