@@ -81,8 +81,8 @@ const activities:Activity[] = [
     rules:["One student becomes the performer; teammates look away from the screen.","The performer holds Secret Word to privately view the selected item.","Choose Draw it or Act it without speaking, writing letters, or mouthing the answer.","The team must guess the word in Japanese before the timer ends."],
   },
   {
-    id:"pass-the-bomb", title:"Pass the Bomb", shortTitle:"Pass the Bomb", description:"Answer a selected Word Pack prompt, pass the imaginary bomb, and keep going until its hidden random fuse explodes.", category:"Production by Speaking", time:"5–10 min", icon:Clock3, tone:"pink", stage:"speaking",
-    rules:["Students form a circle and the teacher lights a hidden 45–90 second fuse.","The player holding the bomb answers the Word Pack prompt.","After a correct answer, show the next word and pass the imaginary bomb.","When the ticking ends and the bomb explodes, the current holder loses the round."],
+    id:"pass-the-bomb", title:"Pass the Bomb", shortTitle:"Pass the Bomb", description:"Answer one shared question from the chosen Word Pack, pass the imaginary bomb, and keep speaking until its hidden fuse explodes.", category:"Production by Speaking", time:"5–10 min", icon:Clock3, tone:"pink", stage:"speaking",
+    rules:["Students form a circle and the teacher chooses a general Word Pack question.","The teacher lights a hidden random fuse.","Each player answers the same question in Japanese, then passes immediately.","When the ticking stops and the bomb explodes, the current holder loses the round."],
   },
 ];
 
@@ -168,7 +168,7 @@ export default function Home(){
   },[readMyMindOpen,quickfireOpen,faultyEchoOpen,delayedDictationOpen,eraseGameOpen,tugOfWarOpen,balloonPopOpen,volcanoOpen,drawOrActOpen,passTheBombOpen]);
 
   const createActivity=()=>{
-    if(!selected||selectedCount===0)return;
+    if(!selected||(selected.id!=="pass-the-bomb"&&selectedCount===0))return;
     if(selected.id==="quickfire"){
       if(selectedVocabulary.length===0)return;
       setSelected(null);
@@ -222,7 +222,6 @@ export default function Home(){
       return;
     }
     if(selected.id==="pass-the-bomb"){
-      if(selectedVocabulary.length===0)return;
       setSelected(null);
       setPassTheBombOpen(true);
       return;
@@ -230,8 +229,8 @@ export default function Home(){
   };
 
   const SelectedIcon=selected?.icon??Target;
-  const vocabularyOnlyActivities=["quickfire","faulty-echo","erase-game","tug-of-war","balloon-pop","volcano","draw-or-act","pass-the-bomb"];
-  const selectedLanguageCount=selected&&vocabularyOnlyActivities.includes(selected.id)?selectedVocabulary.length:selectedCount;
+  const vocabularyOnlyActivities=["quickfire","faulty-echo","erase-game","tug-of-war","balloon-pop","volcano","draw-or-act"];
+  const selectedLanguageCount=selected?.id==="pass-the-bomb"?1:selected&&vocabularyOnlyActivities.includes(selected.id)?selectedVocabulary.length:selectedCount;
   const launchLabel=selected?.id==="quickfire"?"Launch Quickfire":selected?.id==="read-my-mind"?"Launch Read My Mind":selected?.id==="faulty-echo"?"Launch Faulty Echo":selected?.id==="delayed-dictation"?"Launch Delayed Dictation":selected?.id==="erase-game"?"Launch Erase Game":selected?.id==="tug-of-war"?"Launch Tug-of-War":selected?.id==="balloon-pop"?"Launch Balloon Pop":selected?.id==="volcano"?"Launch Volcano":selected?.id==="draw-or-act"?"Launch Draw or Act":selected?.id==="pass-the-bomb"?"Launch Pass the Bomb":"Launch activity";
 
   return <main className="ipad-page" data-theme={theme}>
@@ -241,7 +240,7 @@ export default function Home(){
     </div>
     <header className="ipad-status brand-status">
       <div className="brand-lockup" aria-label="Gamify — Language Activity Studio">
-        <span className="brand-mark" aria-hidden="true"><span>G</span><i/></span>
+        <span className="brand-mark" aria-hidden="true"><span className="brand-letter">G</span><span className="brand-kana" lang="ja">あ</span></span>
         <span className="brand-copy"><strong>Gamify</strong><small>Language Activity Studio</small></span>
       </div>
       <button type="button" className="theme-toggle" onClick={toggleTheme} aria-pressed={theme==="dark"} aria-label={`Switch to ${theme==="light"?"dark":"light"} mode`}>
@@ -333,7 +332,7 @@ export default function Home(){
     {balloonPopOpen&&<BalloonPopGame items={selectedVocabulary} packName={activePack.name} onClose={()=>setBalloonPopOpen(false)}/>}
     {volcanoOpen&&<VolcanoGame items={selectedVocabulary} packName={activePack.name} onClose={()=>setVolcanoOpen(false)}/>}
     {drawOrActOpen&&<DrawOrActGame items={selectedVocabulary} packName={activePack.name} onClose={()=>setDrawOrActOpen(false)}/>}
-    {passTheBombOpen&&<PassTheBombGame items={selectedVocabulary} packName={activePack.name} onClose={()=>setPassTheBombOpen(false)}/>}
+    {passTheBombOpen&&<PassTheBombGame packId={activePack.id} packName={activePack.name} onClose={()=>setPassTheBombOpen(false)}/>}
     <footer className="legal-note">Gamify · Classroom-ready language activities organised by input and production mode.</footer>
   </main>;
 }

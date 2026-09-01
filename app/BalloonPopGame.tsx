@@ -210,8 +210,9 @@ function BalloonField({
   const positions = useMemo(() => balloonLayout(total), [total]);
   const active = useMemo(() => new Set(activeIds), [activeIds]);
   const state = caught === team ? "caught" : falling === team ? "falling" : "flying";
+  const danger = activeIds.length <= Math.ceil(total / 3);
 
-  return <section className={`bp-team-field team-${team} ${state}`} aria-label={`${teamName(team)} has ${activeIds.length} of ${total} balloons remaining`}>
+  return <section className={`bp-team-field team-${team} ${state} ${danger ? "danger" : ""}`} aria-label={`${teamName(team)} has ${activeIds.length} of ${total} balloons remaining`}>
     <header>
       <div><Flag size={17} aria-hidden="true"/><span>{teamName(team)}</span></div>
       <strong>{activeIds.length}<small>/{total}</small></strong>
@@ -246,7 +247,7 @@ function BalloonField({
           </span>;
         })}
       </div>
-      <div className="bp-rider-wrap"><Rider team={team} danger={activeIds.length <= Math.ceil(total / 3)}/></div>
+      <div className="bp-rider-wrap"><Rider team={team} danger={danger}/></div>
       <div className="bp-water" aria-hidden="true"><span/><span/></div>
       <div className="bp-shark-wrap"><Shark team={team}/></div>
       {caught === team && <div className="bp-splash" aria-hidden="true"><i/><i/><i/><i/></div>}

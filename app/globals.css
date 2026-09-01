@@ -1728,3 +1728,87 @@ html[data-theme="dark"] .dd-stepper i{background:#394359}
 @media(prefers-reduced-motion:reduce){
   .theme-toggle{transition:none!important}
 }
+
+/* Personalised Gamify signature — a speech-bubble G with a small あ badge */
+.brand-status{
+  justify-content:flex-start;
+  padding-left:clamp(20px,3.2vw,54px);
+  padding-right:clamp(150px,14vw,210px);
+}
+.brand-lockup{gap:15px}
+.brand-mark{
+  width:58px;
+  height:58px;
+  flex-basis:58px;
+  overflow:visible;
+  border:3px solid rgba(255,255,255,.96);
+  border-radius:21px 21px 21px 12px;
+  background:linear-gradient(145deg,#5bc8ee 0%,#8c7ae7 53%,#e884b1 100%);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.45),0 13px 28px rgba(103,98,178,.24);
+}
+.brand-mark::before{
+  inset:0;
+  border-radius:18px 18px 18px 9px;
+  background:linear-gradient(145deg,rgba(255,255,255,.44),transparent 46%);
+}
+.brand-mark::after{
+  content:"";
+  position:absolute;
+  z-index:0;
+  left:7px;
+  bottom:-5px;
+  width:15px;
+  height:15px;
+  border-radius:3px 3px 5px 3px;
+  background:#d987b6;
+  transform:rotate(35deg);
+}
+.brand-mark>.brand-letter{
+  position:relative;
+  z-index:1;
+  color:#fff;
+  font-size:32px!important;
+  font-weight:850!important;
+  line-height:1;
+  letter-spacing:-.09em!important;
+  text-shadow:0 3px 7px rgba(83,70,151,.24);
+  transform:translate(-2px,-1px);
+}
+.brand-mark>.brand-kana{
+  position:absolute;
+  z-index:3;
+  right:-9px;
+  bottom:-8px;
+  width:28px;
+  height:28px;
+  display:grid;
+  place-items:center;
+  border:2px solid #fff;
+  border-radius:50%;
+  color:#7b559f;
+  background:#fff2d8;
+  box-shadow:0 6px 14px rgba(74,65,119,.22);
+  font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif;
+  font-size:15px!important;
+  font-weight:900!important;
+  line-height:1;
+  letter-spacing:0!important;
+  text-shadow:none;
+  transform:none;
+}
+.brand-copy strong{font-size:28px!important;font-weight:800!important}
+.brand-copy small{color:#756c96;font-size:10px;font-weight:780}
+html[data-theme="dark"] .brand-mark{border-color:rgba(255,255,255,.3);background:linear-gradient(145deg,#398aab,#6658b2 54%,#a84f7a);box-shadow:inset 0 2px 0 rgba(255,255,255,.18),0 13px 28px rgba(0,0,0,.3)}
+html[data-theme="dark"] .brand-mark::after{background:#884569}
+html[data-theme="dark"] .brand-mark>.brand-kana{border-color:#252d42;color:#5b3d7a;background:#ffe8bd;box-shadow:0 6px 14px rgba(0,0,0,.3)}
+@media(max-width:680px){
+  .brand-status{justify-content:flex-start;padding-left:18px;padding-right:72px}
+  .brand-lockup{gap:12px}
+  .brand-mark{width:49px;height:49px;flex-basis:49px;border-radius:17px 17px 17px 10px}
+  .brand-mark::before{border-radius:14px 14px 14px 7px}
+  .brand-mark::after{left:6px;bottom:-4px;width:12px;height:12px}
+  .brand-mark>.brand-letter{font-size:27px!important}
+  .brand-mark>.brand-kana{right:-8px;bottom:-7px;width:24px;height:24px;font-size:13px!important}
+  .brand-copy strong{font-size:23px!important}
+  .brand-copy small{font-size:8px}
+}

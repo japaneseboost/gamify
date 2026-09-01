@@ -22,7 +22,7 @@ export const vocabularyEnglish: Record<string, string> = {
   "うち":"home",
   "学校":"school",
   "コンビニ":"convenience store",
-  "(お)てん":"shop",
+  "ばいてん":"canteen / tuck shop",
   "(お)ちゃ":"tea",
   "ヨーグルト":"yoghurt",
   "カレーライス":"curry rice",
