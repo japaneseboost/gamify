@@ -71,7 +71,7 @@ const activities:Activity[] = [
     rules:["Choose turn-taking or race mode and an English or Japanese prompt.","Students answer aloud; the teacher decides which team loses the round.","Select the losing team, then roll the digital die.","The die pops that many balloons. The last team still in the sky wins."],
   },
   {
-    id:"volcano", title:"Volcano", shortTitle:"Volcano", description:"Answer a Word Pack prompt, roll the special 1–3 die, and climb towards step 12 without overshooting into the lava.", category:"Production by Speaking", time:"8–12 min", icon:Mountain, tone:"orange", stage:"speaking",
+    id:"volcano", title:"Volcano", shortTitle:"Volcano", description:"Answer a Word Pack prompt, roll the special 1–3 die, and climb towards step 12 without overshooting into the lava.", category:"Retrieval Practice", time:"8–12 min", icon:Mountain, tone:"orange", stage:"retrieval",
     rules:["Choose turn-taking or race mode and an English or Japanese prompt.","Students answer aloud; the teacher selects the correct team.","Roll the special 1–3 die and move that climber up the steps.","Land exactly on step 12 to win. Go past 12 and fall into the lava."],
   },
 ];
