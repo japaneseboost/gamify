@@ -119,9 +119,9 @@ function Shark({ team }: { team: TeamId }) {
   return <svg className="bp-shark" viewBox="0 0 190 102" aria-hidden="true">
     <defs>
       <linearGradient id={gradientId} x1="0" y1="0" x2="0.8" y2="1">
-        <stop offset="0" stopColor="#90abc0"/>
-        <stop offset="0.48" stopColor="#587a94"/>
-        <stop offset="1" stopColor="#334f67"/>
+        <stop offset="0" stopColor="#7f99ab"/>
+        <stop offset="0.48" stopColor="#405f75"/>
+        <stop offset="1" stopColor="#203848"/>
       </linearGradient>
       <linearGradient id={bellyId} x1="0" y1="0" x2="1" y2="1">
         <stop offset="0" stopColor="#eff8fb" stopOpacity="0.96"/>
@@ -134,17 +134,19 @@ function Shark({ team }: { team: TeamId }) {
     <path className="bp-shark-belly" fill={`url(#${bellyId})`} d="M51 65c27 20 77 25 121-2-12 14-27 22-47 26-31 6-60-2-74-24Z"/>
     <path className="bp-shark-pectoral" fill="#46677f" d="m103 66-27 25 35-13Z"/>
     <ellipse className="bp-shark-highlight" cx="105" cy="34" rx="39" ry="8"/>
-    <path className="bp-shark-mouth" d="M145 60c12-1 23 2 33 7-9 8-20 13-34 14"/>
-    <path className="bp-shark-teeth" d="m154 67 4 5 4-6 4 4 4-5"/>
+    <path className="bp-shark-jaw" d="M139 59c16-1 31 3 43 10-11 12-24 18-40 16 6-8 5-17-3-26Z"/>
+    <path className="bp-shark-teeth" d="m148 64 5 8 5-7 5 8 5-6 5 7M149 81l5-7 5 6 5-7 5 5"/>
     <ellipse className="bp-shark-eye" cx="147" cy="43" rx="6" ry="6.5"/>
-    <circle className="bp-shark-pupil" cx="149" cy="43" r="2.4"/>
+    <ellipse className="bp-shark-pupil" cx="149" cy="43" rx="1.8" ry="3.3"/>
     <circle className="bp-shark-eye-shine" cx="150" cy="40" r="1.2"/>
+    <path className="bp-shark-brow" d="m138 36 15 4"/>
+    <circle className="bp-shark-nostril" cx="176" cy="57" r="1.8"/>
     <path className="bp-shark-gill" d="M130 52c-3 7-3 14 0 20M136 54c-2 5-2 10 0 15"/>
     <path className={`bp-shark-accent team-${team}`} d="M61 63c18 11 40 15 62 13"/>
   </svg>;
 }
 
-function Rider({ team }: { team: TeamId }) {
+function Rider({ team, danger }: { team: TeamId; danger: boolean }) {
   const skinId = `bp-rider-skin-${team}`;
   const shirtId = `bp-rider-shirt-${team}`;
   const shortsId = `bp-rider-shorts-${team}`;
@@ -165,7 +167,6 @@ function Rider({ team }: { team: TeamId }) {
         <stop offset="1" stopColor="#25364d"/>
       </linearGradient>
     </defs>
-    <path className="bp-rider-rope" d="M13 2 60 46 107 2M13 2 28 73M107 2 92 73"/>
     <ellipse className="bp-rider-shadow" cx="61" cy="143" rx="35" ry="9"/>
     <path className="bp-rider-hair-back" d="M39 49c0-18 11-31 27-31 17 0 29 12 29 31 0 15-9 24-28 25-19 0-28-10-28-25Z"/>
     <circle className="bp-rider-ear" fill={`url(#${skinId})`} cx="40" cy="52" r="7"/>
@@ -176,13 +177,14 @@ function Rider({ team }: { team: TeamId }) {
     <ellipse className="bp-rider-eye" cx="76" cy="53" rx="2.8" ry="3.5"/>
     <circle className="bp-rider-eye-shine" cx="58" cy="52" r="1"/>
     <circle className="bp-rider-eye-shine" cx="77" cy="52" r="1"/>
-    <path className="bp-rider-smile" d="M59 64c5 4 10 4 15 0"/>
-    <circle className="bp-rider-blush" cx="49" cy="62" r="3.5"/><circle className="bp-rider-blush" cx="84" cy="62" r="3.5"/>
+    <path className={`bp-rider-brow ${danger ? "is-worried" : ""}`} d={danger ? "M50 47l9-3M73 44l9 3" : "M51 47l8 1M74 48l8-1"}/>
+    <path className={`bp-rider-mouth ${danger ? "is-worried" : ""}`} d={danger ? "M58 68c5-5 11-5 16 0" : "M60 66c4-1 9-1 13 0"}/>
     <path className="bp-rider-neck" fill={`url(#${skinId})`} d="M59 72h15v13H59Z"/>
     <path className={`bp-rider-shirt team-${team}`} fill={`url(#${shirtId})`} d="M42 82c12-9 36-9 48 0l-5 42H47Z"/>
     <path className="bp-rider-shirt-shine" d="M49 85c7-5 14-6 20-5"/>
-    <path className="bp-rider-arm" fill={`url(#${skinId})`} d="M46 85c-8 3-14 10-19 22l8 5 18-21ZM86 85c8 4 14 11 18 23l-8 5-17-22Z"/>
-    <circle className="bp-rider-hand" fill={`url(#${skinId})`} cx="31" cy="109" r="6"/><circle className="bp-rider-hand" fill={`url(#${skinId})`} cx="100" cy="110" r="6"/>
+    <path className="bp-rider-arm" fill={`url(#${skinId})`} d="M46 84c-10-1-17 1-23 7l6 9c7-5 14-7 24-7ZM86 84c10-1 18 1 24 7l-7 9c-7-5-14-7-24-7Z"/>
+    <circle className="bp-rider-hand" fill={`url(#${skinId})`} cx="27" cy="95" r="6.5"/><circle className="bp-rider-hand" fill={`url(#${skinId})`} cx="106" cy="95" r="6.5"/>
+    <path className="bp-rider-grip" d="M24 94h6M103 94h6"/>
     <path className="bp-rider-harness" d="M48 87 66 113 85 87M46 112h40"/>
     <path className="bp-rider-shorts" fill={`url(#${shortsId})`} d="M48 119h37l5 19-18 2-6-14-6 14-18-2Z"/>
     <path className="bp-rider-leg" fill={`url(#${skinId})`} d="m50 136 13 2-8 20-10-3ZM77 138l13-2 5 19-10 3Z"/>
@@ -216,6 +218,18 @@ function BalloonField({
     </header>
     <div className="bp-team-sky">
       <span className="bp-cloud cloud-one" aria-hidden="true"/><span className="bp-cloud cloud-two" aria-hidden="true"/>
+      <svg className="bp-string-bundle" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+        {positions.map((position, id) => {
+          if (!active.has(id)) return null;
+          const startX = 8 + position.x * 0.84;
+          const startY = 7.5 + position.y * 0.61;
+          const handX = position.x < 50 ? 45.5 : 54.5;
+          const handY = 68;
+          const controlX = (startX + handX) / 2 + ((id % 3) - 1) * 1.2;
+          const controlY = startY + (handY - startY) * 0.48;
+          return <path d={`M ${startX.toFixed(2)} ${startY.toFixed(2)} Q ${controlX.toFixed(2)} ${controlY.toFixed(2)} ${handX} ${handY}`} vectorEffect="non-scaling-stroke" key={`string-${id}`}/>;
+        })}
+      </svg>
       <div className="bp-balloon-cluster" aria-hidden="true">
         {positions.map((position, id) => {
           const isActive = active.has(id);
@@ -228,11 +242,11 @@ function BalloonField({
             "--bp-delay": `${(id % 7) * -0.31}s`,
           } as CSSProperties;
           return <span className={`bp-balloon ${isActive ? "active" : "popped"} ${isPopping ? "popping" : ""}`} style={style} key={id}>
-            <i/><b/>
+            <i/>
           </span>;
         })}
       </div>
-      <div className="bp-rider-wrap"><Rider team={team}/></div>
+      <div className="bp-rider-wrap"><Rider team={team} danger={activeIds.length <= Math.ceil(total / 3)}/></div>
       <div className="bp-water" aria-hidden="true"><span/><span/></div>
       <div className="bp-shark-wrap"><Shark team={team}/></div>
       {caught === team && <div className="bp-splash" aria-hidden="true"><i/><i/><i/><i/></div>}
