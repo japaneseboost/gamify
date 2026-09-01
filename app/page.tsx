@@ -3,7 +3,7 @@
 import {
   ArrowRight, Check, ChevronRight, MessageCircleMore, Move3D, Play,
   Brain, UsersRound, X, PencilLine, Target, PackageOpen,
-  CircleDot, Clock3, Eraser, Flame, ListChecks, Moon, Palette, Puzzle, Shapes, Sun, Zap,
+  CircleDot, Clock3, Eraser, Flame, ListChecks, Moon, Mountain, Palette, Puzzle, Shapes, Sun, Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import ReadMyMindGame from "./ReadMyMindGame";
@@ -13,6 +13,7 @@ import FaultyEchoGame from "./FaultyEchoGame";
 import QuickfireGame from "./QuickfireGame";
 import EraseGame from "./EraseGame";
 import BalloonPopGame from "./BalloonPopGame";
+import VolcanoGame from "./VolcanoGame";
 import { wordPacks, wordPackSeries } from "./wordPacks";
 
 type Activity = {
@@ -68,6 +69,10 @@ const activities:Activity[] = [
     id:"balloon-pop", title:"Balloon Pop", shortTitle:"Balloon Pop", description:"Answer a Word Pack prompt, roll the digital die, and pop that many balloons from the opposing team before the shark gets your rider.", category:"Production by Speaking", time:"8–12 min", icon:CircleDot, tone:"blue", stage:"speaking",
     rules:["Choose turn-taking or race mode and an English or Japanese prompt.","Students answer aloud; the teacher decides which team loses the round.","Select the losing team, then roll the digital die.","The die pops that many balloons. The last team still in the sky wins."],
   },
+  {
+    id:"volcano", title:"Volcano", shortTitle:"Volcano", description:"Answer a Word Pack prompt, roll the special 1–3 die, and climb towards step 12 without overshooting into the lava.", category:"Production by Speaking", time:"8–12 min", icon:Mountain, tone:"orange", stage:"speaking",
+    rules:["Choose turn-taking or race mode and an English or Japanese prompt.","Students answer aloud; the teacher selects the correct team.","Roll the special 1–3 die and move that climber up the steps.","Land exactly on step 12 to win. Go past 12 and fall into the lava."],
+  },
 ];
 
 export default function Home(){
@@ -82,6 +87,7 @@ export default function Home(){
   const [eraseGameOpen,setEraseGameOpen]=useState(false);
   const [tugOfWarOpen,setTugOfWarOpen]=useState(false);
   const [balloonPopOpen,setBalloonPopOpen]=useState(false);
+  const [volcanoOpen,setVolcanoOpen]=useState(false);
   const [memoryDelay,setMemoryDelay]=useState(5);
   const [theme,setTheme]=useState<ThemeMode>("light");
 
@@ -137,11 +143,11 @@ export default function Home(){
 
   useEffect(()=>{
     const close=(event:KeyboardEvent)=>{
-      if(event.key==="Escape"&&!readMyMindOpen&&!quickfireOpen&&!faultyEchoOpen&&!delayedDictationOpen&&!eraseGameOpen&&!tugOfWarOpen&&!balloonPopOpen)setSelected(null);
+      if(event.key==="Escape"&&!readMyMindOpen&&!quickfireOpen&&!faultyEchoOpen&&!delayedDictationOpen&&!eraseGameOpen&&!tugOfWarOpen&&!balloonPopOpen&&!volcanoOpen)setSelected(null);
     };
     window.addEventListener("keydown",close);
     return()=>window.removeEventListener("keydown",close);
-  },[readMyMindOpen,quickfireOpen,faultyEchoOpen,delayedDictationOpen,eraseGameOpen,tugOfWarOpen,balloonPopOpen]);
+  },[readMyMindOpen,quickfireOpen,faultyEchoOpen,delayedDictationOpen,eraseGameOpen,tugOfWarOpen,balloonPopOpen,volcanoOpen]);
 
   const createActivity=()=>{
     if(!selected||selectedCount===0)return;
@@ -185,12 +191,18 @@ export default function Home(){
       setBalloonPopOpen(true);
       return;
     }
+    if(selected.id==="volcano"){
+      if(selectedVocabulary.length===0)return;
+      setSelected(null);
+      setVolcanoOpen(true);
+      return;
+    }
   };
 
   const SelectedIcon=selected?.icon??Target;
-  const vocabularyOnlyActivities=["quickfire","faulty-echo","erase-game","tug-of-war","balloon-pop"];
+  const vocabularyOnlyActivities=["quickfire","faulty-echo","erase-game","tug-of-war","balloon-pop","volcano"];
   const selectedLanguageCount=selected&&vocabularyOnlyActivities.includes(selected.id)?selectedVocabulary.length:selectedCount;
-  const launchLabel=selected?.id==="quickfire"?"Launch Quickfire":selected?.id==="read-my-mind"?"Launch Read My Mind":selected?.id==="faulty-echo"?"Launch Faulty Echo":selected?.id==="delayed-dictation"?"Launch Delayed Dictation":selected?.id==="erase-game"?"Launch Erase Game":selected?.id==="tug-of-war"?"Launch Tug-of-War":selected?.id==="balloon-pop"?"Launch Balloon Pop":"Launch activity";
+  const launchLabel=selected?.id==="quickfire"?"Launch Quickfire":selected?.id==="read-my-mind"?"Launch Read My Mind":selected?.id==="faulty-echo"?"Launch Faulty Echo":selected?.id==="delayed-dictation"?"Launch Delayed Dictation":selected?.id==="erase-game"?"Launch Erase Game":selected?.id==="tug-of-war"?"Launch Tug-of-War":selected?.id==="balloon-pop"?"Launch Balloon Pop":selected?.id==="volcano"?"Launch Volcano":"Launch activity";
 
   return <main className="ipad-page" data-theme={theme}>
     <a className="skip-link" href="#activity-apps">Skip to activities</a>
@@ -289,6 +301,7 @@ export default function Home(){
     {eraseGameOpen&&<EraseGame packId={activePack.id} packName={activePack.name} groups={delayedDictationGroups} patterns={selectedPatterns} onClose={()=>setEraseGameOpen(false)}/>}
     {tugOfWarOpen&&<TugOfWarGame items={selectedVocabulary} packName={activePack.name} onClose={()=>setTugOfWarOpen(false)}/>}
     {balloonPopOpen&&<BalloonPopGame items={selectedVocabulary} packName={activePack.name} onClose={()=>setBalloonPopOpen(false)}/>}
+    {volcanoOpen&&<VolcanoGame items={selectedVocabulary} packName={activePack.name} onClose={()=>setVolcanoOpen(false)}/>}
     <footer className="legal-note">Gamify · Classroom-ready language activities organised by input and production mode.</footer>
   </main>;
 }
