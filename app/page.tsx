@@ -12,7 +12,7 @@ import TugOfWarGame from "./TugOfWarGame";
 import FaultyEchoGame from "./FaultyEchoGame";
 import QuickfireGame from "./QuickfireGame";
 import EraseGame from "./EraseGame";
-import { wordPacks } from "./wordPacks";
+import { wordPacks, wordPackSeries } from "./wordPacks";
 
 type Activity = {
   id:string; title:string; shortTitle:string; description:string;
@@ -204,7 +204,16 @@ export default function Home(){
               <span className="word-pack-icon" aria-hidden="true"><PackageOpen size={24}/></span>
               <div><small>WORD PACK</small><h2>{activePack.name}</h2><p>Build the language set for today&apos;s games.</p></div>
             </div>
-            <label className="pack-picker"><span>Choose pack</span><select className="pack-select" value={packId} onChange={(event)=>choosePack(event.target.value)}>{wordPacks.map((pack)=><option key={pack.id} value={pack.id}>{pack.name}</option>)}</select></label>
+            <section className="pack-series-catalog" aria-labelledby="pack-series-title">
+              <header><span id="pack-series-title">Series</span><small>Add their vocabulary when you send it later.</small></header>
+              <ul>
+                {wordPackSeries.map((series)=><li className={series.status==="available"?"available":"awaiting"} key={series.id}>
+                  <strong>{series.name}</strong>
+                  <small>{series.status==="available"?`${series.chapterCount} chapters`:"Awaiting words"}</small>
+                </li>)}
+              </ul>
+            </section>
+            <label className="pack-picker"><span>Choose chapter</span><select className="pack-select" value={packId} onChange={(event)=>choosePack(event.target.value)}>{wordPackSeries.map((series)=>{const seriesPacks=wordPacks.filter((pack)=>pack.seriesId===series.id);if(seriesPacks.length===0)return null;return <optgroup label={`${series.name} · ${seriesPacks.length} chapters`} key={series.id}>{seriesPacks.map((pack)=><option key={pack.id} value={pack.id}>{pack.name}</option>)}</optgroup>;})}</select></label>
           </header>
 
           <div className="pack-toolbar">
