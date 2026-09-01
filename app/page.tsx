@@ -22,7 +22,7 @@ type Activity = {
   rules:string[];
 };
 
-type StageId = "listening"|"reading"|"writing"|"speaking";
+type StageId = "listening"|"reading"|"writing"|"speaking"|"retrieval";
 type ThemeMode = "light"|"dark";
 
 const lessonStages:{id:StageId;number:string;name:string;purpose:string;tone:string}[] = [
@@ -30,6 +30,7 @@ const lessonStages:{id:StageId;number:string;name:string;purpose:string;tone:str
   {id:"reading",number:"02",name:"Input by Reading",purpose:"Read and process meaning",tone:"cyan"},
   {id:"writing",number:"03",name:"Production by Writing",purpose:"Create language in writing",tone:"orange"},
   {id:"speaking",number:"04",name:"Production by Speaking",purpose:"Use language aloud",tone:"rose"},
+  {id:"retrieval",number:"05",name:"Retrieval Practice",purpose:"Recall and strengthen prior learning",tone:"violet"},
 ];
 
 const vocabularyGroupVisuals:Record<string,{icon:typeof Shapes;tone:string;description:string}> = {
@@ -42,11 +43,11 @@ const vocabularyGroupVisuals:Record<string,{icon:typeof Shapes;tone:string;descr
 
 const activities:Activity[] = [
   {
-    id:"quickfire", title:"Quickfire", shortTitle:"Quickfire", description:"Students race to produce the selected Japanese word or sentence, then the winner moves one step towards the front.", category:"Input by Listening", time:"5–10 min", icon:Flame, tone:"orange", stage:"listening",
+    id:"quickfire", title:"Quickfire", shortTitle:"Quickfire", description:"Students race to produce the selected Japanese word or sentence, then the winner moves one step towards the front.", category:"Retrieval Practice", time:"5–10 min", icon:Flame, tone:"orange", stage:"retrieval",
     rules:["Everyone starts at the back of the classroom.","Teacher reads the English or Japanese prompt aloud.","The first correct Japanese answer wins the round.","The winner moves forward; first to the front wins."],
   },
   {
-    id:"read-my-mind", title:"Read My Mind", shortTitle:"Read My Mind", description:"Sensei secretly chooses one answer. Students predict, listen to clues, change their minds, then see the reveal.", category:"Input by Listening", time:"5–8 min", icon:Brain, tone:"purple", stage:"listening",
+    id:"read-my-mind", title:"Read My Mind", shortTitle:"Read My Mind", description:"Sensei secretly chooses one answer. Students predict, listen to clues, change their minds, then see the reveal.", category:"Input by Reading", time:"5–8 min", icon:Brain, tone:"purple", stage:"reading",
     rules:["Teacher secretly chooses one of four answers.","Students predict using the numbered hand signals.","Give clues; students may change their prediction.","Reveal the answer and celebrate correct predictions."],
   },
   {
@@ -62,7 +63,7 @@ const activities:Activity[] = [
     rules:["Read the complete sentence together.","Erase or reveal one chunk using the chosen mode.","Students still say every hidden chunk from memory.","Continue until they can reproduce the whole sentence."],
   },
   {
-    id:"tug-of-war", title:"Tug-of-War Vocabulary Game", shortTitle:"Tug-of-War", description:"Four starting kana begin in the centre. Drag the matching kana toward the team whenever they give a correct Word Pack item.", category:"Production by Speaking", time:"8–12 min", icon:Move3D, tone:"pink", stage:"speaking",
+    id:"tug-of-war", title:"Tug-of-War Vocabulary Game", shortTitle:"Tug-of-War", description:"Four starting kana begin in the centre. Drag the matching kana toward the team whenever they give a correct Word Pack item.", category:"Retrieval Practice", time:"8–12 min", icon:Move3D, tone:"pink", stage:"retrieval",
     rules:["Four starting kana begin in the centre.","A team says a Word Pack item beginning with one kana.","Teacher drags that kana one column towards the team.","First team to bring three kana home wins the round."],
   },
   {
