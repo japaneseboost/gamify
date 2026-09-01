@@ -6,6 +6,7 @@ import "./tug-of-war.css";
 import "./faulty-echo.css";
 import "./quickfire.css";
 import "./erase-game.css";
+import "./balloon-pop.css";
 
 export const metadata: Metadata = {
   title: "Gamify — Language Activity Workspace",

@@ -3,7 +3,7 @@
 import {
   ArrowRight, Check, ChevronRight, MessageCircleMore, Move3D, Play,
   Brain, UsersRound, X, PencilLine, Target, PackageOpen,
-  Clock3, Eraser, Flame, ListChecks, Moon, Palette, Puzzle, Shapes, Sun, Zap,
+  CircleDot, Clock3, Eraser, Flame, ListChecks, Moon, Palette, Puzzle, Shapes, Sun, Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import ReadMyMindGame from "./ReadMyMindGame";
@@ -12,6 +12,7 @@ import TugOfWarGame from "./TugOfWarGame";
 import FaultyEchoGame from "./FaultyEchoGame";
 import QuickfireGame from "./QuickfireGame";
 import EraseGame from "./EraseGame";
+import BalloonPopGame from "./BalloonPopGame";
 import { wordPacks, wordPackSeries } from "./wordPacks";
 
 type Activity = {
@@ -63,6 +64,10 @@ const activities:Activity[] = [
     id:"tug-of-war", title:"Tug-of-War Vocabulary Game", shortTitle:"Tug-of-War", description:"Four starting kana begin in the centre. Drag the matching kana toward the team whenever they give a correct Word Pack item.", category:"Production by Speaking", time:"8–12 min", icon:Move3D, tone:"pink", stage:"speaking",
     rules:["Four starting kana begin in the centre.","A team says a Word Pack item beginning with one kana.","Teacher drags that kana one column towards the team.","First team to bring three kana home wins the round."],
   },
+  {
+    id:"balloon-pop", title:"Balloon Pop", shortTitle:"Balloon Pop", description:"Answer a Word Pack prompt, roll the digital die, and pop that many balloons from the opposing team before the shark gets your rider.", category:"Production by Speaking", time:"8–12 min", icon:CircleDot, tone:"blue", stage:"speaking",
+    rules:["Choose turn-taking or race mode and an English or Japanese prompt.","Students answer aloud; the teacher decides which team loses the round.","Select the losing team, then roll the digital die.","The die pops that many balloons. The last team still in the sky wins."],
+  },
 ];
 
 export default function Home(){
@@ -76,6 +81,7 @@ export default function Home(){
   const [delayedDictationOpen,setDelayedDictationOpen]=useState(false);
   const [eraseGameOpen,setEraseGameOpen]=useState(false);
   const [tugOfWarOpen,setTugOfWarOpen]=useState(false);
+  const [balloonPopOpen,setBalloonPopOpen]=useState(false);
   const [memoryDelay,setMemoryDelay]=useState(5);
   const [theme,setTheme]=useState<ThemeMode>("light");
 
@@ -131,11 +137,11 @@ export default function Home(){
 
   useEffect(()=>{
     const close=(event:KeyboardEvent)=>{
-      if(event.key==="Escape"&&!readMyMindOpen&&!quickfireOpen&&!faultyEchoOpen&&!delayedDictationOpen&&!eraseGameOpen&&!tugOfWarOpen)setSelected(null);
+      if(event.key==="Escape"&&!readMyMindOpen&&!quickfireOpen&&!faultyEchoOpen&&!delayedDictationOpen&&!eraseGameOpen&&!tugOfWarOpen&&!balloonPopOpen)setSelected(null);
     };
     window.addEventListener("keydown",close);
     return()=>window.removeEventListener("keydown",close);
-  },[readMyMindOpen,quickfireOpen,faultyEchoOpen,delayedDictationOpen,eraseGameOpen,tugOfWarOpen]);
+  },[readMyMindOpen,quickfireOpen,faultyEchoOpen,delayedDictationOpen,eraseGameOpen,tugOfWarOpen,balloonPopOpen]);
 
   const createActivity=()=>{
     if(!selected||selectedCount===0)return;
@@ -173,12 +179,18 @@ export default function Home(){
       setTugOfWarOpen(true);
       return;
     }
+    if(selected.id==="balloon-pop"){
+      if(selectedVocabulary.length===0)return;
+      setSelected(null);
+      setBalloonPopOpen(true);
+      return;
+    }
   };
 
   const SelectedIcon=selected?.icon??Target;
-  const vocabularyOnlyActivities=["quickfire","faulty-echo","erase-game","tug-of-war"];
+  const vocabularyOnlyActivities=["quickfire","faulty-echo","erase-game","tug-of-war","balloon-pop"];
   const selectedLanguageCount=selected&&vocabularyOnlyActivities.includes(selected.id)?selectedVocabulary.length:selectedCount;
-  const launchLabel=selected?.id==="quickfire"?"Launch Quickfire":selected?.id==="read-my-mind"?"Launch Read My Mind":selected?.id==="faulty-echo"?"Launch Faulty Echo":selected?.id==="delayed-dictation"?"Launch Delayed Dictation":selected?.id==="erase-game"?"Launch Erase Game":selected?.id==="tug-of-war"?"Launch Tug-of-War":"Launch activity";
+  const launchLabel=selected?.id==="quickfire"?"Launch Quickfire":selected?.id==="read-my-mind"?"Launch Read My Mind":selected?.id==="faulty-echo"?"Launch Faulty Echo":selected?.id==="delayed-dictation"?"Launch Delayed Dictation":selected?.id==="erase-game"?"Launch Erase Game":selected?.id==="tug-of-war"?"Launch Tug-of-War":selected?.id==="balloon-pop"?"Launch Balloon Pop":"Launch activity";
 
   return <main className="ipad-page" data-theme={theme}>
     <a className="skip-link" href="#activity-apps">Skip to activities</a>
@@ -276,6 +288,7 @@ export default function Home(){
     {delayedDictationOpen&&<DelayedDictationGame packId={activePack.id} groups={delayedDictationGroups} patterns={selectedPatterns} memoryDelay={memoryDelay} onClose={()=>setDelayedDictationOpen(false)}/>}
     {eraseGameOpen&&<EraseGame packId={activePack.id} packName={activePack.name} groups={delayedDictationGroups} patterns={selectedPatterns} onClose={()=>setEraseGameOpen(false)}/>}
     {tugOfWarOpen&&<TugOfWarGame items={selectedVocabulary} packName={activePack.name} onClose={()=>setTugOfWarOpen(false)}/>}
+    {balloonPopOpen&&<BalloonPopGame items={selectedVocabulary} packName={activePack.name} onClose={()=>setBalloonPopOpen(false)}/>}
     <footer className="legal-note">Gamify · Classroom-ready language activities organised by input and production mode.</footer>
   </main>;
 }
