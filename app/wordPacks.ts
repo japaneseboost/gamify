@@ -17,11 +17,11 @@ export type WordPackSeries = {
   id: string;
   name: string;
   status: "available" | "awaiting-words";
-  chapterCount?: number;
+  packCount?: number;
 };
 
 export const wordPackSeries: WordPackSeries[] = [
-  { id: "iitomo2", name: "iitomo2", status: "available", chapterCount: 6 },
+  { id: "iitomo2", name: "iitomo2", status: "available", packCount: 7 },
   { id: "foundation", name: "Foundation", status: "awaiting-words" },
   { id: "year-11", name: "Year 11", status: "awaiting-words" },
   { id: "year-12", name: "Year 12", status: "awaiting-words" },
@@ -81,8 +81,10 @@ export const wordPacks: WordPack[] = [
     "iitomo2",
     "Ch4: ひまな時に何をしますか",
     [
-      { id:"nouns", label:"Nouns", items:["しゅみ","りょうり","どくしょ","つり","へや","うみ","ビーチ","山","川","天気","くもり"] },
-      { id:"verbs", label:"Verbs", items:["つくります","ひきます","(で)あそびます","しゃしんをとります","かきます","つかいます","さんぽします","うたいます"] },
+      { id:"nouns", label:"Nouns", items:["しゅみ","りょうり","どくしょ","つり","かいもの","アクションえいが","おべんとう","へや","うみ","ビーチ","山","川","天気","くもり"] },
+      { id:"verbs", label:"Verbs", items:["つくります","ひきます","(で)あそびます","しゃしんをとります","かきます","つかいます","さんぽします","うたいます","やすみます"] },
+      { id:"adjectives", label:"Adjectives", items:["大好き","好き"] },
+      { id:"expressions", label:"Expressions", items:["あまり好きじゃない"] },
       { id:"adverbs-time", label:"Adverbs & time", items:["あした","あさ","きょ年","たくさん"] },
     ],
     ["[person]にあいます","[vehicle]にのります","うちにいます","[place]にいます","[place]にいてください","といっていない","ひまな時に","しゅうまつに","休みに","いつも","たいてい","よく","時々","あまり〜ません","ぜんぜん〜ません","[verb]ました","[verb]ませんでした","どう","どうでしたか","よかったです","おいしかったです","いいですね"],
@@ -109,5 +111,16 @@ export const wordPacks: WordPack[] = [
       { id:"adverbs-time", label:"Adverbs", items:["もっと","また"] },
     ],
     ["みんなで","全員","かぞくみんなで","もらいます","(お)いわいします","おいしかったです","おもしろかったです","たのしかったです","こんでいました","えんそうします","おなかがいっぱい","きをつけてね","げんきですね","あけてもいいですか"],
+  ),
+  makePack(
+    "iitomo2-tourism",
+    "iitomo2",
+    "Tourism",
+    [
+      { id:"expressions", label:"Expressions", items:["人気があります"] },
+      { id:"nouns", label:"Nouns", items:["ウェルネス","けんこう","ストレス","エネルギー","自然","ヨガ","めいそう","にわ","ホテル","りょかん","せんそう","れきし","しんりんよく","いなか","さいがい","ツーリズム"] },
+      { id:"verbs", label:"Verbs", items:["へらします","上げます","リラックスします","ゆっくりする","かんこうする"] },
+    ],
+    ["[place]は人気があります","[activity]はストレスをへらします","[activity]はエネルギーを上げます"],
   ),
 ];

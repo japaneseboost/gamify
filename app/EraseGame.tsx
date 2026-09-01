@@ -71,6 +71,11 @@ const eraseSentenceBank:Record<string,EraseSentence[]> = {
     sentence("ch4-walk",["山","さんぽします"],chunk("place","やま",particle("で")),chunk("verb","さんぽします")),
     sentence("ch4-sing",["あした","へや","うたいます"],chunk("time","あした"),chunk("place","へや",particle("で")),chunk("verb","うたいます")),
     sentence("ch4-beach",["ビーチ","たくさん","しゃしんをとります"],chunk("place","ビーチ",particle("で")),chunk("detail","たくさん"),chunk("detail","しゃしん",particle("を")),chunk("verb","とります")),
+    sentence("ch4-love-fishing",["つり","大好き"],chunk("detail","つり",particle("が")),chunk("detail","だいすきです")),
+    sentence("ch4-action-film",["アクションえいが","好き"],chunk("detail","アクションえいが",particle("は")),chunk("detail","すきです")),
+    sentence("ch4-shopping",["かいもの","あまり好きじゃない"],chunk("detail","かいもの",particle("は")),chunk("detail","あまりすきじゃないです")),
+    sentence("ch4-rest",["あした","やすみます"],chunk("time","あした"),chunk("verb","やすみます")),
+    sentence("ch4-lunch",["おべんとう","つくります"],chunk("detail","おべんとう",particle("を")),chunk("verb","つくります")),
   ],
   "iitomo2-ch5":[
     sentence("ch5-tall",["キャラクター","せがたかい"],chunk("detail","このキャラクター",particle("は")),chunk("detail","せ",particle("が")),chunk("detail","たかいです")),
@@ -88,12 +93,21 @@ const eraseSentenceBank:Record<string,EraseSentence[]> = {
     sentence("ch6-yukata",["ゆかた","はなび"],chunk("detail","ゆかた",particle("を")),chunk("time","はなび",particle("の"),"よる",particle("に")),chunk("verb","きました")),
     sentence("ch6-karaoke",["みんなで","カラオケ"],chunk("person","みんな",particle("で")),chunk("place","カラオケ",particle("に")),chunk("verb","いきました")),
   ],
+  "iitomo2-tourism":[
+    sentence("tourism-popular",["ホテル","人気があります"],chunk("place","ホテル",particle("は")),chunk("detail","にんきがあります")),
+    sentence("tourism-stress",["しんりんよく","ストレス","へらします"],chunk("detail","しんりんよく",particle("で")),chunk("detail","ストレス",particle("を")),chunk("verb","へらします")),
+    sentence("tourism-energy",["ヨガ","エネルギー","上げます"],chunk("detail","ヨガ",particle("で")),chunk("detail","エネルギー",particle("を")),chunk("verb","あげます")),
+    sentence("tourism-country",["いなか","ゆっくりする"],chunk("place","いなか",particle("で")),chunk("verb","ゆっくりします")),
+    sentence("tourism-nature",["自然","リラックスします"],chunk("place","しぜん",particle("の"),"なか",particle("で")),chunk("verb","リラックスします")),
+    sentence("tourism-meditate",["りょかん","にわ","めいそう"],chunk("place","りょかん",particle("の"),"にわ",particle("で")),chunk("verb","めいそうします")),
+  ],
 };
 
 const kanaOverrides:Record<string,string> = {
   "学校":"がっこう","小学校":"しょうがっこう","中学校":"ちゅうがっこう","高校":"こうこう","大学":"だいがく","すう学":"すうがく","自己紹介":"じこしょうかい",
   "はる（春）":"はる","なつ（夏）":"なつ","あき（秋）":"あき","ふゆ（冬）":"ふゆ","一がつ":"いちがつ","二がつ":"にがつ","三がつ":"さんがつ","にゅう学しき":"にゅうがくしき","水えいたいかい":"すいえいたいかい","しゅう学りょこう":"しゅうがくりょこう",
   "山":"やま","川":"かわ","天気":"てんき","きょ年":"きょねん","手":"て","耳":"みみ","目":"め","先しゅう":"せんしゅう","まい年":"まいとし","おとこの人":"おとこのひと","おんなの人":"おんなのひと",
+  "人気があります":"にんきがあります","上げます":"あげます","自然":"しぜん","大好き":"だいすき","好き":"すき","あまり好きじゃない":"あまりすきじゃない",
 };
 const kanaWord = (value:string) => (kanaOverrides[value]??value)
   .replace(/^\(お\)/,"お")

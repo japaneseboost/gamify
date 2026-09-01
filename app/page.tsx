@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  ArrowRight, Check, ChevronRight, MessageCircleMore, Move3D, Play,
+  ArrowRight, Brush, Check, ChevronRight, MessageCircleMore, Move3D, Play,
   Brain, UsersRound, X, PencilLine, Target, PackageOpen,
   CircleDot, Clock3, Eraser, Flame, ListChecks, Moon, Mountain, Palette, Puzzle, Shapes, Sun, Zap,
 } from "lucide-react";
@@ -14,6 +14,8 @@ import QuickfireGame from "./QuickfireGame";
 import EraseGame from "./EraseGame";
 import BalloonPopGame from "./BalloonPopGame";
 import VolcanoGame from "./VolcanoGame";
+import DrawOrActGame from "./DrawOrActGame";
+import PassTheBombGame from "./PassTheBombGame";
 import { wordPacks, wordPackSeries } from "./wordPacks";
 
 type Activity = {
@@ -74,6 +76,14 @@ const activities:Activity[] = [
     id:"volcano", title:"Volcano", shortTitle:"Volcano", description:"Answer a Word Pack prompt, roll the special 1–3 die, and climb towards step 12 without overshooting into the lava.", category:"Retrieval Practice", time:"8–12 min", icon:Mountain, tone:"orange", stage:"retrieval",
     rules:["Choose turn-taking or race mode and an English or Japanese prompt.","Students answer aloud; the teacher selects the correct team.","Roll the special 1–3 die and move that climber up the steps.","Land exactly on step 12 to win. Go past 12 and fall into the lava."],
   },
+  {
+    id:"draw-or-act", title:"Draw or Act", shortTitle:"Draw or Act", description:"A student privately views one selected Word Pack item, then draws or acts while their team races to guess it in Japanese.", category:"Retrieval Practice", time:"5–10 min", icon:Brush, tone:"purple", stage:"retrieval",
+    rules:["One student becomes the performer; teammates look away from the screen.","The performer holds Secret Word to privately view the selected item.","Choose Draw it or Act it without speaking, writing letters, or mouthing the answer.","The team must guess the word in Japanese before the timer ends."],
+  },
+  {
+    id:"pass-the-bomb", title:"Pass the Bomb", shortTitle:"Pass the Bomb", description:"Answer a selected Word Pack prompt, pass the imaginary bomb, and keep going until its hidden random fuse explodes.", category:"Production by Speaking", time:"5–10 min", icon:Clock3, tone:"pink", stage:"speaking",
+    rules:["Students form a circle and the teacher lights a hidden 45–90 second fuse.","The player holding the bomb answers the Word Pack prompt.","After a correct answer, show the next word and pass the imaginary bomb.","When the ticking ends and the bomb explodes, the current holder loses the round."],
+  },
 ];
 
 export default function Home(){
@@ -89,12 +99,15 @@ export default function Home(){
   const [tugOfWarOpen,setTugOfWarOpen]=useState(false);
   const [balloonPopOpen,setBalloonPopOpen]=useState(false);
   const [volcanoOpen,setVolcanoOpen]=useState(false);
+  const [drawOrActOpen,setDrawOrActOpen]=useState(false);
+  const [passTheBombOpen,setPassTheBombOpen]=useState(false);
   const [memoryDelay,setMemoryDelay]=useState(5);
   const [theme,setTheme]=useState<ThemeMode>("light");
 
   const activePack=wordPacks.find((pack)=>pack.id===packId)??wordPacks[0];
   const selectedCount=selectedVocabulary.length+selectedPatterns.length;
   const totalPackItems=activePack.vocabulary.length+activePack.patterns.length;
+  const allPatternsSelected=activePack.patterns.length>0&&activePack.patterns.every((item)=>selectedPatterns.includes(item));
   const selectedNouns=activePack.vocabularyGroups.find((group)=>group.id==="nouns")?.items.filter((item)=>selectedVocabulary.includes(item))??[];
   const readMyMindOptions=selectedNouns.length>=4?selectedNouns:(selectedVocabulary.length>=4?selectedVocabulary:activePack.vocabulary);
   const delayedDictationGroups=activePack.vocabularyGroups.map((group)=>({...group,items:group.items.filter((item)=>selectedVocabulary.includes(item))})).filter((group)=>group.items.length>0);
@@ -117,6 +130,10 @@ export default function Home(){
       if(allSelected)return current.filter((item)=>!items.includes(item));
       return [...current,...items.filter((item)=>!current.includes(item))];
     });
+  };
+
+  const toggleAllPatterns=()=>{
+    setSelectedPatterns((current)=>activePack.patterns.every((item)=>current.includes(item))?[]:[...activePack.patterns]);
   };
 
   const selectAllItems=()=>{
@@ -144,11 +161,11 @@ export default function Home(){
 
   useEffect(()=>{
     const close=(event:KeyboardEvent)=>{
-      if(event.key==="Escape"&&!readMyMindOpen&&!quickfireOpen&&!faultyEchoOpen&&!delayedDictationOpen&&!eraseGameOpen&&!tugOfWarOpen&&!balloonPopOpen&&!volcanoOpen)setSelected(null);
+      if(event.key==="Escape"&&!readMyMindOpen&&!quickfireOpen&&!faultyEchoOpen&&!delayedDictationOpen&&!eraseGameOpen&&!tugOfWarOpen&&!balloonPopOpen&&!volcanoOpen&&!drawOrActOpen&&!passTheBombOpen)setSelected(null);
     };
     window.addEventListener("keydown",close);
     return()=>window.removeEventListener("keydown",close);
-  },[readMyMindOpen,quickfireOpen,faultyEchoOpen,delayedDictationOpen,eraseGameOpen,tugOfWarOpen,balloonPopOpen,volcanoOpen]);
+  },[readMyMindOpen,quickfireOpen,faultyEchoOpen,delayedDictationOpen,eraseGameOpen,tugOfWarOpen,balloonPopOpen,volcanoOpen,drawOrActOpen,passTheBombOpen]);
 
   const createActivity=()=>{
     if(!selected||selectedCount===0)return;
@@ -198,12 +215,24 @@ export default function Home(){
       setVolcanoOpen(true);
       return;
     }
+    if(selected.id==="draw-or-act"){
+      if(selectedVocabulary.length===0)return;
+      setSelected(null);
+      setDrawOrActOpen(true);
+      return;
+    }
+    if(selected.id==="pass-the-bomb"){
+      if(selectedVocabulary.length===0)return;
+      setSelected(null);
+      setPassTheBombOpen(true);
+      return;
+    }
   };
 
   const SelectedIcon=selected?.icon??Target;
-  const vocabularyOnlyActivities=["quickfire","faulty-echo","erase-game","tug-of-war","balloon-pop","volcano"];
+  const vocabularyOnlyActivities=["quickfire","faulty-echo","erase-game","tug-of-war","balloon-pop","volcano","draw-or-act","pass-the-bomb"];
   const selectedLanguageCount=selected&&vocabularyOnlyActivities.includes(selected.id)?selectedVocabulary.length:selectedCount;
-  const launchLabel=selected?.id==="quickfire"?"Launch Quickfire":selected?.id==="read-my-mind"?"Launch Read My Mind":selected?.id==="faulty-echo"?"Launch Faulty Echo":selected?.id==="delayed-dictation"?"Launch Delayed Dictation":selected?.id==="erase-game"?"Launch Erase Game":selected?.id==="tug-of-war"?"Launch Tug-of-War":selected?.id==="balloon-pop"?"Launch Balloon Pop":selected?.id==="volcano"?"Launch Volcano":"Launch activity";
+  const launchLabel=selected?.id==="quickfire"?"Launch Quickfire":selected?.id==="read-my-mind"?"Launch Read My Mind":selected?.id==="faulty-echo"?"Launch Faulty Echo":selected?.id==="delayed-dictation"?"Launch Delayed Dictation":selected?.id==="erase-game"?"Launch Erase Game":selected?.id==="tug-of-war"?"Launch Tug-of-War":selected?.id==="balloon-pop"?"Launch Balloon Pop":selected?.id==="volcano"?"Launch Volcano":selected?.id==="draw-or-act"?"Launch Draw or Act":selected?.id==="pass-the-bomb"?"Launch Pass the Bomb":"Launch activity";
 
   return <main className="ipad-page" data-theme={theme}>
     <a className="skip-link" href="#activity-apps">Skip to activities</a>
@@ -234,11 +263,11 @@ export default function Home(){
               <ul>
                 {wordPackSeries.map((series)=><li className={series.status==="available"?"available":"awaiting"} key={series.id}>
                   <strong>{series.name}</strong>
-                  <small>{series.status==="available"?`${series.chapterCount} chapters`:"Awaiting words"}</small>
+                  <small>{series.status==="available"?`${series.packCount} word packs`:"Awaiting words"}</small>
                 </li>)}
               </ul>
             </section>
-            <label className="pack-picker"><span>Choose chapter</span><select className="pack-select" value={packId} onChange={(event)=>choosePack(event.target.value)}>{wordPackSeries.map((series)=>{const seriesPacks=wordPacks.filter((pack)=>pack.seriesId===series.id);if(seriesPacks.length===0)return null;return <optgroup label={`${series.name} · ${seriesPacks.length} chapters`} key={series.id}>{seriesPacks.map((pack)=><option key={pack.id} value={pack.id}>{pack.name}</option>)}</optgroup>;})}</select></label>
+            <label className="pack-picker"><span>Choose word pack</span><select className="pack-select" value={packId} onChange={(event)=>choosePack(event.target.value)}>{wordPackSeries.map((series)=>{const seriesPacks=wordPacks.filter((pack)=>pack.seriesId===series.id);if(seriesPacks.length===0)return null;return <optgroup label={`${series.name} · ${seriesPacks.length} word packs`} key={series.id}>{seriesPacks.map((pack)=><option key={pack.id} value={pack.id}>{pack.name}</option>)}</optgroup>;})}</select></label>
           </header>
 
           <div className="pack-toolbar">
@@ -263,7 +292,7 @@ export default function Home(){
               </div>
             </section>
             <section className="pack-group pattern-library" aria-labelledby="pack-patterns-title">
-              <header className="pack-section-heading"><span className="pos-icon pattern-icon" aria-hidden="true"><Puzzle size={16}/></span><div><h3 id="pack-patterns-title">Target patterns</h3><small>Sentence frames and grammar</small></div><span>{selectedPatterns.length}/{activePack.patterns.length}</span></header>
+              <header className="pack-section-heading"><span className="pos-icon pattern-icon" aria-hidden="true"><Puzzle size={16}/></span><div><h3 id="pack-patterns-title">Target patterns</h3><small>Sentence frames and grammar</small></div><div className="pos-group-actions"><span className="pos-count">{selectedPatterns.length}/{activePack.patterns.length}</span><button type="button" className="pos-toggle" onClick={toggleAllPatterns} aria-label={`${allPatternsSelected?"Deselect":"Select"} all target patterns`}>{allPatternsSelected?"Deselect all":"Select all"}</button></div></header>
               <div className="language-chip-grid">{activePack.patterns.map((item)=>{const isSelected=selectedPatterns.includes(item);return <button type="button" className={`language-chip pattern-chip ${isSelected?"selected":""}`} aria-pressed={isSelected} key={item} onClick={()=>toggleLanguageItem("patterns",item)}>{isSelected&&<Check size={13} aria-hidden="true"/>}<span>{item}</span></button>;})}</div>
             </section>
           </div>
@@ -303,6 +332,8 @@ export default function Home(){
     {tugOfWarOpen&&<TugOfWarGame items={selectedVocabulary} packName={activePack.name} onClose={()=>setTugOfWarOpen(false)}/>}
     {balloonPopOpen&&<BalloonPopGame items={selectedVocabulary} packName={activePack.name} onClose={()=>setBalloonPopOpen(false)}/>}
     {volcanoOpen&&<VolcanoGame items={selectedVocabulary} packName={activePack.name} onClose={()=>setVolcanoOpen(false)}/>}
+    {drawOrActOpen&&<DrawOrActGame items={selectedVocabulary} packName={activePack.name} onClose={()=>setDrawOrActOpen(false)}/>}
+    {passTheBombOpen&&<PassTheBombGame items={selectedVocabulary} packName={activePack.name} onClose={()=>setPassTheBombOpen(false)}/>}
     <footer className="legal-note">Gamify · Classroom-ready language activities organised by input and production mode.</footer>
   </main>;
 }

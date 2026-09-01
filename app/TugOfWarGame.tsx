@@ -72,6 +72,11 @@ const readingOverrides: Record<string, string> = {
   "目": "め",
   "先しゅう": "せんしゅう",
   "まい年": "まいとし",
+  "人気があります": "にんきがあります",
+  "上げます": "あげます",
+  "自然": "しぜん",
+  "大好き": "だいすき",
+  "好き": "すき",
 };
 
 const teamNames: Record<TeamId, string> = { a: "Team A", b: "Team B" };

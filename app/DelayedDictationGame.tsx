@@ -92,6 +92,11 @@ function buildSentences(packId: string, groups: VocabularyGroup[], patterns: str
     add("山でさんぽします。", "山", "さんぽします");
     add("あした、へやでうたいます。", "あした", "へや", "うたいます");
     add("ビーチでたくさんしゃしんをとります。", "ビーチ", "たくさん", "しゃしんをとります");
+    add("つりがだいすきです。", "つり", "大好き");
+    add("アクションえいがはすきです。", "アクションえいが", "好き");
+    add("かいものはあまりすきじゃないです。", "かいもの", "あまり好きじゃない");
+    add("あした、やすみます。", "あした", "やすみます");
+    add("おべんとうをつくります。", "おべんとう", "つくります");
   }
 
   if (packId === "iitomo2-ch5") {
@@ -110,6 +115,15 @@ function buildSentences(packId: string, groups: VocabularyGroup[], patterns: str
     add("みんなでおいわいします。", "みんなで");
     add("ゆかたはたいせつです。", "ゆかた", "たいせつ(な)");
     add("またカラオケに行きたいです。", "また", "カラオケ");
+  }
+
+  if (packId === "iitomo2-tourism") {
+    add("ホテルはにんきがあります。", "ホテル", "人気があります");
+    add("しんりんよくでストレスをへらします。", "しんりんよく", "ストレス", "へらします");
+    add("ヨガでエネルギーをあげます。", "ヨガ", "エネルギー", "上げます");
+    add("いなかでゆっくりします。", "いなか", "ゆっくりする");
+    add("しぜんのなかでリラックスします。", "自然", "リラックスします");
+    add("りょかんのにわでめいそうします。", "りょかん", "にわ", "めいそう");
   }
 
   const valid = candidates.filter((candidate) => candidate.needs.every((item) => selected.has(item))).map((candidate) => candidate.text);

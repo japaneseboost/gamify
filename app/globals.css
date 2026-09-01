@@ -762,6 +762,7 @@ button:focus-visible,textarea:focus-visible,input:focus-visible,select:focus-vis
   margin:0 2px 13px!important;
 }
 .pack-section-heading>div{min-width:0;flex:1}
+.pack-section-heading>.pos-group-actions{min-width:auto;flex:0 0 auto}
 .pack-section-heading h3{margin:0;color:var(--pastel-heading);font-size:13px;font-weight:790}
 .pack-section-heading small{display:block;margin-top:3px;color:#8991a5;font-size:10px;line-height:1.25}
 .pack-section-heading>span:last-child{
@@ -840,6 +841,7 @@ button:focus-visible,textarea:focus-visible,input:focus-visible,select:focus-vis
 .pattern-icon{background:#8e7bdf!important}
 .language-chip-grid{display:flex;flex-wrap:wrap;gap:8px}
 .language-chip{
+  position:relative;
   min-height:37px;
   display:inline-flex;
   align-items:center;
@@ -856,10 +858,10 @@ button:focus-visible,textarea:focus-visible,input:focus-visible,select:focus-vis
   line-height:1.25;
   text-align:left;
   opacity:1!important;
-  transition:transform 160ms ease,box-shadow 160ms ease,background 160ms ease,border-color 160ms ease,color 160ms ease;
+  transition:box-shadow 160ms ease,background 160ms ease,border-color 160ms ease,color 160ms ease,filter 120ms ease;
 }
-.language-chip:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--group-accent) 42%,white);color:var(--pastel-heading);background:#fff;box-shadow:0 8px 16px rgba(83,100,137,.09)}
-.language-chip:active{transform:translateY(0) scale(.98)}
+.language-chip:hover{transform:none;border-color:color-mix(in srgb,var(--group-accent) 42%,white);color:var(--pastel-heading);background:#fff;box-shadow:0 8px 16px rgba(83,100,137,.09)}
+.language-chip:active{transform:none;filter:brightness(.97)}
 .language-chip.selected{
   border-color:color-mix(in srgb,var(--group-accent) 46%,white);
   color:color-mix(in srgb,var(--group-accent) 60%,#24324d);
@@ -1595,6 +1597,7 @@ html[data-theme="dark"] .pack-toolbar button:hover{border-color:#5c5683;color:#f
 html[data-theme="dark"] .pack-groups{scrollbar-color:#4b5670 transparent}
 html[data-theme="dark"] .pack-group+.pack-group{border-color:#3a4358}
 html[data-theme="dark"] .pack-section-heading>span:last-child{color:#d7cff6;background:#373251}
+html[data-theme="dark"] .pack-section-heading .pos-count{color:#e8e2ff;background:#373251}
 html[data-theme="dark"] .pos-group{
   border-color:color-mix(in srgb,var(--group-accent) 30%,#344057)!important;
   background:color-mix(in srgb,var(--group-accent) 16%,#1b263a)!important;

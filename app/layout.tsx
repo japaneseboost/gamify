@@ -8,6 +8,8 @@ import "./quickfire.css";
 import "./erase-game.css";
 import "./balloon-pop.css";
 import "./volcano-game.css";
+import "./draw-or-act.css";
+import "./pass-the-bomb.css";
 
 export const metadata: Metadata = {
   title: "Gamify — Language Activity Workspace",
