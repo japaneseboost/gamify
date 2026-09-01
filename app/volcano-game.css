@@ -23,6 +23,7 @@
     radial-gradient(circle at 93% 15%,rgba(240,115,151,.17),transparent 27%),
     radial-gradient(circle at 50% 106%,rgba(255,146,75,.22),transparent 34%),
     linear-gradient(145deg,#f6fcff 0%,#fffdf7 48%,#fff6fa 100%);
+  overflow-x:hidden;
   isolation:isolate;
 }
 .vg-portal::before,.vg-portal::after{
@@ -99,7 +100,7 @@
 .vg-start{grid-column:1/-1;min-height:61px;display:flex;align-items:center;justify-content:center;gap:10px;border:0;border-radius:19px;color:#fff;background:linear-gradient(105deg,#f4a447,#ef6c49 52%,#ab5474);box-shadow:0 16px 29px rgba(208,99,68,.24);font:inherit;font-size:15px;font-weight:880;cursor:pointer}.vg-start:disabled{opacity:.45;box-shadow:none;cursor:not-allowed}
 
 /* Game */
-.vg-game-stage{width:min(1580px,calc(100% - 30px));min-height:0;display:grid;grid-template-rows:auto minmax(505px,1fr);gap:12px;margin:0 auto;padding:14px 0 18px;overflow:auto}
+.vg-game-stage{width:min(1580px,calc(100% - 30px));min-height:0;display:grid;grid-template-rows:auto minmax(505px,1fr);gap:12px;margin:0 auto;padding:14px 0 18px;overflow-x:hidden;overflow-y:auto}
 .vg-prompt-strip{min-height:105px;display:grid;grid-template-columns:minmax(210px,.8fr) minmax(320px,1.6fr) minmax(210px,.8fr);align-items:center;gap:16px;padding:11px 16px;border:2px solid #fff;border-radius:25px;background:var(--vg-panel);box-shadow:0 10px 24px rgba(62,86,111,.08)}
 .vg-prompt-context{display:grid;gap:7px}.vg-prompt-context>small{color:#a54b63;font-size:12px;font-weight:850}.vg-prompt-context>span{width:max-content;display:flex;align-items:center;gap:6px;padding:6px 9px;border-radius:999px;color:#337765;background:#e5f7f1;font-size:9px;font-weight:800}
 .vg-prompt-copy{text-align:center}.vg-prompt-copy p{margin:0 0 2px;color:#b25861;font-size:8px;font-weight:900;letter-spacing:.15em}.vg-prompt-copy h1{margin:0;color:var(--vg-ink);font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif;font-size:clamp(28px,3.35vw,49px);font-weight:880;line-height:1.15;text-wrap:balance}.vg-prompt-copy strong{display:block;margin-top:4px;color:#2b806b;font-family:"M PLUS Rounded 1c","Noto Sans JP",sans-serif;font-size:clamp(16px,1.8vw,25px);line-height:1.25}
