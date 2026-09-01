@@ -254,11 +254,10 @@ export default function Home(){
         <header><span aria-hidden="true"><ListChecks size={18}/></span><div><small>HOW TO PLAY</small><h3 id="launch-rules-title">Game rules</h3></div></header>
         <ol>{selected.rules.map((rule,index)=><li key={rule}><b aria-hidden="true">{index+1}</b><span>{rule}</span></li>)}</ol>
       </section>
-      <section className="launch-config" aria-label="Selected language">
-        <div className="language-preview"><small>{activePack.name} · {selectedLanguageCount} selected</small><strong>{selectedVocabulary.length>0?`${selectedVocabulary.slice(0,8).join("、")}${selectedVocabulary.length>8?" …":""}`:selected&&vocabularyOnlyActivities.includes(selected.id)?"Choose at least one vocabulary item":selectedPatterns.slice(0,6).join("、")||"Choose at least one language item"}</strong>{selected?.id!=="tug-of-war"&&selectedPatterns.length>0&&<span>{selectedPatterns.slice(0,4).join("／")}{selectedPatterns.length>4?" …":""}</span>}</div>
+      {(selected.id==="delayed-dictation"||selected.id==="tug-of-war")&&<section className="launch-config" aria-label="Launch settings">
         {selected.id==="delayed-dictation"&&<div className="dd-launch-setting"><div><strong>Memory delay</strong><small>How long students must hold the sentence before writing.</small></div><div className="dd-delay-options">{[3,5,8,10].map((delay)=><button type="button" key={delay} className={memoryDelay===delay?"selected":""} aria-pressed={memoryDelay===delay} onClick={()=>setMemoryDelay(delay)}>{delay} sec</button>)}</div></div>}
         {selected.id==="tug-of-war"&&<div className="tow-launch-note"><UsersRound size={19}/><div><strong>Teacher-controlled team board</strong><small>Four different starting kana are drawn from the vocabulary selected in this Word Pack.</small></div></div>}
-      </section>
+      </section>}
       <button className="launch-button" onClick={createActivity} disabled={selectedLanguageCount===0}><Play size={19}/> {launchLabel} <ArrowRight size={19}/></button>
     </section></div>}
 
