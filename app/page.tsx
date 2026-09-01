@@ -54,7 +54,7 @@ const activities:Activity[] = [
     rules:["Teacher reads the model sentence once.","Repeat it exactly or change one small detail.","Students echo only when the repeat is correct.","If it is faulty, stay silent and identify the change."],
   },
   {
-    id:"delayed-dictation", title:"Delayed Dictation", shortTitle:"Delayed Dictation", description:"Listen to a hidden sentence, hold it in memory, write it from recall, then self-correct against the model.", category:"Input by Listening", time:"5–8 min", icon:PencilLine, tone:"indigo", stage:"listening",
+    id:"delayed-dictation", title:"Delayed Dictation", shortTitle:"Delayed Dictation", description:"Listen to a hidden sentence, hold it in memory, write it from recall, then self-correct against the model.", category:"Production by Writing", time:"5–8 min", icon:PencilLine, tone:"indigo", stage:"writing",
     rules:["Listen to the hidden sentence twice.","Hold the whole sentence during the memory delay.","Write it from memory when the timer ends.","Reveal the model and self-correct every detail."],
   },
   {
