@@ -182,6 +182,7 @@ html[data-theme="dark"] .bp-rules li,html[data-theme="dark"] .bp-choice-row butt
 html[data-theme="dark"] .bp-choice-row button strong,html[data-theme="dark"] .bp-loser-buttons button strong,html[data-theme="dark"] .bp-rules-dialog li>span{color:#f3f3f6}
 html[data-theme="dark"] .bp-choice-row button.selected{border-color:#8f7ddd;color:#d8d0ff;background:#39334f;box-shadow:0 0 0 3px rgba(143,125,221,.12)}
 html[data-theme="dark"] .bp-setup-options fieldset{border-color:#444b5a;background:#242a38}
+html[data-theme="dark"] .bp-setup-options legend{color:#d9dce6}
 html[data-theme="dark"] .bp-prompt-context>span{color:#aeead9;background:#24453e}
 html[data-theme="dark"] .bp-revealed-answer{color:#9be8d3}
 html[data-theme="dark"] .bp-team-field.team-a>header{border-color:#31596c;background:linear-gradient(110deg,#213d4b,#272e3d)}html[data-theme="dark"] .bp-team-field.team-b>header{border-color:#614052;background:linear-gradient(250deg,#492d3b,#292f3d)}
