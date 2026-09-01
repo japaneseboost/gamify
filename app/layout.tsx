@@ -10,6 +10,8 @@ import "./balloon-pop.css";
 import "./volcano-game.css";
 import "./draw-or-act.css";
 import "./pass-the-bomb.css";
+import "./whats-missing.css";
+import "./hot-seat.css";
 
 export const metadata: Metadata = {
   title: "Gamify — Language Activity Workspace",
@@ -18,8 +20,8 @@ export const metadata: Metadata = {
     "codex-preview": "development",
   },
   icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
+    icon: "/gamify/gamify-favicon.png",
+    shortcut: "/gamify/gamify-favicon.png",
   },
 };
 

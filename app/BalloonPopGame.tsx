@@ -249,7 +249,11 @@ function BalloonField({
       </div>
       <div className="bp-rider-wrap"><Rider team={team} danger={danger}/></div>
       <div className="bp-water" aria-hidden="true"><span/><span/></div>
-      <div className="bp-shark-wrap"><Shark team={team}/></div>
+      <div className="bp-shark-track" aria-hidden="true">
+        <div className="bp-shark-patrol">
+          <div className="bp-shark-facing"><Shark team={team}/></div>
+        </div>
+      </div>
       {caught === team && <div className="bp-splash" aria-hidden="true"><i/><i/><i/><i/></div>}
     </div>
     <footer><span className="bp-balloon-meter"><i style={{ width: `${(activeIds.length / total) * 100}%` }}/></span><b>{activeIds.length === 0 ? "Down in the water!" : `${activeIds.length} balloons keeping the rider safe`}</b></footer>

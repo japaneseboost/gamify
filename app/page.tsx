@@ -1,9 +1,11 @@
 "use client";
 
+import Image from "next/image";
+import gamifyLogo from "../public/gamify-logo.png";
 import {
-  ArrowRight, Brush, Check, ChevronRight, MessageCircleMore, Move3D, Play,
+  Armchair, ArrowRight, Brush, Check, ChevronRight, MessageCircleMore, Move3D, Play,
   Brain, UsersRound, X, PencilLine, Target, PackageOpen,
-  CircleDot, Clock3, Eraser, Flame, ListChecks, Moon, Mountain, Palette, Puzzle, Shapes, Sun, Zap,
+  CircleDot, Clock3, Eraser, EyeOff, Flame, ListChecks, Moon, Mountain, Palette, Puzzle, Shapes, Sun, Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import ReadMyMindGame from "./ReadMyMindGame";
@@ -16,6 +18,8 @@ import BalloonPopGame from "./BalloonPopGame";
 import VolcanoGame from "./VolcanoGame";
 import DrawOrActGame from "./DrawOrActGame";
 import PassTheBombGame from "./PassTheBombGame";
+import WhatsMissingGame from "./WhatsMissingGame";
+import HotSeatGame from "./HotSeatGame";
 import { wordPacks, wordPackSeries } from "./wordPacks";
 
 type Activity = {
@@ -84,6 +88,14 @@ const activities:Activity[] = [
     id:"pass-the-bomb", title:"Pass the Bomb", shortTitle:"Pass the Bomb", description:"Answer one shared question from the chosen Word Pack, pass the imaginary bomb, and keep speaking until its hidden fuse explodes.", category:"Production by Speaking", time:"5–10 min", icon:Clock3, tone:"pink", stage:"speaking",
     rules:["Students form a circle and the teacher chooses a general Word Pack question.","The teacher lights a hidden random fuse.","Each player answers the same question in Japanese, then passes immediately.","When the ticking stops and the bomb explodes, the current holder loses the round."],
   },
+  {
+    id:"whats-missing", title:"What’s Missing?", shortTitle:"What’s Missing?", description:"Students memorise a wall of picture vocabulary cards, then identify what disappeared or changed after the animated curtain opens.", category:"Production by Speaking", time:"5–10 min", icon:EyeOff, tone:"purple", stage:"speaking",
+    rules:["Study 8–12 picture vocabulary cards for ten seconds.","An animated curtain closes while Gamify changes the board.","The curtain opens with one or two cards missing, moved, changed, or hidden.","Students say what changed in Japanese; reveal the answer, then start another round."],
+  },
+  {
+    id:"hot-seat", title:"Hot Seat", shortTitle:"Hot Seat", description:"One student faces away from the screen while teammates describe each Japanese and English Word Pack item without saying or spelling it.", category:"Production by Speaking", time:"5–10 min", icon:Armchair, tone:"orange", stage:"speaking",
+    rules:["Choose Team A or Team B and seat one student with their back to the screen.","Teammates describe the displayed Japanese and English item without saying, translating, spelling, or mouthing it.","Use Pass, Next (wrong), or Next (correct) to move through the Word Pack.","Each correct answer adds one point to the active team. Score as many as possible in 60 seconds."],
+  },
 ];
 
 export default function Home(){
@@ -101,6 +113,8 @@ export default function Home(){
   const [volcanoOpen,setVolcanoOpen]=useState(false);
   const [drawOrActOpen,setDrawOrActOpen]=useState(false);
   const [passTheBombOpen,setPassTheBombOpen]=useState(false);
+  const [whatsMissingOpen,setWhatsMissingOpen]=useState(false);
+  const [hotSeatOpen,setHotSeatOpen]=useState(false);
   const [memoryDelay,setMemoryDelay]=useState(5);
   const [theme,setTheme]=useState<ThemeMode>("light");
 
@@ -161,11 +175,11 @@ export default function Home(){
 
   useEffect(()=>{
     const close=(event:KeyboardEvent)=>{
-      if(event.key==="Escape"&&!readMyMindOpen&&!quickfireOpen&&!faultyEchoOpen&&!delayedDictationOpen&&!eraseGameOpen&&!tugOfWarOpen&&!balloonPopOpen&&!volcanoOpen&&!drawOrActOpen&&!passTheBombOpen)setSelected(null);
+      if(event.key==="Escape"&&!readMyMindOpen&&!quickfireOpen&&!faultyEchoOpen&&!delayedDictationOpen&&!eraseGameOpen&&!tugOfWarOpen&&!balloonPopOpen&&!volcanoOpen&&!drawOrActOpen&&!passTheBombOpen&&!whatsMissingOpen&&!hotSeatOpen)setSelected(null);
     };
     window.addEventListener("keydown",close);
     return()=>window.removeEventListener("keydown",close);
-  },[readMyMindOpen,quickfireOpen,faultyEchoOpen,delayedDictationOpen,eraseGameOpen,tugOfWarOpen,balloonPopOpen,volcanoOpen,drawOrActOpen,passTheBombOpen]);
+  },[readMyMindOpen,quickfireOpen,faultyEchoOpen,delayedDictationOpen,eraseGameOpen,tugOfWarOpen,balloonPopOpen,volcanoOpen,drawOrActOpen,passTheBombOpen,whatsMissingOpen,hotSeatOpen]);
 
   const createActivity=()=>{
     if(!selected||(selected.id!=="pass-the-bomb"&&selectedCount===0))return;
@@ -226,12 +240,25 @@ export default function Home(){
       setPassTheBombOpen(true);
       return;
     }
+    if(selected.id==="whats-missing"){
+      if(selectedVocabulary.length<8)return;
+      setSelected(null);
+      setWhatsMissingOpen(true);
+      return;
+    }
+    if(selected.id==="hot-seat"){
+      if(selectedVocabulary.length===0)return;
+      setSelected(null);
+      setHotSeatOpen(true);
+      return;
+    }
   };
 
   const SelectedIcon=selected?.icon??Target;
-  const vocabularyOnlyActivities=["quickfire","faulty-echo","erase-game","tug-of-war","balloon-pop","volcano","draw-or-act"];
+  const vocabularyOnlyActivities=["quickfire","faulty-echo","erase-game","tug-of-war","balloon-pop","volcano","draw-or-act","whats-missing","hot-seat"];
   const selectedLanguageCount=selected?.id==="pass-the-bomb"?1:selected&&vocabularyOnlyActivities.includes(selected.id)?selectedVocabulary.length:selectedCount;
-  const launchLabel=selected?.id==="quickfire"?"Launch Quickfire":selected?.id==="read-my-mind"?"Launch Read My Mind":selected?.id==="faulty-echo"?"Launch Faulty Echo":selected?.id==="delayed-dictation"?"Launch Delayed Dictation":selected?.id==="erase-game"?"Launch Erase Game":selected?.id==="tug-of-war"?"Launch Tug-of-War":selected?.id==="balloon-pop"?"Launch Balloon Pop":selected?.id==="volcano"?"Launch Volcano":selected?.id==="draw-or-act"?"Launch Draw or Act":selected?.id==="pass-the-bomb"?"Launch Pass the Bomb":"Launch activity";
+  const canLaunchSelected=selectedLanguageCount>0&&(selected?.id!=="whats-missing"||selectedVocabulary.length>=8);
+  const launchLabel=selected?.id==="quickfire"?"Launch Quickfire":selected?.id==="read-my-mind"?"Launch Read My Mind":selected?.id==="faulty-echo"?"Launch Faulty Echo":selected?.id==="delayed-dictation"?"Launch Delayed Dictation":selected?.id==="erase-game"?"Launch Erase Game":selected?.id==="tug-of-war"?"Launch Tug-of-War":selected?.id==="balloon-pop"?"Launch Balloon Pop":selected?.id==="volcano"?"Launch Volcano":selected?.id==="draw-or-act"?"Launch Draw or Act":selected?.id==="pass-the-bomb"?"Launch Pass the Bomb":selected?.id==="whats-missing"?"Launch What’s Missing?":selected?.id==="hot-seat"?"Launch Hot Seat":"Launch activity";
 
   return <main className="ipad-page" data-theme={theme}>
     <a className="skip-link" href="#activity-apps">Skip to activities</a>
@@ -239,9 +266,14 @@ export default function Home(){
       <span className="pastel-blob blob-sky"/><span className="pastel-blob blob-mint"/><span className="pastel-blob blob-peach"/><span className="pastel-blob blob-lavender"/>
     </div>
     <header className="ipad-status brand-status">
-      <div className="brand-lockup" aria-label="Gamify — Language Activity Studio">
-        <span className="brand-mark" aria-hidden="true"><span className="brand-letter">G</span><span className="brand-kana" lang="ja">あ</span></span>
-        <span className="brand-copy"><strong>Gamify</strong><small>Language Activity Studio</small></span>
+      <div className="brand-lockup brand-image-lockup">
+        <Image
+          className="brand-logo-image"
+          src={gamifyLogo}
+          alt="Gamify — Language Activity Studio"
+          loading="eager"
+          sizes="(max-width: 680px) 180px, 230px"
+        />
       </div>
       <button type="button" className="theme-toggle" onClick={toggleTheme} aria-pressed={theme==="dark"} aria-label={`Switch to ${theme==="light"?"dark":"light"} mode`}>
         <span aria-hidden="true">{theme==="light"?<Moon size={19}/>:<Sun size={19}/>}</span>
@@ -320,7 +352,8 @@ export default function Home(){
         {selected.id==="delayed-dictation"&&<div className="dd-launch-setting"><div><strong>Memory delay</strong><small>How long students must hold the sentence before writing.</small></div><div className="dd-delay-options">{[3,5,8,10].map((delay)=><button type="button" key={delay} className={memoryDelay===delay?"selected":""} aria-pressed={memoryDelay===delay} onClick={()=>setMemoryDelay(delay)}>{delay} sec</button>)}</div></div>}
         {selected.id==="tug-of-war"&&<div className="tow-launch-note"><UsersRound size={19}/><div><strong>Teacher-controlled team board</strong><small>Four different starting kana are drawn from the vocabulary selected in this Word Pack.</small></div></div>}
       </section>}
-      <button className="launch-button" onClick={createActivity} disabled={selectedLanguageCount===0}><Play size={19}/> {launchLabel} <ArrowRight size={19}/></button>
+      {selected.id==="whats-missing"&&selectedVocabulary.length<8&&<p className="launch-requirement" role="status">Select at least 8 vocabulary words to play.</p>}
+      <button className="launch-button" onClick={createActivity} disabled={!canLaunchSelected}><Play size={19}/> {launchLabel} <ArrowRight size={19}/></button>
     </section></div>}
 
     {readMyMindOpen&&<ReadMyMindGame options={readMyMindOptions} onClose={()=>setReadMyMindOpen(false)}/>}
@@ -333,6 +366,8 @@ export default function Home(){
     {volcanoOpen&&<VolcanoGame items={selectedVocabulary} packName={activePack.name} onClose={()=>setVolcanoOpen(false)}/>}
     {drawOrActOpen&&<DrawOrActGame items={selectedVocabulary} packName={activePack.name} onClose={()=>setDrawOrActOpen(false)}/>}
     {passTheBombOpen&&<PassTheBombGame packId={activePack.id} packName={activePack.name} onClose={()=>setPassTheBombOpen(false)}/>}
+    {whatsMissingOpen&&<WhatsMissingGame items={selectedVocabulary} packName={activePack.name} onClose={()=>setWhatsMissingOpen(false)}/>}
+    {hotSeatOpen&&<HotSeatGame items={selectedVocabulary} packName={activePack.name} onClose={()=>setHotSeatOpen(false)}/>}
     <footer className="legal-note">Gamify · Classroom-ready language activities organised by input and production mode.</footer>
   </main>;
 }
