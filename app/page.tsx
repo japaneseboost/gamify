@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  ArrowRight, Check, MessageCircleMore, Move3D, Play,
+  ArrowRight, Check, ChevronRight, MessageCircleMore, Move3D, Play,
   Brain, UsersRound, X, PencilLine, Target, PackageOpen,
   Clock3, Eraser, Flame, ListChecks, Moon, Palette, Puzzle, Shapes, Sun, Zap,
 } from "lucide-react";
@@ -240,7 +240,7 @@ export default function Home(){
         <h1 className="visually-hidden" id="apps-title">Gamify learning modes</h1>
         <div className="lesson-stage-grid">
           {lessonStages.map((stage)=>{const stageActivities=activities.filter((activity)=>activity.stage===stage.id);if(stageActivities.length===0)return null;return <section className={`lesson-stage stage-${stage.tone}`} key={stage.id} aria-labelledby={`stage-${stage.id}`}><header><span className="stage-index"><small>Stage</small><b>{stage.number}</b></span><div><h2 id={`stage-${stage.id}`}>{stage.name}</h2><p>{stage.purpose}</p></div></header><div className="stage-activities">
-            {stageActivities.map((activity)=>{const Icon=activity.icon;return <button className="stage-activity" key={activity.id} onClick={()=>setSelected(activity)} aria-label={`Create ${activity.title}`}><span className={`app-icon app-${activity.tone}`}><Icon size={24}/><i/></span><span><strong>{activity.shortTitle}</strong><small>{activity.time}</small></span></button>;})}
+            {stageActivities.map((activity)=>{const Icon=activity.icon;return <button className="stage-activity" key={activity.id} onClick={()=>setSelected(activity)} aria-label={`Create ${activity.title}`}><span className={`app-icon app-${activity.tone}`}><Icon size={24}/><i/></span><span className="activity-copy"><strong>{activity.shortTitle}</strong><small>{activity.time}</small></span><ChevronRight className="activity-chevron" size={18} aria-hidden="true"/></button>;})}
           </div></section>;})}
         </div>
       </section>
