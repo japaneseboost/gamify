@@ -278,6 +278,7 @@ export default function BalloonPopGame({ items, packName, onClose }: Props) {
   const [balloons, setBalloons] = useState<Record<TeamId, number[]>>({ a: [], b: [] });
   const [dieValue, setDieValue] = useState(1);
   const [rolling, setRolling] = useState(false);
+  const [dieSpinning, setDieSpinning] = useState(false);
   const [popping, setPopping] = useState<{ team: TeamId; id: number } | null>(null);
   const [falling, setFalling] = useState<TeamId | null>(null);
   const [caught, setCaught] = useState<TeamId | null>(null);
@@ -369,6 +370,7 @@ export default function BalloonPopGame({ items, packName, onClose }: Props) {
     setSelectedLoser(null);
     setDieValue(1);
     setRolling(false);
+    setDieSpinning(false);
     setPopping(null);
     setFalling(null);
     setCaught(null);
@@ -404,6 +406,7 @@ export default function BalloonPopGame({ items, packName, onClose }: Props) {
     if (!selectedLoser || rolling || winner) return;
     const losingTeam = selectedLoser;
     setRolling(true);
+    setDieSpinning(true);
     setRevealed(false);
     setAnnouncement(`Rolling for ${teamName(losingTeam)}.`);
 
@@ -417,8 +420,10 @@ export default function BalloonPopGame({ items, packName, onClose }: Props) {
     const result = 1 + Math.floor(Math.random() * 6);
     if (!mountedRef.current) return;
     setDieValue(result);
+    setDieSpinning(false);
+    setAnnouncement(`${teamName(losingTeam)} rolled ${result}. Get ready to pop!`);
     playTone(660, 0.13, 0.045, "triangle");
-    await sleep(230);
+    await sleep(1000);
 
     const activeIds = [...balloons[losingTeam]];
     const popCount = Math.min(result, activeIds.length);
@@ -542,10 +547,10 @@ export default function BalloonPopGame({ items, packName, onClose }: Props) {
             <button type="button" className={`team-b ${selectedLoser === "b" ? "selected" : ""}`} aria-pressed={selectedLoser === "b"} onClick={() => selectLosingTeam("b")} disabled={rolling || Boolean(winner)}><span>B</span><strong>Team B loses</strong></button>
           </div>
           <div className={`bp-die-zone ${selectedLoser ? `target-${selectedLoser}` : ""}`}>
-            <span className="bp-die-label">{rolling ? "ROLLING…" : selectedLoser ? `${teamName(selectedLoser)} AT RISK` : "SELECT A TEAM"}</span>
-            <DieFace value={dieValue} rolling={rolling}/>
-            <strong className="bp-die-result">{rolling ? "?" : dieValue}</strong>
-            <button type="button" className="bp-roll-button" onClick={rollDie} disabled={!selectedLoser || rolling || Boolean(winner)}><Dice5 size={21}/>{rolling ? "Rolling…" : "Roll & pop"}</button>
+            <span className="bp-die-label">{dieSpinning ? "ROLLING…" : rolling ? `${teamName(selectedLoser!)} ROLLED ${dieValue}` : selectedLoser ? `${teamName(selectedLoser)} AT RISK` : "SELECT A TEAM"}</span>
+            <DieFace value={dieValue} rolling={dieSpinning}/>
+            <strong className="bp-die-result">{dieSpinning ? "?" : dieValue}</strong>
+            <button type="button" className="bp-roll-button" onClick={rollDie} disabled={!selectedLoser || rolling || Boolean(winner)}><Dice5 size={21}/>{dieSpinning ? "Rolling…" : rolling ? popping ? "Popping…" : `Rolled ${dieValue}` : "Roll & pop"}</button>
           </div>
           <div className="bp-next-step" aria-live="polite"><CircleDot size={16}/><span>{announcement}</span></div>
         </section>
