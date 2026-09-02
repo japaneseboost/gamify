@@ -5,7 +5,7 @@ import gamifyLogo from "../public/gamify-logo.png";
 import {
   Armchair, ArrowRight, Brush, Check, ChevronRight, MessageCircleMore, Move3D, Play,
   Brain, UsersRound, X, PencilLine, Target, PackageOpen,
-  CircleDot, Clock3, Eraser, EyeOff, Flame, ListChecks, Moon, Mountain, Palette, Puzzle, Shapes, Sun, Zap,
+  Clock3, Eraser, EyeOff, Flame, ListChecks, Moon, Mountain, Palette, Puzzle, Shapes, Sun, Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import ReadMyMindGame from "./ReadMyMindGame";
@@ -47,6 +47,16 @@ const vocabularyGroupVisuals:Record<string,{icon:typeof Shapes;tone:string;descr
   "adverbs-time":{icon:Clock3,tone:"lavender",description:"Time, frequency and manner"},
 };
 
+const FierceSharkIcon = ({size=24,className}:{size?:number;className?:string}) => (
+  <svg className={className} width={size} height={size} viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M3 8.5 9.5 14C13 9.5 17.5 7.5 22 8.5c3.2.7 5.8 2.5 7.5 5.5-1.7 3-4.3 4.8-7.5 5.5-4.5 1-9-.9-12.5-5.5L3 19.5 5.5 14 3 8.5Z"/>
+    <path d="m14.5 9 3-5 3.2 4.7"/>
+    <path d="m21.5 11.2 3.4-1"/>
+    <circle cx="24.6" cy="11.4" r=".7" fill="currentColor" stroke="none"/>
+    <path d="M21.5 15h6l-1.2 2-1.2-1.5-1.2 1.5-1.2-1.5-1.2 1.5"/>
+  </svg>
+);
+
 const activities:Activity[] = [
   {
     id:"quickfire", title:"Quickfire", shortTitle:"Quickfire", description:"Students race to produce the selected Japanese word or sentence, then the winner moves one step towards the front.", category:"Retrieval Practice", time:"5–10 min", icon:Flame, tone:"orange", stage:"retrieval",
@@ -73,7 +83,7 @@ const activities:Activity[] = [
     rules:["Four starting kana begin in the centre.","A team says a Word Pack item beginning with one kana.","Teacher drags that kana one column towards the team.","First team to bring three kana home wins the round."],
   },
   {
-    id:"balloon-pop", title:"Balloon Pop", shortTitle:"Balloon Pop", description:"Answer a Word Pack prompt, roll the digital die, and pop that many balloons from the opposing team before the shark gets your rider.", category:"Production by Speaking", time:"8–12 min", icon:CircleDot, tone:"blue", stage:"speaking",
+    id:"balloon-pop", title:"Balloon Pop", shortTitle:"Balloon Pop", description:"Answer a Word Pack prompt, roll the digital die, and pop that many balloons from the opposing team before the shark gets your rider.", category:"Production by Speaking", time:"8–12 min", icon:FierceSharkIcon, tone:"blue", stage:"speaking",
     rules:["Choose turn-taking or race mode and an English or Japanese prompt.","Students answer aloud; the teacher decides which team loses the round.","Select the losing team, then roll the digital die.","The die pops that many balloons. The last team still in the sky wins."],
   },
   {
