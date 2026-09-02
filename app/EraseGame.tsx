@@ -72,7 +72,7 @@ const eraseSentenceBank:Record<string,EraseSentence[]> = {
     sentence("ch4-sing",["あした","へや","うたいます"],chunk("time","あした"),chunk("place","へや",particle("で")),chunk("verb","うたいます")),
     sentence("ch4-beach",["ビーチ","たくさん","しゃしんをとります"],chunk("place","ビーチ",particle("で")),chunk("detail","たくさん"),chunk("detail","しゃしん",particle("を")),chunk("verb","とります")),
     sentence("ch4-love-fishing",["つり","大好き"],chunk("detail","つり",particle("が")),chunk("detail","だいすきです")),
-    sentence("ch4-action-film",["アクションえいが","好き"],chunk("detail","アクションえいが",particle("は")),chunk("detail","すきです")),
+    sentence("ch4-action-film",["アクションえいが","好き"],chunk("detail","アクションえいが",particle("が")),chunk("detail","すきです")),
     sentence("ch4-shopping",["かいもの","あまり好きじゃない"],chunk("detail","かいもの",particle("は")),chunk("detail","あまりすきじゃないです")),
     sentence("ch4-rest",["あした","やすみます"],chunk("time","あした"),chunk("verb","やすみます")),
     sentence("ch4-lunch",["おべんとう","つくります"],chunk("detail","おべんとう",particle("を")),chunk("verb","つくります")),
@@ -280,11 +280,13 @@ export default function EraseGame({packId,packName,groups,patterns,onClose}:Prop
     </section></main>}
 
     {phase==="playing"&&<main className="eg-game-stage">
-      <section className="eg-round-bar"><div><small>READING ROUND</small><strong>Round {round}</strong></div><span>{progressLabel}</span><button type="button" onClick={()=>resetBoard(mode)}><RotateCcw size={17}/> Reset sentence</button></section>
-      <nav className="eg-mode-bar" aria-label="Erase mode">{modeDetails.map((option)=>{const Icon=option.icon;return <button type="button" key={option.id} className={mode===option.id?"selected":""} aria-pressed={mode===option.id} onClick={()=>changeMode(option.id)}><Icon size={16}/><span>{option.label}</span></button>;})}</nav>
+      <section className="eg-game-toolbar" aria-label="Round and erase controls">
+        <div className="eg-round-meta"><small>READING ROUND</small><strong>Round {round}</strong></div>
+        <nav className="eg-mode-bar" aria-label="Erase mode">{modeDetails.map((option)=>{const Icon=option.icon;return <button type="button" key={option.id} className={mode===option.id?"selected":""} aria-pressed={mode===option.id} onClick={()=>changeMode(option.id)}><Icon size={16}/><span>{option.label}</span></button>;})}</nav>
+        <div className="eg-round-tools"><span>{progressLabel}</span><button type="button" onClick={()=>resetBoard(mode)}><RotateCcw size={17}/> Reset sentence</button></div>
+      </section>
 
       <section className="eg-board">
-        <div className="eg-board-heading"><p>SENTENCE BUILDER</p><h1>{mode==="reverse"&&actions===0?"Can you rebuild the sentence?":actions===0?"Read the complete sentence together.":complete&&mode!=="reverse"?"Can you say the whole sentence?":"Keep the whole sentence in your memory."}</h1><span>{mode==="teacher"?"Click any chunk to hide or restore it.":mode==="reverse"?"Reveal the chunks, but keep predicting the complete sentence.":"Students say every chunk, including the missing ones."}</span></div>
         <div className="eg-sentence-builder" aria-live="polite">
           {current.chunks.map((sentenceChunk,chunkIndex)=>{
             const isHidden=hiddenChunks.has(chunkIndex);
@@ -292,6 +294,7 @@ export default function EraseGame({packId,packName,groups,patterns,onClose}:Prop
             return <div className="eg-chunk-wrap" key={`${current.key}-${chunkIndex}`}>{mode==="teacher"?<button type="button" className={`eg-chunk ${isHidden?"hidden":""}`} aria-pressed={isHidden} aria-label={`${isHidden?"Restore":"Erase"} chunk ${chunkIndex+1}`} onClick={()=>toggleTeacherChunk(chunkIndex)}>{content}</button>:<span className={`eg-chunk ${isHidden?"hidden":""}`}>{content}</span>}{chunkIndex<current.chunks.length-1?<i aria-hidden="true"/>:<span className="eg-full-stop" lang="ja">。</span>}</div>;
           })}
         </div>
+        <div className="eg-board-heading"><h1>{mode==="reverse"&&actions===0?"Can you rebuild the sentence?":actions===0?"Read the complete sentence together.":complete&&mode!=="reverse"?"Can you say the whole sentence?":"Keep the whole sentence in your memory."}</h1></div>
         {complete&&<div className={`eg-complete-note ${mode==="reverse"?"reverse":""}`}>{mode==="reverse"?<Eye size={20}/>:<EyeOff size={20}/>}<strong>{mode==="reverse"?"The full sentence is back!":"Now say every missing part from memory!"}</strong></div>}
       </section>
 
