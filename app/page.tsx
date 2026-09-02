@@ -20,7 +20,7 @@ import DrawOrActGame from "./DrawOrActGame";
 import PassTheBombGame from "./PassTheBombGame";
 import WhatsMissingGame from "./WhatsMissingGame";
 import HotSeatGame from "./HotSeatGame";
-import { wordPacks, wordPackSeries } from "./wordPacks";
+import { displayWordPackItem, wordPacks, wordPackSeries } from "./wordPacks";
 
 type Activity = {
   id:string; title:string; shortTitle:string; description:string;
@@ -99,6 +99,7 @@ const activities:Activity[] = [
 ];
 
 export default function Home(){
+  const [seriesId,setSeriesId]=useState(wordPacks[0].seriesId);
   const [packId,setPackId]=useState(wordPacks[0].id);
   const [selectedVocabulary,setSelectedVocabulary]=useState<string[]>(()=>[...wordPacks[0].vocabulary]);
   const [selectedPatterns,setSelectedPatterns]=useState<string[]>(()=>[...wordPacks[0].patterns]);
@@ -119,6 +120,7 @@ export default function Home(){
   const [theme,setTheme]=useState<ThemeMode>("light");
 
   const activePack=wordPacks.find((pack)=>pack.id===packId)??wordPacks[0];
+  const packsInSelectedSeries=wordPacks.filter((pack)=>pack.seriesId===seriesId);
   const selectedCount=selectedVocabulary.length+selectedPatterns.length;
   const totalPackItems=activePack.vocabulary.length+activePack.patterns.length;
   const allPatternsSelected=activePack.patterns.length>0&&activePack.patterns.every((item)=>selectedPatterns.includes(item));
@@ -131,6 +133,13 @@ export default function Home(){
     setPackId(nextPack.id);
     setSelectedVocabulary([...nextPack.vocabulary]);
     setSelectedPatterns([...nextPack.patterns]);
+  };
+
+  const chooseSeries=(nextSeriesId:string)=>{
+    const seriesPacks=wordPacks.filter((pack)=>pack.seriesId===nextSeriesId);
+    if(seriesPacks.length===0)return;
+    setSeriesId(nextSeriesId);
+    if(!seriesPacks.some((pack)=>pack.id===packId))choosePack(seriesPacks[0].id);
   };
 
   const toggleLanguageItem=(group:"vocabulary"|"patterns",item:string)=>{
@@ -290,15 +299,12 @@ export default function Home(){
               <div><small>WORD PACK</small><h2>{activePack.name}</h2><p>Build the language set for today&apos;s games.</p></div>
             </div>
             <section className="pack-series-catalog" aria-labelledby="pack-series-title">
-              <header><span id="pack-series-title">Series</span><small>Add their vocabulary when you send it later.</small></header>
+              <header><span id="pack-series-title">Choose series</span><small>Then choose a word pack below.</small></header>
               <ul>
-                {wordPackSeries.map((series)=><li className={series.status==="available"?"available":"awaiting"} key={series.id}>
-                  <strong>{series.name}</strong>
-                  <small>{series.status==="available"?`${series.packCount} word packs`:"Awaiting words"}</small>
-                </li>)}
+                {wordPackSeries.map((series)=>{const hasPacks=wordPacks.some((pack)=>pack.seriesId===series.id);const isActive=seriesId===series.id;return <li key={series.id}><button type="button" className={`${hasPacks?"available":"awaiting"} ${isActive?"selected":""}`} disabled={!hasPacks} aria-pressed={isActive} onClick={()=>chooseSeries(series.id)}><strong>{series.name}</strong><small>{hasPacks?`${series.packCount} ${series.packCount===1?"word pack":"word packs"}`:"Awaiting words"}</small></button></li>;})}
               </ul>
             </section>
-            <label className="pack-picker"><span>Choose word pack</span><select className="pack-select" value={packId} onChange={(event)=>choosePack(event.target.value)}>{wordPackSeries.map((series)=>{const seriesPacks=wordPacks.filter((pack)=>pack.seriesId===series.id);if(seriesPacks.length===0)return null;return <optgroup label={`${series.name} · ${seriesPacks.length} word packs`} key={series.id}>{seriesPacks.map((pack)=><option key={pack.id} value={pack.id}>{pack.name}</option>)}</optgroup>;})}</select></label>
+            <label className="pack-picker"><span>Choose word pack</span><select className="pack-select" value={packId} onChange={(event)=>choosePack(event.target.value)}>{packsInSelectedSeries.map((pack)=><option key={pack.id} value={pack.id}>{pack.name}</option>)}</select></label>
           </header>
 
           <div className="pack-toolbar">
@@ -317,14 +323,14 @@ export default function Home(){
                   const GroupIcon=visual.icon;
                   return <section className={`pos-group pos-${visual.tone}`} key={group.id} aria-labelledby={`pos-${activePack.id}-${group.id}`}>
                     <header><span className="pos-icon" aria-hidden="true"><GroupIcon size={16}/></span><div className="pos-copy"><h4 id={`pos-${activePack.id}-${group.id}`}>{group.label}</h4><small>{visual.description}</small></div><div className="pos-group-actions"><span className="pos-count">{selectedInGroup}/{group.items.length}</span><button type="button" className="pos-toggle" onClick={()=>toggleVocabularyGroup(group.items)} aria-label={`${allSelected?"Deselect":"Select"} all ${group.label.toLowerCase()} words`}>{allSelected?"Deselect all":"Select all"}</button></div></header>
-                    <div className="language-chip-grid">{group.items.map((item)=>{const isSelected=selectedVocabulary.includes(item);return <button type="button" className={`language-chip ${isSelected?"selected":""}`} aria-pressed={isSelected} key={item} onClick={()=>toggleLanguageItem("vocabulary",item)}>{isSelected&&<Check size={13} aria-hidden="true"/>}<span>{item}</span></button>;})}</div>
+                    <div className="language-chip-grid">{group.items.map((item)=>{const isSelected=selectedVocabulary.includes(item);return <button type="button" className={`language-chip ${isSelected?"selected":""}`} aria-pressed={isSelected} key={item} onClick={()=>toggleLanguageItem("vocabulary",item)}>{isSelected&&<Check size={13} aria-hidden="true"/>}<span>{displayWordPackItem(item)}</span></button>;})}</div>
                   </section>;
                 })}
               </div>
             </section>
             <section className="pack-group pattern-library" aria-labelledby="pack-patterns-title">
               <header className="pack-section-heading"><span className="pos-icon pattern-icon" aria-hidden="true"><Puzzle size={16}/></span><div><h3 id="pack-patterns-title">Target patterns</h3><small>Sentence frames and grammar</small></div><div className="pos-group-actions"><span className="pos-count">{selectedPatterns.length}/{activePack.patterns.length}</span><button type="button" className="pos-toggle" onClick={toggleAllPatterns} aria-label={`${allPatternsSelected?"Deselect":"Select"} all target patterns`}>{allPatternsSelected?"Deselect all":"Select all"}</button></div></header>
-              <div className="language-chip-grid">{activePack.patterns.map((item)=>{const isSelected=selectedPatterns.includes(item);return <button type="button" className={`language-chip pattern-chip ${isSelected?"selected":""}`} aria-pressed={isSelected} key={item} onClick={()=>toggleLanguageItem("patterns",item)}>{isSelected&&<Check size={13} aria-hidden="true"/>}<span>{item}</span></button>;})}</div>
+              <div className="language-chip-grid">{activePack.patterns.map((item)=>{const isSelected=selectedPatterns.includes(item);return <button type="button" className={`language-chip pattern-chip ${isSelected?"selected":""}`} aria-pressed={isSelected} key={item} onClick={()=>toggleLanguageItem("patterns",item)}>{isSelected&&<Check size={13} aria-hidden="true"/>}<span>{displayWordPackItem(item)}</span></button>;})}</div>
             </section>
           </div>
         </article>
