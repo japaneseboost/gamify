@@ -37,6 +37,12 @@ type Prompt = {
   english: string;
 };
 
+type PopState = {
+  team: TeamId;
+  id: number;
+  sequence: number;
+};
+
 type BalloonPosition = {
   x: number;
   y: number;
@@ -203,7 +209,7 @@ function BalloonField({
   team: TeamId;
   total: number;
   activeIds: number[];
-  popping: { team: TeamId; id: number } | null;
+  popping: PopState | null;
   falling: TeamId | null;
   caught: TeamId | null;
 }) {
@@ -211,8 +217,9 @@ function BalloonField({
   const active = useMemo(() => new Set(activeIds), [activeIds]);
   const state = caught === team ? "caught" : falling === team ? "falling" : "flying";
   const danger = activeIds.length <= Math.ceil(total / 3);
+  const impactClass = popping?.team === team ? `impact impact-${popping.sequence % 2}` : "";
 
-  return <section className={`bp-team-field team-${team} ${state} ${danger ? "danger" : ""}`} aria-label={`${teamName(team)} has ${activeIds.length} of ${total} balloons remaining`}>
+  return <section className={`bp-team-field team-${team} ${state} ${danger ? "danger" : ""} ${impactClass}`} aria-label={`${teamName(team)} has ${activeIds.length} of ${total} balloons remaining`}>
     <header>
       <div><Flag size={17} aria-hidden="true"/><span>{teamName(team)}</span></div>
       <strong>{activeIds.length}<small>/{total}</small></strong>
@@ -254,7 +261,10 @@ function BalloonField({
           <div className="bp-shark-facing"><Shark team={team}/></div>
         </div>
       </div>
-      {caught === team && <div className="bp-splash" aria-hidden="true"><i/><i/><i/><i/></div>}
+      {caught === team && <div className="bp-splash" aria-hidden="true">
+        <span className="bp-splash-ring ring-one"/><span className="bp-splash-ring ring-two"/>
+        {Array.from({ length: 8 }, (_, index) => <i key={index}/>) }
+      </div>}
     </div>
     <footer><span className="bp-balloon-meter"><i style={{ width: `${(activeIds.length / total) * 100}%` }}/></span><b>{activeIds.length === 0 ? "Down in the water!" : `${activeIds.length} balloons keeping the rider safe`}</b></footer>
   </section>;
@@ -279,7 +289,8 @@ export default function BalloonPopGame({ items, packName, onClose }: Props) {
   const [dieValue, setDieValue] = useState(1);
   const [rolling, setRolling] = useState(false);
   const [dieSpinning, setDieSpinning] = useState(false);
-  const [popping, setPopping] = useState<{ team: TeamId; id: number } | null>(null);
+  const [popping, setPopping] = useState<PopState | null>(null);
+  const [popProgress, setPopProgress] = useState<{ current: number; total: number } | null>(null);
   const [falling, setFalling] = useState<TeamId | null>(null);
   const [caught, setCaught] = useState<TeamId | null>(null);
   const [winner, setWinner] = useState<TeamId | null>(null);
@@ -356,10 +367,87 @@ export default function BalloonPopGame({ items, packName, onClose }: Props) {
     source.start();
   };
 
+  const playTensionRise = () => {
+    const context = getAudioContext();
+    if (!context) return;
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    oscillator.type = "sawtooth";
+    oscillator.frequency.setValueAtTime(82, context.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(188, context.currentTime + 0.92);
+    gain.gain.setValueAtTime(0.0001, context.currentTime);
+    gain.gain.linearRampToValueAtTime(0.021, context.currentTime + 0.16);
+    gain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.96);
+    oscillator.connect(gain).connect(context.destination);
+    oscillator.start();
+    oscillator.stop(context.currentTime + 0.98);
+  };
+
+  const playFallSting = () => {
+    const context = getAudioContext();
+    if (!context) return;
+    const start = context.currentTime;
+    [392, 311, 233, 147].forEach((frequency, index) => {
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      const noteStart = start + index * 0.16;
+      oscillator.type = index < 2 ? "triangle" : "sawtooth";
+      oscillator.frequency.setValueAtTime(frequency, noteStart);
+      oscillator.frequency.exponentialRampToValueAtTime(Math.max(58, frequency * 0.72), noteStart + 0.34);
+      gain.gain.setValueAtTime(0.0001, noteStart);
+      gain.gain.linearRampToValueAtTime(index === 3 ? 0.055 : 0.035, noteStart + 0.025);
+      gain.gain.exponentialRampToValueAtTime(0.0001, noteStart + 0.38);
+      oscillator.connect(gain).connect(context.destination);
+      oscillator.start(noteStart);
+      oscillator.stop(noteStart + 0.4);
+    });
+  };
+
   const playSplash = () => {
-    playTone(185, 0.34, 0.06, "sawtooth");
-    window.setTimeout(() => playTone(92, 0.42, 0.05, "sine"), 120);
-    window.setTimeout(() => playTone(310, 0.16, 0.035, "triangle"), 260);
+    const context = getAudioContext();
+    if (!context) return;
+    const duration = 0.78;
+    const buffer = context.createBuffer(1, Math.floor(context.sampleRate * duration), context.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let sample = 0; sample < data.length; sample += 1) {
+      const progress = sample / data.length;
+      data[sample] = (Math.random() * 2 - 1) * Math.pow(1 - progress, 1.7);
+    }
+
+    const body = context.createBufferSource();
+    const bodyFilter = context.createBiquadFilter();
+    const bodyGain = context.createGain();
+    body.buffer = buffer;
+    bodyFilter.type = "lowpass";
+    bodyFilter.frequency.setValueAtTime(2100, context.currentTime);
+    bodyFilter.frequency.exponentialRampToValueAtTime(380, context.currentTime + duration);
+    bodyGain.gain.setValueAtTime(0.0001, context.currentTime);
+    bodyGain.gain.linearRampToValueAtTime(0.18, context.currentTime + 0.025);
+    bodyGain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + duration);
+    body.connect(bodyFilter).connect(bodyGain).connect(context.destination);
+    body.start();
+
+    const spray = context.createBufferSource();
+    const sprayFilter = context.createBiquadFilter();
+    const sprayGain = context.createGain();
+    spray.buffer = buffer;
+    sprayFilter.type = "highpass";
+    sprayFilter.frequency.value = 2400;
+    sprayGain.gain.setValueAtTime(0.075, context.currentTime);
+    sprayGain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.46);
+    spray.connect(sprayFilter).connect(sprayGain).connect(context.destination);
+    spray.start();
+
+    const thump = context.createOscillator();
+    const thumpGain = context.createGain();
+    thump.type = "sine";
+    thump.frequency.setValueAtTime(118, context.currentTime);
+    thump.frequency.exponentialRampToValueAtTime(48, context.currentTime + 0.42);
+    thumpGain.gain.setValueAtTime(0.11, context.currentTime);
+    thumpGain.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.46);
+    thump.connect(thumpGain).connect(context.destination);
+    thump.start();
+    thump.stop(context.currentTime + 0.48);
   };
 
   const resetBoard = () => {
@@ -372,6 +460,7 @@ export default function BalloonPopGame({ items, packName, onClose }: Props) {
     setRolling(false);
     setDieSpinning(false);
     setPopping(null);
+    setPopProgress(null);
     setFalling(null);
     setCaught(null);
     setWinner(null);
@@ -423,6 +512,7 @@ export default function BalloonPopGame({ items, packName, onClose }: Props) {
     setDieSpinning(false);
     setAnnouncement(`${teamName(losingTeam)} rolled ${result}. Get ready to pop!`);
     playTone(660, 0.13, 0.045, "triangle");
+    playTensionRise();
     await sleep(1000);
 
     const activeIds = [...balloons[losingTeam]];
@@ -433,23 +523,31 @@ export default function BalloonPopGame({ items, packName, onClose }: Props) {
     for (let index = 0; index < poppingIds.length; index += 1) {
       if (!mountedRef.current) return;
       const id = poppingIds[index];
-      setPopping({ team: losingTeam, id });
+      const currentPop = index + 1;
+      setPopProgress({ current: currentPop, total: popCount });
+      setAnnouncement(`Pop ${currentPop} of ${popCount} — ${teamName(losingTeam)} is losing a balloon!`);
+      setPopping({ team: losingTeam, id, sequence: index });
       playPop(index);
-      await sleep(175);
+      await sleep(460);
       setBalloons((current) => ({ ...current, [losingTeam]: current[losingTeam].filter((balloonId) => balloonId !== id) }));
-      await sleep(75);
+      await sleep(260);
     }
     setPopping(null);
+    setPopProgress(null);
 
     const remaining = activeIds.length - popCount;
     if (remaining === 0) {
+      setAnnouncement(`${teamName(losingTeam)} has no balloons left… hold on!`);
+      playFallSting();
+      await sleep(420);
+      if (!mountedRef.current) return;
       setFalling(losingTeam);
       setAnnouncement(`${teamName(losingTeam)} is falling!`);
-      await sleep(780);
+      await sleep(1060);
       if (!mountedRef.current) return;
       setCaught(losingTeam);
       playSplash();
-      await sleep(850);
+      await sleep(1180);
       if (!mountedRef.current) return;
       const winningTeam = otherTeam(losingTeam);
       setWinner(winningTeam);
@@ -546,11 +644,11 @@ export default function BalloonPopGame({ items, packName, onClose }: Props) {
             <button type="button" className={`team-a ${selectedLoser === "a" ? "selected" : ""}`} aria-pressed={selectedLoser === "a"} onClick={() => selectLosingTeam("a")} disabled={rolling || Boolean(winner)}><span>A</span><strong>Team A loses</strong></button>
             <button type="button" className={`team-b ${selectedLoser === "b" ? "selected" : ""}`} aria-pressed={selectedLoser === "b"} onClick={() => selectLosingTeam("b")} disabled={rolling || Boolean(winner)}><span>B</span><strong>Team B loses</strong></button>
           </div>
-          <div className={`bp-die-zone ${selectedLoser ? `target-${selectedLoser}` : ""}`}>
-            <span className="bp-die-label">{dieSpinning ? "ROLLING…" : rolling ? `${teamName(selectedLoser!)} ROLLED ${dieValue}` : selectedLoser ? `${teamName(selectedLoser)} AT RISK` : "SELECT A TEAM"}</span>
+          <div className={`bp-die-zone ${selectedLoser ? `target-${selectedLoser}` : ""} ${popProgress ? "is-popping" : ""}`}>
+            <span className="bp-die-label">{dieSpinning ? "ROLLING…" : popProgress ? `POP ${popProgress.current} OF ${popProgress.total}` : rolling ? `${teamName(selectedLoser!)} ROLLED ${dieValue}` : selectedLoser ? `${teamName(selectedLoser)} AT RISK` : "SELECT A TEAM"}</span>
             <DieFace value={dieValue} rolling={dieSpinning}/>
             <strong className="bp-die-result">{dieSpinning ? "?" : dieValue}</strong>
-            <button type="button" className="bp-roll-button" onClick={rollDie} disabled={!selectedLoser || rolling || Boolean(winner)}><Dice5 size={21}/>{dieSpinning ? "Rolling…" : rolling ? popping ? "Popping…" : `Rolled ${dieValue}` : "Roll & pop"}</button>
+            <button type="button" className="bp-roll-button" onClick={rollDie} disabled={!selectedLoser || rolling || Boolean(winner)}><Dice5 size={21}/>{dieSpinning ? "Rolling…" : popProgress ? `Popping ${popProgress.current}/${popProgress.total}` : rolling ? `Rolled ${dieValue}` : "Roll & pop"}</button>
           </div>
           <div className="bp-next-step" aria-live="polite"><CircleDot size={16}/><span>{announcement}</span></div>
         </section>

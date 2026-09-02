@@ -23,7 +23,7 @@ export type WordPackSeries = {
 export const wordPackSeries: WordPackSeries[] = [
   { id: "iitomo2", name: "iitomo2", status: "available", packCount: 7 },
   { id: "foundation", name: "Foundation", status: "awaiting-words" },
-  { id: "year-11", name: "Year 11", status: "awaiting-words" },
+  { id: "year-11", name: "Year 11", status: "available", packCount: 1 },
   { id: "year-12", name: "Year 12", status: "awaiting-words" },
 ];
 
@@ -122,5 +122,19 @@ export const wordPacks: WordPack[] = [
       { id:"verbs", label:"Verbs", items:["へらします","上げます","リラックスします","ゆっくりする","かんこうする"] },
     ],
     ["[place]は人気があります","[activity]はストレスをへらします","[activity]はエネルギーを上げます"],
+  ),
+  makePack(
+    "year11-hiroshima",
+    "year-11",
+    "広島",
+    [
+      { id:"places-travel", label:"Places & travel", items:["広島","ツアー","ホテル","部屋","洋室","平和記念公園","地元","伝統工芸","店","オーストラリア","フェリー","宮島","神社","旅行","世界遺産"] },
+      { id:"people-things", label:"People & things", items:["メール","家族","タオル","シーツ","観光客","経験","ガイド","歴史","平和","晩ご飯","お好み焼き","筆","書道","写真"] },
+      { id:"verbs", label:"Verbs", items:["教えます","着きます","観光します","説明します","話します","食べます","買います","帰ります","始めます","乗ります","知ります","撮ります","会います"] },
+      { id:"adjectives", label:"Adjectives", items:["広い","きれい","新しい","気もちがいい","多い","こんでいます","親切(な)","有名(な)","楽しみ(な)"] },
+      { id:"time", label:"Time expressions", items:["きのう","午後","二日間","今日","午前中","明日","来月"] },
+      { id:"expressions", label:"Useful expressions", items:["ありがとう","〜てくれます","〜予定です","〜つもりです","〜たいと思っています","〜について","〜そうです","〜たら","〜間に"] },
+    ],
+    ["[place]に着きました","[place]で観光する予定です","[transport]で[place]に行きました","[topic]について説明してくれました","[food]を食べるつもりです","[item]を買いたいと思っています","[transport]に乗って[place]に行く予定です","[place]は世界遺産だそうです","[verb]たら","[time]間に"],
   ),
 ];
