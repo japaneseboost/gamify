@@ -1,7 +1,8 @@
 "use client";
 
-import Image from "next/image";
+import Image, { type StaticImageData } from "next/image";
 import gamifyLogo from "../public/gamify-logo.png";
+import balloonSharkIcon from "../public/balloon-shark-icon.webp";
 import {
   Armchair, ArrowRight, Brush, Check, ChevronRight, MessageCircleMore, Move3D, Play,
   Brain, UsersRound, X, PencilLine, Target, PackageOpen,
@@ -25,7 +26,7 @@ import { displayWordPackItem, wordPacks, wordPackSeries } from "./wordPacks";
 
 type Activity = {
   id:string; title:string; shortTitle:string; description:string;
-  category:string; time:string; icon:typeof MessageCircleMore; tone:string; stage:StageId;
+  category:string; time:string; icon:typeof MessageCircleMore; image?:StaticImageData; tone:string; stage:StageId;
   rules:string[];
 };
 
@@ -47,16 +48,6 @@ const vocabularyGroupVisuals:Record<string,{icon:typeof Shapes;tone:string;descr
   expressions:{icon:MessageCircleMore,tone:"pink",description:"Useful classroom phrases"},
   "adverbs-time":{icon:Clock3,tone:"lavender",description:"Time, frequency and manner"},
 };
-
-const FierceSharkIcon = ({size=24,className}:{size?:number;className?:string}) => (
-  <svg className={className} width={size} height={size} viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M3 8.5 9.5 14C13 9.5 17.5 7.5 22 8.5c3.2.7 5.8 2.5 7.5 5.5-1.7 3-4.3 4.8-7.5 5.5-4.5 1-9-.9-12.5-5.5L3 19.5 5.5 14 3 8.5Z"/>
-    <path d="m14.5 9 3-5 3.2 4.7"/>
-    <path d="m21.5 11.2 3.4-1"/>
-    <circle cx="24.6" cy="11.4" r=".7" fill="currentColor" stroke="none"/>
-    <path d="M21.5 15h6l-1.2 2-1.2-1.5-1.2 1.5-1.2-1.5-1.2 1.5"/>
-  </svg>
-);
 
 const activities:Activity[] = [
   {
@@ -88,7 +79,7 @@ const activities:Activity[] = [
     rules:["Four starting kana begin in the centre.","A team says a Word Pack item beginning with one kana.","Teacher drags that kana one column towards the team.","First team to bring three kana home wins the round."],
   },
   {
-    id:"balloon-pop", title:"Balloon Pop", shortTitle:"Balloon Pop", description:"Answer a Word Pack prompt, roll the digital die, and pop that many balloons from the opposing team before the shark gets your rider.", category:"Production by Speaking", time:"8–12 min", icon:FierceSharkIcon, tone:"blue", stage:"speaking",
+    id:"balloon-pop", title:"Balloon Pop", shortTitle:"Balloon Pop", description:"Answer a Word Pack prompt, roll the digital die, and pop that many balloons from the opposing team before the shark gets your rider.", category:"Production by Speaking", time:"8–12 min", icon:Target, image:balloonSharkIcon, tone:"blue", stage:"speaking",
     rules:["Choose turn-taking or race mode and an English or Japanese prompt.","Students answer aloud; the teacher decides which team loses the round.","Select the losing team, then roll the digital die.","The die pops that many balloons. The last team still in the sky wins."],
   },
   {
@@ -362,7 +353,7 @@ export default function Home(){
         <h1 className="visually-hidden" id="apps-title">Gamify learning modes</h1>
         <div className="lesson-stage-grid">
           {lessonStages.map((stage)=>{const stageActivities=activities.filter((activity)=>activity.stage===stage.id);if(stageActivities.length===0)return null;return <section className={`lesson-stage stage-${stage.tone}`} key={stage.id} aria-labelledby={`stage-${stage.id}`}><header><span className="stage-index"><small>Stage</small><b>{stage.number}</b></span><div><h2 id={`stage-${stage.id}`}>{stage.name}</h2><p>{stage.purpose}</p></div></header><div className="stage-activities">
-            {stageActivities.map((activity)=>{const Icon=activity.icon;return <button className="stage-activity" key={activity.id} onClick={()=>setSelected(activity)} aria-label={`Create ${activity.title}`}><span className={`app-icon app-${activity.tone}`}><Icon size={24}/><i/></span><span className="activity-copy"><strong>{activity.shortTitle}</strong><small>{activity.time}</small></span><ChevronRight className="activity-chevron" size={18} aria-hidden="true"/></button>;})}
+            {stageActivities.map((activity)=>{const Icon=activity.icon;return <button className="stage-activity" key={activity.id} onClick={()=>setSelected(activity)} aria-label={`Create ${activity.title}`}><span className={`app-icon app-${activity.tone} ${activity.image?"app-image-icon":""}`}>{activity.image?<Image className="game-card-character" src={activity.image} alt="" aria-hidden="true" sizes="64px"/>:<Icon size={24}/>}<i/></span><span className="activity-copy"><strong>{activity.shortTitle}</strong><small>{activity.time}</small></span><ChevronRight className="activity-chevron" size={18} aria-hidden="true"/></button>;})}
           </div></section>;})}
         </div>
       </section>
@@ -370,7 +361,7 @@ export default function Home(){
 
     {selected&&<div className="modal-backdrop app-modal-backdrop" onMouseDown={(event)=>{if(event.target===event.currentTarget)setSelected(null);}}><section className="launch-sheet" role="dialog" aria-modal="true" aria-labelledby="launch-title">
       <button className="sheet-close" onClick={()=>setSelected(null)} aria-label="Close"><X size={20}/></button>
-      <header className="launch-identity"><div className={`app-icon app-${selected.tone}`}><SelectedIcon size={34}/><i/></div><div><p className="sheet-category">{selected.category} · {selected.time}</p><h2 id="launch-title">{selected.title}</h2></div></header>
+      <header className="launch-identity"><div className={`app-icon app-${selected.tone} ${selected.image?"app-image-icon":""}`}>{selected.image?<Image className="game-card-character" src={selected.image} alt="" aria-hidden="true" sizes="80px"/>:<SelectedIcon size={34}/>}<i/></div><div><p className="sheet-category">{selected.category} · {selected.time}</p><h2 id="launch-title">{selected.title}</h2></div></header>
       <p className="launch-description">{selected.description}</p>
       <section className={`launch-rules launch-rules-${selected.tone}`} aria-labelledby="launch-rules-title">
         <header><span aria-hidden="true"><ListChecks size={18}/></span><div><small>HOW TO PLAY</small><h3 id="launch-rules-title">Game rules</h3></div></header>

@@ -2328,3 +2328,34 @@ html[data-theme="dark"] .ooo-explanation.visible strong{color:#9fe1ce}
   .ooo-option-grid li,.ooo-controls button,.ooo-close{transition:none!important}
   .ooo-option-grid li.odd{transform:none}
 }
+
+
+/* Supplied Balloon Pop character icon */
+.app-icon.app-image-icon{
+  overflow:hidden;
+  border-color:rgba(112,196,228,.72);
+  background:linear-gradient(145deg,#e7faff 0%,#a8def3 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 10px 23px rgba(55,139,188,.22);
+}
+.app-icon.app-image-icon::before{
+  z-index:2;
+  pointer-events:none;
+  background:linear-gradient(145deg,rgba(255,255,255,.42),transparent 42%);
+}
+.app-icon .game-card-character{
+  position:relative;
+  z-index:1;
+  width:100%;
+  height:100%;
+  max-width:none;
+  object-fit:contain;
+  filter:drop-shadow(0 4px 5px rgba(14,65,112,.25));
+  transform:scale(1.13);
+}
+.app-icon.app-image-icon i{z-index:3;background:rgba(255,255,255,.30)}
+.launch-identity .app-icon .game-card-character{transform:scale(1.09)}
+html[data-theme="dark"] .app-icon.app-image-icon{
+  border-color:rgba(85,172,210,.58);
+  background:linear-gradient(145deg,#d9f5ff 0%,#78bedf 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.64),0 12px 25px rgba(0,0,0,.26);
+}
