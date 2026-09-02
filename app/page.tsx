@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import ReadMyMindGame from "./ReadMyMindGame";
+import OddOneOutGame from "./OddOneOutGame";
 import DelayedDictationGame from "./DelayedDictationGame";
 import TugOfWarGame from "./TugOfWarGame";
 import FaultyEchoGame from "./FaultyEchoGame";
@@ -79,6 +80,10 @@ const activities:Activity[] = [
     rules:["Read the complete sentence together.","Erase or reveal one chunk using the chosen mode.","Students still say every hidden chunk from memory.","Continue until they can reproduce the whole sentence."],
   },
   {
+    id:"odd-one-out", title:"Odd One Out", shortTitle:"Odd One Out", description:"Compare vocabulary on Japanese-style plates and identify the word that belongs to a different category.", category:"Input by Reading", time:"5–10 min", icon:Shapes, tone:"purple", stage:"reading",
+    rules:["Read all the words and decide what most of them have in common.","Students vote together by showing 1, 2, 3, or 4 fingers.","Reveal the odd word and discuss why it belongs to a different category.","Play 10 questions: the first six have 3 options, then the last four increase to 4."],
+  },
+  {
     id:"tug-of-war", title:"Tug-of-War Vocabulary Game", shortTitle:"Tug-of-War", description:"Four starting kana begin in the centre. Drag the matching kana toward the team whenever they give a correct Word Pack item.", category:"Retrieval Practice", time:"8–12 min", icon:Move3D, tone:"pink", stage:"retrieval",
     rules:["Four starting kana begin in the centre.","A team says a Word Pack item beginning with one kana.","Teacher drags that kana one column towards the team.","First team to bring three kana home wins the round."],
   },
@@ -119,6 +124,7 @@ export default function Home(){
   const [faultyEchoOpen,setFaultyEchoOpen]=useState(false);
   const [delayedDictationOpen,setDelayedDictationOpen]=useState(false);
   const [eraseGameOpen,setEraseGameOpen]=useState(false);
+  const [oddOneOutOpen,setOddOneOutOpen]=useState(false);
   const [tugOfWarOpen,setTugOfWarOpen]=useState(false);
   const [balloonPopOpen,setBalloonPopOpen]=useState(false);
   const [volcanoOpen,setVolcanoOpen]=useState(false);
@@ -194,11 +200,11 @@ export default function Home(){
 
   useEffect(()=>{
     const close=(event:KeyboardEvent)=>{
-      if(event.key==="Escape"&&!readMyMindOpen&&!quickfireOpen&&!faultyEchoOpen&&!delayedDictationOpen&&!eraseGameOpen&&!tugOfWarOpen&&!balloonPopOpen&&!volcanoOpen&&!drawOrActOpen&&!passTheBombOpen&&!whatsMissingOpen&&!hotSeatOpen)setSelected(null);
+      if(event.key==="Escape"&&!readMyMindOpen&&!quickfireOpen&&!faultyEchoOpen&&!delayedDictationOpen&&!eraseGameOpen&&!oddOneOutOpen&&!tugOfWarOpen&&!balloonPopOpen&&!volcanoOpen&&!drawOrActOpen&&!passTheBombOpen&&!whatsMissingOpen&&!hotSeatOpen)setSelected(null);
     };
     window.addEventListener("keydown",close);
     return()=>window.removeEventListener("keydown",close);
-  },[readMyMindOpen,quickfireOpen,faultyEchoOpen,delayedDictationOpen,eraseGameOpen,tugOfWarOpen,balloonPopOpen,volcanoOpen,drawOrActOpen,passTheBombOpen,whatsMissingOpen,hotSeatOpen]);
+  },[readMyMindOpen,quickfireOpen,faultyEchoOpen,delayedDictationOpen,eraseGameOpen,oddOneOutOpen,tugOfWarOpen,balloonPopOpen,volcanoOpen,drawOrActOpen,passTheBombOpen,whatsMissingOpen,hotSeatOpen]);
 
   const createActivity=()=>{
     if(!selected||(selected.id!=="pass-the-bomb"&&selectedCount===0))return;
@@ -228,6 +234,12 @@ export default function Home(){
       if(selectedVocabulary.length===0)return;
       setSelected(null);
       setEraseGameOpen(true);
+      return;
+    }
+    if(selected.id==="odd-one-out"){
+      if(selectedVocabulary.length<4)return;
+      setSelected(null);
+      setOddOneOutOpen(true);
       return;
     }
     if(selected.id==="tug-of-war"){
@@ -274,10 +286,10 @@ export default function Home(){
   };
 
   const SelectedIcon=selected?.icon??Target;
-  const vocabularyOnlyActivities=["quickfire","faulty-echo","erase-game","tug-of-war","balloon-pop","volcano","draw-or-act","whats-missing","hot-seat"];
+  const vocabularyOnlyActivities=["quickfire","faulty-echo","erase-game","odd-one-out","tug-of-war","balloon-pop","volcano","draw-or-act","whats-missing","hot-seat"];
   const selectedLanguageCount=selected?.id==="pass-the-bomb"?1:selected&&vocabularyOnlyActivities.includes(selected.id)?selectedVocabulary.length:selectedCount;
-  const canLaunchSelected=selectedLanguageCount>0&&(selected?.id!=="whats-missing"||selectedVocabulary.length>=8);
-  const launchLabel=selected?.id==="quickfire"?"Launch Quickfire":selected?.id==="read-my-mind"?"Launch Read My Mind":selected?.id==="faulty-echo"?"Launch Faulty Echo":selected?.id==="delayed-dictation"?"Launch Delayed Dictation":selected?.id==="erase-game"?"Launch Erase Game":selected?.id==="tug-of-war"?"Launch Tug-of-War":selected?.id==="balloon-pop"?"Launch Balloon Pop":selected?.id==="volcano"?"Launch Volcano":selected?.id==="draw-or-act"?"Launch Draw or Act":selected?.id==="pass-the-bomb"?"Launch Pass the Bomb":selected?.id==="whats-missing"?"Launch What’s Missing?":selected?.id==="hot-seat"?"Launch Hot Seat":"Launch activity";
+  const canLaunchSelected=selectedLanguageCount>0&&(selected?.id!=="whats-missing"||selectedVocabulary.length>=8)&&(selected?.id!=="odd-one-out"||selectedVocabulary.length>=4);
+  const launchLabel=selected?.id==="quickfire"?"Launch Quickfire":selected?.id==="read-my-mind"?"Launch Read My Mind":selected?.id==="faulty-echo"?"Launch Faulty Echo":selected?.id==="delayed-dictation"?"Launch Delayed Dictation":selected?.id==="erase-game"?"Launch Erase Game":selected?.id==="odd-one-out"?"Launch Odd One Out":selected?.id==="tug-of-war"?"Launch Tug-of-War":selected?.id==="balloon-pop"?"Launch Balloon Pop":selected?.id==="volcano"?"Launch Volcano":selected?.id==="draw-or-act"?"Launch Draw or Act":selected?.id==="pass-the-bomb"?"Launch Pass the Bomb":selected?.id==="whats-missing"?"Launch What’s Missing?":selected?.id==="hot-seat"?"Launch Hot Seat":"Launch activity";
 
   return <main className="ipad-page" data-theme={theme}>
     <a className="skip-link" href="#activity-apps">Skip to activities</a>
@@ -369,6 +381,7 @@ export default function Home(){
         {selected.id==="tug-of-war"&&<div className="tow-launch-note"><UsersRound size={19}/><div><strong>Teacher-controlled team board</strong><small>Four different starting kana are drawn from the vocabulary selected in this Word Pack.</small></div></div>}
       </section>}
       {selected.id==="whats-missing"&&selectedVocabulary.length<8&&<p className="launch-requirement" role="status">Select at least 8 vocabulary words to play.</p>}
+      {selected.id==="odd-one-out"&&selectedVocabulary.length<4&&<p className="launch-requirement" role="status">Select at least 4 vocabulary words to play all difficulty levels.</p>}
       <button className="launch-button" onClick={createActivity} disabled={!canLaunchSelected}><Play size={19}/> {launchLabel} <ArrowRight size={19}/></button>
     </section></div>}
 
@@ -377,6 +390,7 @@ export default function Home(){
     {faultyEchoOpen&&<FaultyEchoGame packId={activePack.id} packName={activePack.name} groups={delayedDictationGroups} patterns={selectedPatterns} onClose={()=>setFaultyEchoOpen(false)}/>}
     {delayedDictationOpen&&<DelayedDictationGame packId={activePack.id} groups={delayedDictationGroups} patterns={selectedPatterns} memoryDelay={memoryDelay} onClose={()=>setDelayedDictationOpen(false)}/>}
     {eraseGameOpen&&<EraseGame packId={activePack.id} packName={activePack.name} groups={delayedDictationGroups} patterns={selectedPatterns} onClose={()=>setEraseGameOpen(false)}/>}
+    {oddOneOutOpen&&<OddOneOutGame groups={delayedDictationGroups} packName={activePack.name} onClose={()=>setOddOneOutOpen(false)}/>}
     {tugOfWarOpen&&<TugOfWarGame items={selectedVocabulary} packName={activePack.name} onClose={()=>setTugOfWarOpen(false)}/>}
     {balloonPopOpen&&<BalloonPopGame items={selectedVocabulary} packName={activePack.name} onClose={()=>setBalloonPopOpen(false)}/>}
     {volcanoOpen&&<VolcanoGame items={selectedVocabulary} packName={activePack.name} onClose={()=>setVolcanoOpen(false)}/>}
