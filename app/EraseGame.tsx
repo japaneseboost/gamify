@@ -14,7 +14,7 @@ import {
   WholeWord,
   X,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { VocabularyGroup } from "./wordPacks";
 
 type Props = {
@@ -124,13 +124,29 @@ const modeDetails:{id:EraseMode;label:string;description:string;icon:typeof Shuf
   {id:"reverse",label:"Reverse reveal",description:"Begin blank and reveal one chunk at a time",icon:Eye},
 ];
 
+const fallbackSentence=()=>sentence("fallback",[],chunk("detail","にほんご"),chunk("detail",particle("を")),chunk("verb","よみます"));
+
 function chooseSentence(pool:EraseSentence[],previousKey=""){
   const different=pool.filter((item)=>item.key!==previousKey);
   const choices=different.length?different:pool;
-  return choices[Math.floor(Math.random()*choices.length)]??sentence("fallback",[],chunk("detail","にほんご"),chunk("detail",particle("を")),chunk("verb","よみます"));
+  return choices[Math.floor(Math.random()*choices.length)]??fallbackSentence();
+}
+
+function chooseUnusedSentence(pool:EraseSentence[],usedKeys:Set<string>,previousKey=""){
+  let choices=pool.filter((item)=>!usedKeys.has(item.key));
+
+  if(!choices.length){
+    pool.forEach((item)=>usedKeys.delete(item.key));
+    choices=pool;
+  }
+
+  const next=chooseSentence(choices,previousKey);
+  usedKeys.add(next.key);
+  return next;
 }
 
 const chunkText = (value:SentenceChunk) => value.parts.map((part)=>part.text).join("");
+const sentenceSignature = (value:EraseSentence) => value.chunks.map(chunkText).join("|");
 const particleKeys = (value:EraseSentence) => value.chunks.flatMap((sentenceChunk,chunkIndex)=>sentenceChunk.parts.flatMap((part,partIndex)=>part.particle?[`${chunkIndex}-${partIndex}`]:[]));
 const verbIndexes = (value:EraseSentence) => value.chunks.flatMap((sentenceChunk,index)=>sentenceChunk.role==="verb"?[index]:[]);
 
@@ -148,9 +164,11 @@ export default function EraseGame({packId,packName,groups,patterns,onClose}:Prop
   )),[vocabulary]);
   const sentences=useMemo(()=>{
     const curated=(eraseSentenceBank[packId]??[]).filter((item)=>item.needs.every((need)=>selected.has(need)));
-    return curated.length?curated:fallbackSentences;
+    const source=curated.length?curated:fallbackSentences;
+    return Array.from(new Map(source.map((item)=>[sentenceSignature(item),item])).values());
   },[fallbackSentences,packId,selected]);
   const [current,setCurrent]=useState<EraseSentence>(()=>chooseSentence(sentences));
+  const usedSentenceKeys=useRef<Set<string>>(new Set());
 
   const poolForMode=(nextMode:EraseMode)=>{
     if(nextMode==="verbs"){
@@ -171,7 +189,8 @@ export default function EraseGame({packId,packName,groups,patterns,onClose}:Prop
   };
 
   const startGame=()=>{
-    const next=chooseSentence(poolForMode(mode));
+    usedSentenceKeys.current.clear();
+    const next=chooseUnusedSentence(poolForMode(mode),usedSentenceKeys.current);
     setCurrent(next);
     setRound(1);
     resetBoard(mode,next);
@@ -180,7 +199,8 @@ export default function EraseGame({packId,packName,groups,patterns,onClose}:Prop
 
   const changeMode=(nextMode:EraseMode)=>{
     const pool=poolForMode(nextMode);
-    const next=(nextMode==="verbs"&&verbIndexes(current).length===0)||(nextMode==="particles"&&particleKeys(current).length===0)?chooseSentence(pool,current.key):current;
+    const needsCompatibleSentence=(nextMode==="verbs"&&verbIndexes(current).length===0)||(nextMode==="particles"&&particleKeys(current).length===0);
+    const next=needsCompatibleSentence?chooseUnusedSentence(pool,usedSentenceKeys.current,current.key):current;
     setMode(nextMode);
     setCurrent(next);
     resetBoard(nextMode,next);
@@ -225,13 +245,16 @@ export default function EraseGame({packId,packName,groups,patterns,onClose}:Prop
   };
 
   const newSentence=()=>{
-    const next=chooseSentence(poolForMode(mode),current.key);
+    const next=chooseUnusedSentence(poolForMode(mode),usedSentenceKeys.current,current.key);
     setCurrent(next);
     setRound((value)=>value+1);
     resetBoard(mode,next);
   };
 
   const relevantTotal=mode==="particles"?particleKeys(current).length:mode==="verbs"?verbIndexes(current).length:current.chunks.length;
+  const activeSentencePool=poolForMode(mode);
+  const usedSentenceCount=activeSentencePool.filter((item)=>usedSentenceKeys.current.has(item.key)).length;
+  const allUniqueSentencesUsed=activeSentencePool.length>0&&usedSentenceCount>=activeSentencePool.length;
   const relevantHidden=mode==="particles"?hiddenParticles.size:mode==="verbs"?verbIndexes(current).filter((index)=>hiddenChunks.has(index)).length:hiddenChunks.size;
   const complete=mode==="reverse"?hiddenChunks.size===0:relevantTotal>0&&relevantHidden>=relevantTotal;
   const progressValue=mode==="reverse"?current.chunks.length-hiddenChunks.size:relevantHidden;
@@ -272,7 +295,7 @@ export default function EraseGame({packId,packName,groups,patterns,onClose}:Prop
         {complete&&<div className={`eg-complete-note ${mode==="reverse"?"reverse":""}`}>{mode==="reverse"?<Eye size={20}/>:<EyeOff size={20}/>}<strong>{mode==="reverse"?"The full sentence is back!":"Now say every missing part from memory!"}</strong></div>}
       </section>
 
-      <section className="eg-controls"><div><small>CLASS PROMPT</small><strong>{mode==="teacher"?"Choose the next chunk on the board.":actionLabel}</strong><span>After every change, read the complete sentence again.</span></div>{mode!=="teacher"&&<button type="button" className="eg-main-action" onClick={nextStep} disabled={complete}>{mode==="reverse"?<Eye size={20}/>:<Eraser size={20}/>} {complete?(mode==="reverse"?"Fully revealed":"All erased"):actionLabel}</button>}<button type="button" className="eg-new-sentence" onClick={newSentence}><RefreshCw size={19}/><span><small>START ANOTHER ROUND</small>New sentence</span></button></section>
+      <section className="eg-controls"><div><small>CLASS PROMPT</small><strong>{mode==="teacher"?"Choose the next chunk on the board.":actionLabel}</strong><span>After every change, read the complete sentence again.</span></div>{mode!=="teacher"&&<button type="button" className="eg-main-action" onClick={nextStep} disabled={complete}>{mode==="reverse"?<Eye size={20}/>:<Eraser size={20}/>} {complete?(mode==="reverse"?"Fully revealed":"All erased"):actionLabel}</button>}<button type="button" className="eg-new-sentence" onClick={newSentence} aria-label={allUniqueSentencesUsed?"Start a fresh sentence cycle":"Show a new unused sentence"}><RefreshCw size={19}/><span><small>{allUniqueSentencesUsed?"ALL UNIQUE SENTENCES USED":"START ANOTHER ROUND"}</small>{allUniqueSentencesUsed?"Start fresh cycle":"New sentence"}</span></button></section>
     </main>}
   </div>;
 }
