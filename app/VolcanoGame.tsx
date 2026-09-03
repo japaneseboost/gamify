@@ -10,9 +10,8 @@ import {
   Mountain,
   RotateCcw,
   Shuffle,
-  Swords,
+  Star,
   Trophy,
-  UsersRound,
   Volume2,
   VolumeX,
   X,
@@ -27,7 +26,6 @@ type Props = {
 };
 
 type TeamId = "a" | "b";
-type PlayMode = "turns" | "race";
 type PromptLanguage = "english" | "japanese";
 type Phase = "setup" | "playing" | "finished";
 
@@ -132,24 +130,22 @@ function ClimbField({ team, position, moving, falling, winner }: { team: TeamId;
         {Array.from({ length: 12 }, (_, index) => {
           const step = index + 1;
           const style = { "--vg-step-x": `${index * 7.05}%`, "--vg-step-y": `${index * 6.25}%` } as CSSProperties;
-          return <span className={step === position ? "current" : step < position ? "passed" : ""} style={style} key={step}><b>{step}</b></span>;
+          return <span className={`${step === position ? "current" : step < position ? "passed" : ""} ${step === 10 ? "win-step" : ""}`.trim()} style={style} key={step}><b>{step}</b>{step === 10 && <Star size={14} fill="currentColor"/>}</span>;
         })}
       </div>
       <div className="vg-climber" style={climberStyle}><Climber team={team} danger={position >= 10}/></div>
       {falling && <div className="vg-fall-trail" aria-hidden="true"><i/><i/><i/></div>}
     </div>
-    <footer><span><i style={{ width: `${(position / 12) * 100}%` }}/></span><b>{position === 12 ? "Standing on the summit!" : position === 0 ? "Ready at the base" : `${12 - position} safe ${12 - position === 1 ? "step" : "steps"} remaining`}</b></footer>
+    <footer><span><i style={{ width: `${(position / 12) * 100}%` }}/></span><b>{position === 12 ? "Standing on the summit!" : position >= 10 ? "Safe win unlocked — stop or climb" : position === 0 ? "Ready at the base" : `${10 - position} ${10 - position === 1 ? "step" : "steps"} to the safe-win star`}</b></footer>
   </section>;
 }
 
 export default function VolcanoGame({ items, packName, onClose }: Props) {
   const prompts = useMemo<Prompt[]>(() => items.map((value) => ({ key: value, japanese: cleanJapaneseWord(value), english: vocabularyEnglish[value] ?? value })), [items]);
   const [phase, setPhase] = useState<Phase>("setup");
-  const [playMode, setPlayMode] = useState<PlayMode>("turns");
   const [promptLanguage, setPromptLanguage] = useState<PromptLanguage>("english");
   const [prompt, setPrompt] = useState<Prompt>(() => choosePrompt(prompts));
   const [positions, setPositions] = useState<Record<TeamId, number>>({ a: 0, b: 0 });
-  const [currentTurn, setCurrentTurn] = useState<TeamId>("a");
   const [selectedTeam, setSelectedTeam] = useState<TeamId | null>(null);
   const [dieValue, setDieValue] = useState(1);
   const [rolling, setRolling] = useState(false);
@@ -232,7 +228,6 @@ export default function VolcanoGame({ items, packName, onClose }: Props) {
   const resetGame = () => {
     setPrompt(choosePrompt(prompts));
     setPositions({ a: 0, b: 0 });
-    setCurrentTurn("a");
     setSelectedTeam(null);
     setDieValue(1);
     setRolling(false);
@@ -252,7 +247,7 @@ export default function VolcanoGame({ items, packName, onClose }: Props) {
   };
 
   const selectTeam = (team: TeamId) => {
-    if (rolling || winner || (playMode === "turns" && currentTurn !== team)) return;
+    if (rolling || winner) return;
     setSelectedTeam(team);
     setAnnouncement(`${teamName(team)} answered correctly. Roll the 1–3 die.`);
     playTone(team === "a" ? 349 : 415, 0.08, 0.025, "triangle");
@@ -320,7 +315,6 @@ export default function VolcanoGame({ items, packName, onClose }: Props) {
     setRolling(false);
     setMovingTeam(null);
     setSelectedTeam(null);
-    if (playMode === "turns") setCurrentTurn((current) => otherTeam(current));
     setPrompt((current) => choosePrompt(prompts, current.key));
     setAnnouncement("Next prompt ready. Choose the correct team.");
   };
@@ -330,20 +324,13 @@ export default function VolcanoGame({ items, packName, onClose }: Props) {
     setPrompt((current) => choosePrompt(prompts, current.key));
     setRevealed(false);
     setSelectedTeam(null);
-    if (playMode === "turns") setCurrentTurn((current) => otherTeam(current));
     setAnnouncement("New prompt ready.");
     playTone(520, 0.08, 0.024, "triangle");
   };
 
-  const finishByHeight = () => {
-    if (rolling || winner) return;
-    if (positions.a === positions.b) {
-      setAnnouncement("The teams are level. Play one more prompt to break the tie.");
-      playTone(210, 0.15, 0.025, "sine");
-      return;
-    }
-    const leader: TeamId = positions.a > positions.b ? "a" : "b";
-    completeWin(leader, `${teamName(leader)} was standing highest when the teacher ended the match.`);
+  const claimVictory = (team: TeamId) => {
+    if (rolling || winner || positions[team] < 10) return;
+    completeWin(team, `${teamName(team)} stopped safely on step ${positions[team]} and claimed the win.`);
   };
 
   const playAgain = () => {
@@ -354,7 +341,6 @@ export default function VolcanoGame({ items, packName, onClose }: Props) {
   const promptText = promptLanguage === "english" ? prompt.english : prompt.japanese;
   const answerText = promptLanguage === "english" ? prompt.japanese : prompt.english;
   const promptDirection = promptLanguage === "english" ? "English → Japanese" : "Japanese → English";
-  const turnCopy = playMode === "race" ? "Both teams race to answer" : `${teamName(currentTurn)} answers this turn`;
   const busy = rolling || Boolean(movingTeam) || Boolean(fallingTeam);
 
   return <div className={`vg-portal ${fallingTeam ? "is-erupting" : ""}`} role="dialog" aria-modal="true" aria-label="Volcano classroom game">
@@ -371,21 +357,17 @@ export default function VolcanoGame({ items, packName, onClose }: Props) {
       <section className="vg-start-panel" aria-labelledby="vg-start-title">
         <div className="vg-start-hero">
           <div className="vg-mini-volcano" aria-hidden="true"><i/><i/><i/><span className="mini-climber-a"/><span className="mini-climber-b"/></div>
-          <p>SPEAKING GAME · 2-TEAM CHALLENGE</p>
+          <p>RETRIEVAL GAME · 2-TEAM RACE</p>
           <h1 id="vg-start-title">Climb high—but don&apos;t fall into the lava!</h1>
-          <span>Answer Word Pack prompts, roll 1–3, and move towards the summit. Exact step 12 is safe; anything higher is not.</span>
+          <span>Race to answer, roll 1–3, and climb. From the starred step 10, stop and claim victory—or risk climbing higher. Go past 12 and fall into the lava.</span>
         </div>
         <ol className="vg-rules">
-          <li><b>1</b><div><strong>Answer the prompt</strong><span>Play in turns or let both teams race.</span></div></li>
+          <li><b>1</b><div><strong>Race to answer</strong><span>The first team with the correct answer earns the roll.</span></div></li>
           <li><b>2</b><div><strong>Select the correct team</strong><span>The answering team earns the roll.</span></div></li>
           <li><b>3</b><div><strong>Roll the 1–3 die</strong><span>The climber moves up that many steps.</span></div></li>
-          <li><b>4</b><div><strong>Land exactly on 12</strong><span>Reach the summit to win. Go past it and fall into the lava.</span></div></li>
+          <li><b>4</b><div><strong>Stop or take the risk</strong><span>From the starred step 10, claim victory or keep climbing. Go past 12 and lose.</span></div></li>
         </ol>
-        <div className="vg-setup-options">
-          <fieldset><legend>How teams answer</legend><div className="vg-choice-row">
-            <button type="button" className={playMode === "turns" ? "selected" : ""} aria-pressed={playMode === "turns"} onClick={() => setPlayMode("turns")}><UsersRound size={20}/><span><strong>Take turns</strong><small>Team A, then Team B</small></span></button>
-            <button type="button" className={playMode === "race" ? "selected" : ""} aria-pressed={playMode === "race"} onClick={() => setPlayMode("race")}><Swords size={20}/><span><strong>Race mode</strong><small>First correct answer rolls</small></span></button>
-          </div></fieldset>
+        <div className="vg-setup-options vg-prompt-only">
           <fieldset><legend>Prompt language</legend><div className="vg-choice-row">
             <button type="button" className={promptLanguage === "english" ? "selected" : ""} aria-pressed={promptLanguage === "english"} onClick={() => setPromptLanguage("english")}><span className="vg-language-mark">EN</span><span><strong>English</strong><small>Answer in Japanese</small></span></button>
             <button type="button" className={promptLanguage === "japanese" ? "selected" : ""} aria-pressed={promptLanguage === "japanese"} onClick={() => setPromptLanguage("japanese")}><span className="vg-language-mark">日</span><span><strong>Japanese</strong><small>Give the English meaning</small></span></button>
@@ -397,7 +379,7 @@ export default function VolcanoGame({ items, packName, onClose }: Props) {
 
     {phase !== "setup" && <main className="vg-game-stage">
       <section className="vg-prompt-strip" aria-live="polite">
-        <div className="vg-prompt-context"><small>{turnCopy}</small><span><Languages size={15}/>{promptDirection}</span></div>
+        <div className="vg-prompt-context"><small>Both teams race to answer</small><span><Languages size={15}/>{promptDirection}</span></div>
         <div className="vg-prompt-copy"><p>CLASS PROMPT</p><h1>{promptText}</h1>{revealed && <strong>{answerText}</strong>}</div>
         <div className="vg-prompt-actions"><button type="button" onClick={() => setRevealed((value) => !value)} disabled={busy}>{revealed ? <><Eye size={17}/> Hide answer</> : <><Eye size={17}/> Reveal answer</>}</button><button type="button" onClick={nextPrompt} disabled={busy}><Shuffle size={17}/> New prompt</button></div>
       </section>
@@ -406,10 +388,10 @@ export default function VolcanoGame({ items, packName, onClose }: Props) {
         <ClimbField team="a" position={positions.a} moving={movingTeam === "a"} falling={fallingTeam === "a"} winner={winner === "a"}/>
 
         <section className="vg-control-core" aria-labelledby="vg-control-title">
-          <div className="vg-control-heading"><small>TEACHER CONTROLS</small><h2 id="vg-control-title">Who answered correctly?</h2><p>{playMode === "turns" ? `${teamName(currentTurn)} is taking this turn.` : "Choose the fastest correct team."}</p></div>
+          <div className="vg-control-heading"><small>TEACHER CONTROLS</small><h2 id="vg-control-title">Who answered correctly?</h2><p>Choose the fastest correct team.</p></div>
           <div className="vg-team-buttons">
-            <button type="button" className={`team-a ${selectedTeam === "a" ? "selected" : ""}`} aria-pressed={selectedTeam === "a"} onClick={() => selectTeam("a")} disabled={busy || Boolean(winner) || (playMode === "turns" && currentTurn !== "a")}><span>A</span><strong>Team A correct</strong></button>
-            <button type="button" className={`team-b ${selectedTeam === "b" ? "selected" : ""}`} aria-pressed={selectedTeam === "b"} onClick={() => selectTeam("b")} disabled={busy || Boolean(winner) || (playMode === "turns" && currentTurn !== "b")}><span>B</span><strong>Team B correct</strong></button>
+            <button type="button" className={`team-a ${selectedTeam === "a" ? "selected" : ""}`} aria-pressed={selectedTeam === "a"} onClick={() => selectTeam("a")} disabled={busy || Boolean(winner)}><span>A</span><strong>Team A correct</strong></button>
+            <button type="button" className={`team-b ${selectedTeam === "b" ? "selected" : ""}`} aria-pressed={selectedTeam === "b"} onClick={() => selectTeam("b")} disabled={busy || Boolean(winner)}><span>B</span><strong>Team B correct</strong></button>
           </div>
           <div className={`vg-die-zone ${selectedTeam ? `target-${selectedTeam}` : ""}`}>
             <span className="vg-die-label">{rolling ? "ROLLING 1–3…" : selectedTeam ? `${teamName(selectedTeam)} CLIMBS` : "SELECT A TEAM"}</span>
@@ -418,7 +400,19 @@ export default function VolcanoGame({ items, packName, onClose }: Props) {
             <button type="button" className="vg-roll-button" onClick={rollDie} disabled={!selectedTeam || busy || Boolean(winner)}><Dice3 size={21}/>{rolling ? "Rolling…" : "Roll & climb"}</button>
           </div>
           <div className="vg-next-step" aria-live="polite"><Mountain size={16}/><span>{announcement}</span></div>
-          <button type="button" className="vg-end-match" onClick={finishByHeight} disabled={busy || Boolean(winner)}><Trophy size={16}/> End match — highest wins</button>
+          <div className="vg-claim-zone" aria-live="polite">
+            {positions.a < 10 && positions.b < 10 ? (
+              <p><Star size={15} fill="currentColor"/> Reach the starred step 10 to unlock a safe win.</p>
+            ) : (
+              <>
+                <p><Star size={15} fill="currentColor"/> Safe win unlocked — stop now or risk another climb.</p>
+                <div>
+                  {positions.a >= 10 && <button type="button" className="team-a" onClick={() => claimVictory("a")} disabled={busy || Boolean(winner)}><Trophy size={15}/> Team A: stop &amp; win</button>}
+                  {positions.b >= 10 && <button type="button" className="team-b" onClick={() => claimVictory("b")} disabled={busy || Boolean(winner)}><Trophy size={15}/> Team B: stop &amp; win</button>}
+                </div>
+              </>
+            )}
+          </div>
           <div className="vg-volcano-scene"><VolcanoArt/></div>
         </section>
 
@@ -434,7 +428,7 @@ export default function VolcanoGame({ items, packName, onClose }: Props) {
       <section className="vg-rules-dialog" role="dialog" aria-modal="true" aria-labelledby="vg-rules-title">
         <button type="button" className="vg-rules-close" onClick={() => setRulesOpen(false)} aria-label="Close game rules"><X size={20}/></button>
         <span className="vg-rules-icon" aria-hidden="true"><Mountain size={30}/></span><small>HOW TO PLAY</small><h2 id="vg-rules-title">Volcano rules</h2>
-        <ol><li><b>1</b><span>Students answer the displayed English or Japanese Word Pack prompt.</span></li><li><b>2</b><span>Teacher selects the correct team, then rolls the special 1–3 die.</span></li><li><b>3</b><span>The team&apos;s climber moves up by the rolled number.</span></li><li><b>4</b><span>Landing exactly on 12 wins. Going beyond 12 sends the climber into the lava.</span></li></ol>
+        <ol><li><b>1</b><span>Both teams race to answer the displayed English or Japanese Word Pack prompt.</span></li><li><b>2</b><span>Teacher selects the fastest correct team, then rolls the special 1–3 die.</span></li><li><b>3</b><span>The team&apos;s climber moves up by the rolled number.</span></li><li><b>4</b><span>From the starred step 10, the team may stop and win or keep climbing. Exact step 12 wins; going beyond 12 loses.</span></li></ol>
         <button type="button" className="vg-rules-done" onClick={() => setRulesOpen(false)}>Back to the game <ArrowRight size={18}/></button>
       </section>
     </div>}
