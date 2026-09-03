@@ -83,8 +83,8 @@ const activities:Activity[] = [
     rules:["Choose turn-taking or race mode and an English or Japanese prompt.","Students answer aloud; the teacher decides which team loses the round.","Select the losing team, then roll the digital die.","The die pops that many balloons. The last team still in the sky wins."],
   },
   {
-    id:"volcano", title:"Volcano", shortTitle:"Volcano", description:"Answer a Word Pack prompt, roll the special 1–3 die, and climb towards step 12 without overshooting into the lava.", category:"Retrieval Practice", time:"8–12 min", icon:Mountain, tone:"orange", stage:"retrieval",
-    rules:["Choose turn-taking or race mode and an English or Japanese prompt.","Students answer aloud; the teacher selects the correct team.","Roll the special 1–3 die and move that climber up the steps.","Land exactly on step 12 to win. Go past 12 and fall into the lava."],
+    id:"volcano", title:"Volcano", shortTitle:"Volcano", description:"Race to answer, roll the special 1–3 die, and reach the starred safe-win zone without overshooting into the lava.", category:"Retrieval Practice", time:"8–12 min", icon:Mountain, tone:"orange", stage:"retrieval",
+    rules:["Both teams race to answer an English or Japanese prompt.","The teacher selects the fastest correct team.","Roll the special 1–3 die and move that climber up the steps.","From step 10, stop and claim victory or keep climbing. Exact step 12 wins; going beyond 12 loses."],
   },
   {
     id:"draw-or-act", title:"Draw or Act", shortTitle:"Draw or Act", description:"A student privately views one selected Word Pack item, then draws or acts while their team races to guess it in Japanese.", category:"Retrieval Practice", time:"5–10 min", icon:Brush, tone:"purple", stage:"retrieval",
