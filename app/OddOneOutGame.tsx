@@ -183,23 +183,16 @@ export default function OddOneOutGame({ groups, packName, onClose }: Props) {
           </div>
         </section>
 
-        <section className={`ooo-explanation ${revealed ? "visible" : ""}`} aria-live="polite" aria-atomic="true">
-          {revealed ? (
-            <>
-              <span><Check size={20}/></span>
-              <div>
-                <small>THE ODD ONE OUT IS NUMBER {question.oddIndex + 1}</small>
-                <strong>{displayWordPackItem(question.options[question.oddIndex])}</strong>
-                <p>It belongs with <b>{question.oddLabel}</b>. The other words belong with <b>{question.sharedLabel}</b>.</p>
-              </div>
-            </>
-          ) : (
-            <>
-              <span aria-hidden="true"><Eye size={20}/></span>
-              <div><small>THINKING TIME</small><strong>Look for what the words have in common.</strong></div>
-            </>
-          )}
-        </section>
+        {revealed && (
+          <section className="ooo-explanation visible" aria-live="polite" aria-atomic="true">
+            <span><Check size={20}/></span>
+            <div>
+              <small>THE ODD ONE OUT IS NUMBER {question.oddIndex + 1}</small>
+              <strong>{displayWordPackItem(question.options[question.oddIndex])}</strong>
+              <p>It belongs with <b>{question.oddLabel}</b>. The other words belong with <b>{question.sharedLabel}</b>.</p>
+            </div>
+          </section>
+        )}
       </main>
 
       <footer className="ooo-controls">
