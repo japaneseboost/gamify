@@ -22,7 +22,7 @@ import DrawOrActGame from "./DrawOrActGame";
 import PassTheBombGame from "./PassTheBombGame";
 import WhatsMissingGame from "./WhatsMissingGame";
 import HotSeatGame from "./HotSeatGame";
-import { displayWordPackItem, wordPacks, wordPackSeries } from "./wordPacks";
+import { displayWordPackItem, wordPacks, wordPackSeries, type WordPack } from "./wordPacks";
 
 type Activity = {
   id:string; title:string; shortTitle:string; description:string;
@@ -48,6 +48,32 @@ const vocabularyGroupVisuals:Record<string,{icon:typeof Shapes;tone:string;descr
   expressions:{icon:MessageCircleMore,tone:"pink",description:"Useful classroom phrases"},
   "adverbs-time":{icon:Clock3,tone:"lavender",description:"Time, frequency and manner"},
 };
+
+function buildAllPacksOption(seriesId:string):WordPack {
+  const series=wordPackSeries.find((item)=>item.id===seriesId);
+  const packs=wordPacks.filter((pack)=>pack.seriesId===seriesId);
+  const seenVocabulary=new Set<string>();
+  const mergedGroups=new Map<string,{id:string;label:string;items:string[]}>();
+
+  packs.forEach((pack)=>pack.vocabularyGroups.forEach((group)=>{
+    const merged=mergedGroups.get(group.id)??{id:group.id,label:group.label,items:[]};
+    group.items.forEach((item)=>{
+      if(seenVocabulary.has(item))return;
+      seenVocabulary.add(item);
+      merged.items.push(item);
+    });
+    mergedGroups.set(group.id,merged);
+  }));
+
+  return {
+    id:`all-packs-${seriesId}`,
+    seriesId,
+    name:`${series?.name??"Series"} · All packs`,
+    vocabulary:Array.from(seenVocabulary),
+    vocabularyGroups:Array.from(mergedGroups.values()).filter((group)=>group.items.length>0),
+    patterns:Array.from(new Set(packs.flatMap((pack)=>pack.patterns))),
+  };
+}
 
 const activities:Activity[] = [
   {
@@ -126,8 +152,9 @@ export default function Home(){
   const [memoryDelay,setMemoryDelay]=useState(5);
   const [theme,setTheme]=useState<ThemeMode>("light");
 
-  const activePack=wordPacks.find((pack)=>pack.id===packId)??wordPacks[0];
   const packsInSelectedSeries=wordPacks.filter((pack)=>pack.seriesId===seriesId);
+  const allPacksOption=buildAllPacksOption(seriesId);
+  const activePack=packId===allPacksOption.id?allPacksOption:(wordPacks.find((pack)=>pack.id===packId)??wordPacks[0]);
   const selectedCount=selectedVocabulary.length+selectedPatterns.length;
   const totalPackItems=activePack.vocabulary.length+activePack.patterns.length;
   const allPatternsSelected=activePack.patterns.length>0&&activePack.patterns.every((item)=>selectedPatterns.includes(item));
@@ -136,7 +163,7 @@ export default function Home(){
   const delayedDictationGroups=activePack.vocabularyGroups.map((group)=>({...group,items:group.items.filter((item)=>selectedVocabulary.includes(item))})).filter((group)=>group.items.length>0);
 
   const choosePack=(nextPackId:string)=>{
-    const nextPack=wordPacks.find((pack)=>pack.id===nextPackId)??wordPacks[0];
+    const nextPack=nextPackId===allPacksOption.id?allPacksOption:(wordPacks.find((pack)=>pack.id===nextPackId)??wordPacks[0]);
     setPackId(nextPack.id);
     setSelectedVocabulary([...nextPack.vocabulary]);
     setSelectedPatterns([...nextPack.patterns]);
@@ -317,7 +344,7 @@ export default function Home(){
                 {wordPackSeries.map((series)=>{const hasPacks=wordPacks.some((pack)=>pack.seriesId===series.id);const isActive=seriesId===series.id;return <li key={series.id}><button type="button" className={`${hasPacks?"available":"awaiting"} ${isActive?"selected":""}`} disabled={!hasPacks} aria-pressed={isActive} onClick={()=>chooseSeries(series.id)}><strong>{series.name}</strong><small>{hasPacks?`${series.packCount} ${series.packCount===1?"word pack":"word packs"}`:"Awaiting words"}</small></button></li>;})}
               </ul>
             </section>
-            <label className="pack-picker"><span>Choose word pack</span><select className="pack-select" value={packId} onChange={(event)=>choosePack(event.target.value)}>{packsInSelectedSeries.map((pack)=><option key={pack.id} value={pack.id}>{pack.name}</option>)}</select></label>
+            <label className="pack-picker"><span>Choose word pack</span><select className="pack-select" value={packId} onChange={(event)=>choosePack(event.target.value)}><option value={allPacksOption.id}>All packs ({packsInSelectedSeries.length} combined)</option>{packsInSelectedSeries.map((pack)=><option key={pack.id} value={pack.id}>{pack.name}</option>)}</select></label>
           </header>
 
           <div className="pack-toolbar">
