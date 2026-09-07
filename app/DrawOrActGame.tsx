@@ -70,14 +70,14 @@ export default function DrawOrActGame({items,packName,onClose}:Props){
   const [round,setRound]=useState(1);
   const [word,setWord]=useState(()=>chooseWord(pool));
   const [mode,setMode]=useState<ClueMode>(null);
-  const [duration,setDuration]=useState(30);
-  const [secondsLeft,setSecondsLeft]=useState(30);
+  const [duration,setDuration]=useState(60);
+  const [secondsLeft,setSecondsLeft]=useState(60);
   const [timerState,setTimerState]=useState<TimerState>("idle");
   const [secretVisible,setSecretVisible]=useState(false);
   const [soundEnabled,setSoundEnabled]=useState(true);
   const [teamAScore,setTeamAScore]=useState(0);
   const [teamBScore,setTeamBScore]=useState(0);
-  const secondsRef=useRef(30);
+  const secondsRef=useRef(60);
   const tickVariantRef=useRef(false);
   const audioRef=useRef<AudioContext|null>(null);
 
@@ -162,7 +162,7 @@ export default function DrawOrActGame({items,packName,onClose}:Props){
       <section className="doa-round-strip" aria-label={`Round ${round}`}>
         <div><small>CLASSROOM ROUND</small><strong>Round {round}</strong></div>
         <p><LockKeyhole size={17}/><span>Only the performer should look while holding the secret button.</span></p>
-        <div className="doa-duration" aria-label="Countdown length">{[15,30,45].map((value)=><button type="button" key={value} className={duration===value?"selected":""} aria-pressed={duration===value} onClick={()=>resetTimer(value)}>{value}s</button>)}</div>
+        <div className="doa-duration" aria-label="Countdown length">{[15,30,45,60].map((value)=><button type="button" key={value} className={duration===value?"selected":""} aria-pressed={duration===value} onClick={()=>resetTimer(value)}>{value}s</button>)}</div>
       </section>
 
       <section className="doa-play-grid">
