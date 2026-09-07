@@ -100,7 +100,7 @@ const activities:Activity[] = [
   },
   {
     id:"hot-seat", title:"Hot Seat", shortTitle:"Hot Seat", description:"One student faces away from the screen while teammates describe each Japanese and English Word Pack item without saying or spelling it.", category:"Production by Speaking", time:"5–10 min", icon:Armchair, tone:"orange", stage:"speaking",
-    rules:["Choose Team A or Team B and seat one student with their back to the screen.","Teammates describe the displayed Japanese and English item without saying, translating, spelling, or mouthing it.","Use Pass, Next (wrong), or Next (correct) to move through the Word Pack.","Each correct answer adds one point to the active team. Score as many as possible in 60 seconds."],
+    rules:["Choose Team A or Team B and seat one student with their back to the screen.","Teammates describe the displayed Japanese and English item without saying, translating, spelling, or mouthing it.","Use Pass, Next (wrong), or Next (correct) to move through the Word Pack.","Each correct answer adds one point to the active team. Score as many as possible in three minutes."],
   },
 ];
 
