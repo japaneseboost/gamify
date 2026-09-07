@@ -12,6 +12,8 @@ type TeamId = "a" | "b";
 type Phase = "setup" | "playing" | "finished";
 type Action = "correct" | "wrong" | "pass" | null;
 
+const ROUND_SECONDS = 180;
+
 const furigana: Array<[string, string]> = [
   ["小学校", "しょうがっこう"], ["中学校", "ちゅうがっこう"], ["自己紹介", "じこしょうかい"],
   ["人気", "にんき"], ["大好き", "だいすき"], ["自然", "しぜん"], ["上げます", "あげます"],
@@ -62,13 +64,13 @@ export default function HotSeatGame({ items, packName, onClose }: Props) {
   const [scores, setScores] = useState<Record<TeamId, number>>({ a: 0, b: 0 });
   const [round, setRound] = useState(1);
   const [word, setWord] = useState(() => chooseWord(pool));
-  const [seconds, setSeconds] = useState(60);
+  const [seconds, setSeconds] = useState(ROUND_SECONDS);
   const [roundCorrect, setRoundCorrect] = useState(0);
   const [roundWrong, setRoundWrong] = useState(0);
   const [roundPassed, setRoundPassed] = useState(0);
   const [lastAction, setLastAction] = useState<Action>(null);
   const [soundOn, setSoundOn] = useState(true);
-  const secondsRef = useRef(60);
+  const secondsRef = useRef(ROUND_SECONDS);
   const audioRef = useRef<AudioContext | null>(null);
 
   const audio = () => {
@@ -113,8 +115,8 @@ export default function HotSeatGame({ items, packName, onClose }: Props) {
   };
 
   const startRound = () => {
-    secondsRef.current = 60;
-    setSeconds(60);
+    secondsRef.current = ROUND_SECONDS;
+    setSeconds(ROUND_SECONDS);
     setRoundCorrect(0);
     setRoundWrong(0);
     setRoundPassed(0);
@@ -128,8 +130,8 @@ export default function HotSeatGame({ items, packName, onClose }: Props) {
     setRound((current) => current + 1);
     setActiveTeam((current) => current === "a" ? "b" : "a");
     setPhase("setup");
-    setSeconds(60);
-    secondsRef.current = 60;
+    setSeconds(ROUND_SECONDS);
+    secondsRef.current = ROUND_SECONDS;
   };
 
   const resetMatch = () => {
@@ -137,13 +139,14 @@ export default function HotSeatGame({ items, packName, onClose }: Props) {
     setRound(1);
     setActiveTeam("a");
     setPhase("setup");
-    setSeconds(60);
-    secondsRef.current = 60;
+    setSeconds(ROUND_SECONDS);
+    secondsRef.current = ROUND_SECONDS;
   };
 
   const japanese = cleanJapaneseWord(word);
   const english = vocabularyEnglish[word] ?? word;
-  const timerPercent = Math.max(0, Math.round((seconds / 60) * 100));
+  const timerPercent = Math.max(0, Math.round((seconds / ROUND_SECONDS) * 100));
+  const timerDisplay = `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 
   return <div className="hs-portal" role="dialog" aria-modal="true" aria-label="Hot Seat classroom game">
     <header className="hs-topbar">
@@ -158,15 +161,15 @@ export default function HotSeatGame({ items, packName, onClose }: Props) {
     {phase === "setup" ? <main className="hs-setup-stage">
       <section className="hs-start-panel" aria-labelledby="hs-title">
         <div className="hs-start-visual" aria-hidden="true"><div className="hs-screen-card"><strong lang="ja">買い物</strong><span>shopping</span></div><i className="hs-chair-back"/><i className="hs-student-head"/><span className="hs-clue-one">shop</span><span className="hs-clue-two">buy</span></div>
-        <div className="hs-start-copy"><p>PRODUCTION BY SPEAKING · 60 SECOND CHALLENGE</p><h1 id="hs-title">Clue it.<br/>Guess it.</h1><span>One student faces away from the screen while teammates describe the displayed word without saying or spelling it.</span></div>
+        <div className="hs-start-copy"><p>PRODUCTION BY SPEAKING · 3 MINUTE CHALLENGE</p><h1 id="hs-title">Clue it.<br/>Guess it.</h1><span>One student faces away from the screen while teammates describe the displayed word without saying or spelling it.</span></div>
         <section className="hs-team-setup" aria-label="Choose the team playing this round"><small>WHO IS IN THE HOT SEAT?</small><div>{(["a", "b"] as TeamId[]).map((team) => <button type="button" key={team} className={`team-${team} ${activeTeam === team ? "selected" : ""}`} aria-pressed={activeTeam === team} onClick={() => setActiveTeam(team)}><span>TEAM {team.toUpperCase()}</span><strong>{scores[team]} points</strong></button>)}</div></section>
-        <button type="button" className="hs-start" onClick={startRound}><Play size={20}/> Start 60-second round</button>
+        <button type="button" className="hs-start" onClick={startRound}><Play size={20}/> Start 3-minute round</button>
       </section>
     </main> : <main className="hs-game-stage">
       <header className="hs-roundbar">
         <div><small>HOT SEAT ROUND</small><strong>Round {round}</strong></div>
         <div className={`hs-active-team team-${activeTeam}`}><Crown size={17}/><span>Team {activeTeam.toUpperCase()} is playing</span></div>
-        <div className={`hs-countdown ${seconds <= 10 ? "urgent" : ""}`} style={{ "--hs-time": `${timerPercent}%` } as React.CSSProperties} aria-live="polite"><span><Clock3 size={17}/><b>{seconds}</b><small>sec</small></span></div>
+        <div className={`hs-countdown ${seconds <= 10 ? "urgent" : ""}`} style={{ "--hs-time": `${timerPercent}%` } as React.CSSProperties} aria-live="polite"><span><Clock3 size={17}/><b>{timerDisplay}</b><small>min</small></span></div>
       </header>
 
       <section className="hs-play-area">
